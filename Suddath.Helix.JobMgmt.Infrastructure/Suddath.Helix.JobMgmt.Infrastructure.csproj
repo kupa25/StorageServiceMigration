@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- SonarQube needs this -->
+    <ProjectGuid>{E1C43580-92DB-4431-96BD-4A68E7FD8BD8}</ProjectGuid>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Domain\Tmp\**" />
+    <Compile Remove="tmp\**" />
+    <EmbeddedResource Remove="Domain\Tmp\**" />
+    <EmbeddedResource Remove="tmp\**" />
+    <None Remove="Domain\Tmp\**" />
+    <None Remove="tmp\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Domain\AddressType.cs" />
+    <Compile Remove="Domain\Contact.cs" />
+    <Compile Remove="Domain\EmailType.cs" />
+    <Compile Remove="Domain\PhoneType.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.6" />
+    <PackageReference Include="Helix.API.Results" Version="20190415.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
+    <PackageReference Include="Suddath.Helix.Common" Version="1.0.135" />
+    <PackageReference Include="Suddath.Helix.Common.Infrastructure.EventBus" Version="1.1.50" />
+    <PackageReference Include="Suddath.Helix.MergeTemplates" Version="1.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Service.Interfaces\Suddath.Helix.JobMgmt.Services.Interfaces.csproj" />
+  </ItemGroup>
+</Project>

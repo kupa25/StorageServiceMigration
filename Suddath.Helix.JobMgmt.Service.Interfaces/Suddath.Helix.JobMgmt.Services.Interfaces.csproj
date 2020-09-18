@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- SonarQube needs this -->
+    <ProjectGuid>{F9847CA9-F5A0-4A65-96AB-F592E3B1A535}</ProjectGuid>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="2.2.0" />
+    <PackageReference Include="Helix.API.Results" Version="20190415.1.0" />
+    <PackageReference Include="Suddath.Helix.MergeTemplates" Version="1.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Models\Suddath.Helix.JobMgmt.Models.csproj" />
+  </ItemGroup>
+</Project>

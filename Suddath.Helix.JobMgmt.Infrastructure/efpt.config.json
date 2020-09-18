@@ -1,0 +1,403 @@
+﻿{
+   "ContextClassName": "JobDbContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "IncludeConnectionString": false,
+   "ModelNamespace": "Domain",
+   "OutputContextPath": ".",
+   "OutputPath": "Domain",
+   "ProjectRootNamespace": "Suddath.Helix.JobMgmt.Infrastructure",
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[AccountCode]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[BillableItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[BillableItemAdjustment]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[BillableItemStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[BillableItemType]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[GLCode]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[GPTransaction]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[GPTransactionType]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[Invoice]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[InvoiceStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[billing].[PaymentReceived]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[currency].[ExchangeRate]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[AccountEntity]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Address]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[ApplicationPatch]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Document]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[DocumentHistory]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Email]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[LookupItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[NewMoves]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Phone]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[ServiceOrderContact]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Transferee]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[TransfereePhone]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Vendor]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[Feedback].[Configuration]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[Feedback].[Feedback]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[Branch]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[Job]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[JobContact]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[JobStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[JobSuperServiceAuthorization]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrder]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderAirFreight]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderAirFreightItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderAirFreightLeg]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderClaimDamage]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderClaimInspection]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderClaimRepair]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderClaimSettlement]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderCustomClearance]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderDestinationAgent]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderDestinationAgentPartialDelivery]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderInsuranceClaim]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderLineHaul]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderMoveInfo]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreight]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightContainer]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightLCL]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightLeg]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightLiftVan]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightLooseItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderOceanFreightVehicle]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderRoadFreight]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderRoadFreightLeg]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderRoadFreightLTL]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderStorage]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderStoragePartialDelivery]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderStorageRevenue]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderThirdParty]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderThirdPartyCrate]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[ServiceOrderThirdPartyService]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[SuperServiceOrder]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[jobs].[SuperServiceOrderStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[Logs].[IntegrationEventLog]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[Logs].[Serilog]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[lookups].[Country]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[merge_templates].[Template]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[merge_templates].[TemplatePack]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[merge_templates].[TemplateType]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[PayableItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[PayableItemAdjustment]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[PayableItemStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[PaymentSent]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[VendorInvoice]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[payables].[VendorInvoiceStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[service].[Service]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[service].[ServiceCategory]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[service].[SuperService]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[service].[SuperServiceMode]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[survey].[JobSurveyInfo]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[survey].[SuperServiceOrderAccessorial]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[survey].[SuperServiceOrderCrate]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[survey].[SuperServiceOrderSurveyResult]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[Activity]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ActivityDetail]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ActivityType]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ApprovalRequest]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[Entitlement]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ServiceCode]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ServiceItem]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[ServiceItemStatus]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[Shipment]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[taskorders].[TaskOrder]"
+      }
+   ],
+   "UseDatabaseNames": true,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseNodaTime": false,
+   "UseSpatial": false,
+   "UseStoredProcedures": false
+}

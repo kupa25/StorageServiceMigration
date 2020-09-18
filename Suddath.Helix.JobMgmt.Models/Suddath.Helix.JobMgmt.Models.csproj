@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- SonarQube needs this -->
+    <ProjectGuid>{64A0206E-86DF-473F-AB18-971E50FA36DA}</ProjectGuid>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="LegacyJobDto - Copy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Suddath.Helix.Common" Version="1.0.135" />
+    <PackageReference Include="Suddath.Helix.Common.Infrastructure.EventBus" Version="1.1.50" />
+    <PackageReference Include="Suddath.Helix.MergeTemplates" Version="1.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="RequestModels\HomeFront\" />
+  </ItemGroup>
+</Project>
