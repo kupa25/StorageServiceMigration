@@ -8,6 +8,9 @@ namespace Suddath.Helix.JobMgmt.Infrastructure
 {
     public partial class JobDbContext : DbContext
     {
+        private static string _connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Jobs;trusted_connection=yes;";
+        //private static string _connectionString= @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
+
         public JobDbContext()
         {
         }
@@ -121,7 +124,7 @@ namespace Suddath.Helix.JobMgmt.Infrastructure
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Data Source=(LocalDb)\MSSQLLocalDB;;database=Jobs;trusted_connection=yes;");
+            optionsBuilder.UseSqlServer(_connectionString);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

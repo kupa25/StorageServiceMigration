@@ -25,9 +25,6 @@ namespace StorageServiceMigration
 
         private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
 
-        //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net";
-        private static string _jobsBaseUrl = "https://localhost:5001";
-
         private static async Task Main(string[] args)
         {
             await setApiAccessTokenAsync();
@@ -46,10 +43,8 @@ namespace StorageServiceMigration
                 //Add JobContacts
                 await addJobContacts(move, jobId);
 
-                /// api / v{ version}/ Jobs /{ jobId}/ contacts
-
                 //Add SuperService
-                /// api / v{ version}/ jobs /{ jobId}/ superServices / Order
+                await JobsApi.CreateStorageSSO(_httpClient, jobId);
 
                 //Each Milestone page we patch the info
                 /// api / v{ version}/ jobs /{ jobId}/ services / orders /{ serviceOrderId}
@@ -83,7 +78,7 @@ namespace StorageServiceMigration
 
                     case 1:
                         contactType = "Move Consultant";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format());
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format(), "TBuracchio@suddath.com");
                         break;
 
                     case 2:
@@ -112,7 +107,7 @@ namespace StorageServiceMigration
 
             Console.WriteLine("Adding Job Contacts");
 
-            var url = _jobsBaseUrl + $"/api/v1/Jobs/{jobId}/contacts";
+            var url = $"/{jobId}/contacts";
 
             await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
         }
@@ -156,7 +151,7 @@ namespace StorageServiceMigration
         {
             Console.WriteLine("Creating a job");
 
-            var url = _jobsBaseUrl + "/api/v1/Jobs";
+            var url = string.Empty;
 
             var movesAccount = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.AccountId));
             var movesBooker = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.Booker));

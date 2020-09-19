@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StorageServiceMigration": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
