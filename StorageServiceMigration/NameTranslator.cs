@@ -8,7 +8,6 @@ namespace StorageServiceMigration
     {
         public static Dictionary<string, string> repo = new Dictionary<string, string>
         {
-            {" ", " " },
             {"STEPHANYBALLASSO", "Stephany.Ballasso@suddath.com" }
         };
     }

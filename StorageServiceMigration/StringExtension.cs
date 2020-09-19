@@ -10,7 +10,7 @@ namespace StorageServiceMigration
         {
             if (s == null)
             {
-                s = " ";
+                s = string.Empty;
             }
 
             return s;

@@ -40,8 +40,18 @@ namespace StorageServiceMigration
                 //Add the job
                 var jobId = await addStorageJob(move);
 
+                //update datecreated on the job
+                Console.WriteLine("Updating Jobs Created Date");
+                using (var context = new JobDbContext())
+                {
+                    var createdJob = context.Job.Find(jobId);
+
+                    createdJob.DateCreated = move.DateEntered.GetValueOrDefault(DateTime.UtcNow);
+                    context.SaveChanges();
+                }
+
                 //Add JobContacts
-                await addJobContacts(move);
+                await addJobContacts(move, jobId);
 
                 /// api / v{ version}/ Jobs /{ jobId}/ contacts
 
@@ -62,20 +72,55 @@ namespace StorageServiceMigration
             }
         }
 
-        private static async Task addJobContacts(Move move)
+        private static async Task addJobContacts(Move move, int jobId)
         {
-            //Get BIller Name
-            var adObj = await GetADName(NameTranslator.repo.GetValueOrDefault(move.BILLER.Format()));
+            var jobContactList = new List<CreateJobContactDto>();
 
-            var jobContact = new CreateJobContactDto
+            for (int i = 0; i < 4; i++) // we are only mapping 5 people.. since thats in the datamap
             {
-                ContactType = "Move Consultant",
-                Email = adObj.FirstOrDefault().email,
-                FullName = adObj.FirstOrDefault().fullName,
-                Phone = adObj.FirstOrDefault().phone
-            };
+                var dictionaryValue = string.Empty;
+                var contactType = string.Empty;
 
-            adObj = await GetADName(NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format()));
+                switch (i)
+                {
+                    case 0:
+                        contactType = "Biller Contact";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.BILLER.Format());
+                        break;
+
+                    case 1:
+                        contactType = "Move Consultant";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format());
+                        break;
+
+                    case 2:
+                        contactType = "Traffic Consultant";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.TRAFFIC_MANAGER.Format());
+                        break;
+
+                    case 3:
+                        contactType = "Pricing Consultant";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.QUOTED_BY.Format());
+                        break;
+                }
+
+                var adObj = await GetADName(dictionaryValue);
+
+                if (adObj == null) { continue; }
+
+                jobContactList.Add(new CreateJobContactDto
+                {
+                    ContactType = contactType,
+                    Email = adObj.FirstOrDefault().email,
+                    FullName = adObj.FirstOrDefault().fullName,
+                    Phone = adObj.FirstOrDefault().phone
+                });
+            }
+
+            Console.WriteLine("Adding Job Contacts");
+
+            var url = _jobsBaseUrl + $"/api/v1/Jobs/{jobId}/contacts";
+            await CallJobsApi(url, jobContactList);
         }
 
         private static async Task<List<ADUser>> GetADName(string v)
@@ -85,10 +130,13 @@ namespace StorageServiceMigration
             var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
             var response = await _httpClient.GetAsync(url);
             var parsedResponse = await HandleResponse(response);
+            List<ADUser> payload = null;
 
-            var payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
-
-            Console.WriteLine($"Ad retreived {parsedResponse}");
+            try
+            {
+                payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
+            }
+            catch (Exception ex) { }
 
             return payload;
         }
@@ -138,13 +186,19 @@ namespace StorageServiceMigration
             }
 
             var model = move.ToJobModel(movesAccount.Id, movesBooker.Id, (int?)billTo?.Id, billToLabel);
+            string parsedResponse = await CallJobsApi(url, model);
+
+            Console.WriteLine($"Job added {parsedResponse}");
+            return int.Parse(parsedResponse);
+        }
+
+        private static async Task<string> CallJobsApi(string url, dynamic model)
+        {
             var payload = JsonConvert.SerializeObject(model);
 
             var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
             var parsedResponse = await HandleResponse(response);
-
-            Console.WriteLine($"Job added {parsedResponse}");
-            return int.Parse(parsedResponse);
+            return parsedResponse;
         }
 
         private static async Task setApiAccessTokenAsync()
