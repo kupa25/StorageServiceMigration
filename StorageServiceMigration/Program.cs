@@ -41,14 +41,7 @@ namespace StorageServiceMigration
                 var jobId = await addStorageJob(move);
 
                 //update datecreated on the job
-                Console.WriteLine("Updating Jobs Created Date");
-                using (var context = new JobDbContext())
-                {
-                    var createdJob = context.Job.Find(jobId);
-
-                    createdJob.DateCreated = move.DateEntered.GetValueOrDefault(DateTime.UtcNow);
-                    context.SaveChanges();
-                }
+                JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow));
 
                 //Add JobContacts
                 await addJobContacts(move, jobId);
@@ -120,7 +113,8 @@ namespace StorageServiceMigration
             Console.WriteLine("Adding Job Contacts");
 
             var url = _jobsBaseUrl + $"/api/v1/Jobs/{jobId}/contacts";
-            await CallJobsApi(url, jobContactList);
+
+            await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
         }
 
         private static async Task<List<ADUser>> GetADName(string v)
@@ -186,19 +180,10 @@ namespace StorageServiceMigration
             }
 
             var model = move.ToJobModel(movesAccount.Id, movesBooker.Id, (int?)billTo?.Id, billToLabel);
-            string parsedResponse = await CallJobsApi(url, model);
+            string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job added {parsedResponse}");
             return int.Parse(parsedResponse);
-        }
-
-        private static async Task<string> CallJobsApi(string url, dynamic model)
-        {
-            var payload = JsonConvert.SerializeObject(model);
-
-            var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
-            var parsedResponse = await HandleResponse(response);
-            return parsedResponse;
         }
 
         private static async Task setApiAccessTokenAsync()
