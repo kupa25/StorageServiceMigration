@@ -1,8 +1,11 @@
-﻿using IdentityModel.Client;
+﻿using Helix.API.Results;
+using IdentityModel.Client;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Suddath.Helix.JobMgmt.Infrastructure;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
+using Suddath.Helix.JobMgmt.Models;
+using Suddath.Helix.JobMgmt.Models.ResponseModels;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using Suddath.Helix.JobMgmt.Services.Water.Mapper;
 using System;
@@ -37,7 +40,9 @@ namespace StorageServiceMigration
                 //Add the job
                 var jobId = await addStorageJob(move);
 
-                //Add Move Consultant
+                //Add JobContacts
+                await addJobContacts(move);
+
                 /// api / v{ version}/ Jobs /{ jobId}/ contacts
 
                 //Add SuperService
@@ -55,6 +60,37 @@ namespace StorageServiceMigration
                 /// api / v{ version}/ Tasks / jobs /{ jobId}
                 ///
             }
+        }
+
+        private static async Task addJobContacts(Move move)
+        {
+            //Get BIller Name
+            var adObj = await GetADName(NameTranslator.repo.GetValueOrDefault(move.BILLER.Format()));
+
+            var jobContact = new CreateJobContactDto
+            {
+                ContactType = "Move Consultant",
+                Email = adObj.FirstOrDefault().email,
+                FullName = adObj.FirstOrDefault().fullName,
+                Phone = adObj.FirstOrDefault().phone
+            };
+
+            adObj = await GetADName(NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format()));
+        }
+
+        private static async Task<List<ADUser>> GetADName(string v)
+        {
+            Console.WriteLine("Get the Ad Name for : " + v);
+
+            var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
+            var response = await _httpClient.GetAsync(url);
+            var parsedResponse = await HandleResponse(response);
+
+            var payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
+
+            Console.WriteLine($"Ad retreived {parsedResponse}");
+
+            return payload;
         }
 
         private static async Task RetrieveJobsAccountAndVendor()
@@ -121,7 +157,7 @@ namespace StorageServiceMigration
                 ClientId = "utility.ccrf",
                 GrantType = "client_credentials",
                 ClientSecret = "E5NDJlMDQzM2QwNjFiNTBlN2ZkZjA0YTgzYTc1ZGYiLCJzY29wZSI6WyJhZGd4",
-                Scope = "jobsapi taskapi "
+                Scope = "jobsapi taskapi adapi "
             });
             if (response.IsError) throw new Exception(response.Error);
 

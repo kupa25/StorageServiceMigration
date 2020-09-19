@@ -19,6 +19,11 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Column("MOVES_ID")]
         public string Id { get; set; }
 
+        public string MOVE_COORDINATOR { get; set; }
+        public string TRAFFIC_MANAGER { get; set; }
+        public string BILLER { get; set; }
+        public string QUOTED_BY { get; set; }
+
         [Column("NAMES_ID")]
         public string VendorId { get; set; }
 
@@ -59,7 +64,6 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [NotMapped]
         public string MOVE_MANAGER_PHONE { get; set; }
 
-        public string TRAFFIC_MANAGER { get; set; }
         public int? AUTHORIZED_WEIGHT { get; set; }
 
         [Column("CORPORATE")]
