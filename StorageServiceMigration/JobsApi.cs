@@ -21,6 +21,8 @@ namespace StorageServiceMigration
         //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
         private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
 
+        #region Jobs Api call
+
         public static async Task<string> CallJobsApi(HttpClient _httpClient, string url, dynamic model)
         {
             url = _jobsBaseUrl + url;
@@ -62,6 +64,22 @@ namespace StorageServiceMigration
             return content;
         }
 
+        internal static Task UpdateJobCostMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Jobs Api call
+
+        #region Storage
+
+        internal static Task UpdateStorageMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Storage
+
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId)
         {
             Console.WriteLine("Creating Storage SSO");
@@ -80,11 +98,11 @@ namespace StorageServiceMigration
             return response;
         }
 
-        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int oaId, Move move, int jobId)
+        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("ORIGIN"));
 
-            var soUrl = $"/{jobId}/services/orders/{oaId}?serviceName=OA";
+            var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
 
             var original = await CallJobsApi(httpClient, soUrl, null);
             var copyOfOriginal = original;
@@ -96,6 +114,31 @@ namespace StorageServiceMigration
             if (origin != null && origin.DOCS_RCV_DATE != null)
             {
                 modifiedObj.IsAllDocumentsReceived = true;
+
+                var patch = new JsonPatchDocument();
+                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+                await Patch(httpClient, soUrl, patch);
+            }
+        }
+
+        internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        {
+            var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
+
+            var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=DA";
+
+            var original = await CallJobsApi(httpClient, soUrl, null);
+            var copyOfOriginal = original;
+
+            var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original);
+            var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal);
+
+            //All docs received.
+            if (origin != null && origin.DOCS_RCV_DATE != null)
+            {
+                //TODO: do we need to implement this in the api??
+                //modifiedObj.IsAllDocumentsReceived = true;
 
                 var patch = new JsonPatchDocument();
                 FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
