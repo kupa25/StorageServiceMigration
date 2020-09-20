@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
+using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,6 +58,20 @@ namespace StorageServiceMigration
             catch (Exception ex) { }
 
             return response;
+        }
+
+        internal static async Task UpdateOriginMilestone(HttpClient httpClient, List<ServiceOrder> serviceOrders, Move move, int jobId)
+        {
+            var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("ORIGIN"));
+            var jobsOriginRecord = serviceOrders.FirstOrDefault(so => so.ServiceId == 24);
+
+            var url = $"/{jobId}/services/orders/{jobsOriginRecord.Id}?serviceName=OA";
+            var patchDoc = new List<JsonPatchDocument<ServiceOrderMoveInfo>>();
+
+            //All docs received.
+            if (origin != null && origin.DOCS_RCV_DATE != null)
+            {
+            }
         }
     }
 }

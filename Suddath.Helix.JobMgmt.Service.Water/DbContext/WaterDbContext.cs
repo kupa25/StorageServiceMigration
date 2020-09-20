@@ -23,6 +23,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("BINGO");
+
             modelBuilder.Entity<MoveAgent>()
                 .HasKey(ma => new { ma.Id, ma.VendorNameId, ma.JobCategory });
 

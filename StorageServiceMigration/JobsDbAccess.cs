@@ -1,7 +1,9 @@
-﻿using Suddath.Helix.JobMgmt.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using Suddath.Helix.JobMgmt.Infrastructure;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +21,21 @@ namespace StorageServiceMigration
                 createdJob.DateCreated = date;
                 context.SaveChanges();
             }
+        }
+
+        internal static async Task<List<ServiceOrder>> GetServiceOrderForJobs(int jobId)
+        {
+            Console.WriteLine($"Retrieve all the ServiceOrders Created");
+
+            List<ServiceOrder> result;
+            using (var context = new JobDbContext())
+            {
+                result = await context.ServiceOrder.AsNoTracking()
+                                                 .Include(so => so.SuperServiceOrder)
+                                                 .Where(so => so.SuperServiceOrder.JobId == jobId).ToListAsync();
+            }
+
+            return result;
         }
     }
 }

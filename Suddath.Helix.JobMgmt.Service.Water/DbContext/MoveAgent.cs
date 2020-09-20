@@ -10,9 +10,12 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Key, ForeignKey("Move")]
         [Column("MOVES_ID", Order = 0)]
         public string Id { get; set; }
+
         [Key, ForeignKey("Name")]
         [Column("NAMES_ID", Order = 1)]
         public string VendorNameId { get; set; }
+
+        public DateTime? DOCS_RCV_DATE { get; set; }
 
         [Key]
         [Column("JOB_CATEGORY", Order = 2)]
@@ -51,11 +54,13 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
 
         [Column("CUSTOM_DATE1")]
         public DateTime? CustomsInDate { get; set; }
+
         [Column("CUSTOM_DATE2")]
         public DateTime? CustomsOutDate { get; set; }
 
         [Column("SIT_IN")]
         public DateTime? SITinDate { get; set; }
+
         [Column("SIT_OUT")]
         public DateTime? SIToutDate { get; set; }
 
@@ -65,18 +70,19 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Column("PORT_LD")]
         public string PortLoad { get; set; }
 
-
         [Column("PORT_DC")]
         public string PortDischarge { get; set; }
+
         [MaxLength(40)]
         public string CONTAINER_SIZES { get; set; }
+
         [MaxLength(40)]
         public string VSL_VOY1 { get; set; }
+
         [MaxLength(40)]
         public string VSL_VOY2 { get; set; }
 
         public virtual Move Move { get; set; }
         public virtual Name Name { get; set; }
-
     }
 }

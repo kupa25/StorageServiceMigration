@@ -46,6 +46,10 @@ namespace StorageServiceMigration
                 //Add SuperService
                 await JobsApi.CreateStorageSSO(_httpClient, jobId);
 
+                var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
+
+                await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders, move, jobId);
+
                 //Each Milestone page we patch the info
                 /// api / v{ version}/ jobs /{ jobId}/ services / orders /{ serviceOrderId}
 
