@@ -40,13 +40,23 @@ namespace StorageServiceMigration
             }
         }
 
+        public static async Task<string> Patch(HttpClient _httpClient, string url, dynamic model)
+        {
+            url = _jobsBaseUrl + url;
+
+            var payload = JsonConvert.SerializeObject(model);
+            var response = await _httpClient.PatchAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
+            var parsedResponse = await HandleResponse(response);
+            return parsedResponse;
+        }
+
         public static async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception(content);
+                throw new Exception($"{response.ReasonPhrase} : {content}");
             }
 
             return content;
@@ -86,10 +96,12 @@ namespace StorageServiceMigration
             if (origin != null && origin.DOCS_RCV_DATE != null)
             {
                 modifiedObj.IsAllDocumentsReceived = true;
-            }
 
-            var patch = new JsonPatchDocument();
-            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+                var patch = new JsonPatchDocument();
+                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+                await Patch(httpClient, soUrl, patch);
+            }
         }
 
         private static T Convert<T>(string parsedResponse)
