@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
+using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrder;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using System;
 using System.Collections.Generic;
@@ -23,11 +25,19 @@ namespace StorageServiceMigration
         {
             url = _jobsBaseUrl + url;
 
-            var payload = JsonConvert.SerializeObject(model);
-
-            var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
-            var parsedResponse = await HandleResponse(response);
-            return parsedResponse;
+            if (model != null)
+            {
+                var payload = JsonConvert.SerializeObject(model);
+                var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
+                var parsedResponse = await HandleResponse(response);
+                return parsedResponse;
+            }
+            else
+            {
+                var response = await _httpClient.GetAsync(url);
+                var parsedResponse = await HandleResponse(response);
+                return parsedResponse;
+            }
         }
 
         public static async Task<string> HandleResponse(HttpResponseMessage response)
@@ -60,17 +70,83 @@ namespace StorageServiceMigration
             return response;
         }
 
-        internal static async Task UpdateOriginMilestone(HttpClient httpClient, List<ServiceOrder> serviceOrders, Move move, int jobId)
+        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int oaId, Move move, int jobId)
         {
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("ORIGIN"));
-            var jobsOriginRecord = serviceOrders.FirstOrDefault(so => so.ServiceId == 24);
 
-            var url = $"/{jobId}/services/orders/{jobsOriginRecord.Id}?serviceName=OA";
-            var patchDoc = new List<JsonPatchDocument<ServiceOrderMoveInfo>>();
+            var soUrl = $"/{jobId}/services/orders/{oaId}?serviceName=OA";
+
+            var original = await CallJobsApi(httpClient, soUrl, null);
+            var copyOfOriginal = original;
+
+            var origObj = Convert<GetServiceOrderOriginAgentResponse>(original);
+            var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal);
 
             //All docs received.
             if (origin != null && origin.DOCS_RCV_DATE != null)
             {
+                modifiedObj.IsAllDocumentsReceived = true;
+            }
+
+            var patch = new JsonPatchDocument();
+            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+        }
+
+        private static T Convert<T>(string parsedResponse)
+        {
+            try
+            {
+                return ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<T>(parsedResponse) : default(T));
+            }
+            catch (Exception ex) { Console.WriteLine("*********ERROR**"); }
+
+            return default(T);
+        }
+
+        private static void FillPatchForObject(JObject orig, JObject mod, JsonPatchDocument patch, string path)
+        {
+            var origNames = orig.Properties().Select(x => x.Name).ToArray();
+            var modNames = mod.Properties().Select(x => x.Name).ToArray();
+
+            // Names removed in modified
+            foreach (var k in origNames.Except(modNames))
+            {
+                var prop = orig.Property(k);
+                patch.Remove(path + prop.Name);
+            }
+
+            // Names added in modified
+            foreach (var k in modNames.Except(origNames))
+            {
+                var prop = mod.Property(k);
+                patch.Add(path + prop.Name, prop.Value);
+            }
+
+            // Present in both
+            foreach (var k in origNames.Intersect(modNames))
+            {
+                var origProp = orig.Property(k);
+                var modProp = mod.Property(k);
+
+                if (origProp.Value.Type != modProp.Value.Type)
+                {
+                    patch.Replace(path + modProp.Name, modProp.Value);
+                }
+                else if (!string.Equals(
+                                origProp.Value.ToString(Newtonsoft.Json.Formatting.None),
+                                modProp.Value.ToString(Newtonsoft.Json.Formatting.None)))
+                {
+                    if (origProp.Value.Type == JTokenType.Object)
+                    {
+                        // Recurse into objects
+                        FillPatchForObject(origProp.Value as JObject, modProp.Value as JObject, patch, path + modProp.Name + "/");
+                    }
+                    else
+                    {
+                        // Replace values directly
+                        patch.Replace(path + modProp.Name, modProp.Value);
+                    }
+                }
             }
         }
     }
