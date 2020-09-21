@@ -73,19 +73,6 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return "Unknown";
         }
 
-        internal static object GetValueFromRepo(string value)
-        {
-            var result = string.Empty;
-            NameTranslator.repo.TryGetValue(value, out result);
-
-            if (result == null)
-            {
-                result = "MigrationScript@test.com";
-            }
-
-            return result;
-        }
-
         internal static string ToNotesCategory(Notes src)
         {
             var result = string.Empty;

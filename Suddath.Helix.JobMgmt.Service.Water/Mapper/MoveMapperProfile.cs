@@ -32,7 +32,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             CreateMap<Notes, CreateJobNoteRequest>()
                 .ForMember(d => d.Module, opt => opt.MapFrom(src => "JOB"))
                 .ForMember(d => d.Message, opt => opt.MapFrom(src => src.NOTE))
-                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => MoveMappers.GetValueFromRepo(src.ENTERED_BY)))
+                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 .ForMember(d => d.Category, opt => opt.MapFrom(src => MoveMappers.ToNotesCategory(src)))
 
                 ;

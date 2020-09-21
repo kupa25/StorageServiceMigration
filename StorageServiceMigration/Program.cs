@@ -60,7 +60,24 @@ namespace StorageServiceMigration
                 //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
                 //Add Notes
-                var createJobNoteRequests = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
+                var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
+
+                foreach (var note in notesEntity)
+                {
+                    var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
+
+                    if (adObj != null && adObj.Count > 0)
+                    {
+                        note.ENTERED_BY = adObj.FirstOrDefault().email;
+                    }
+                    else
+                    {
+                        note.ENTERED_BY = "MigrationScript@test.com";
+                    }
+                }
+
+                var createJobNoteRequests = notesEntity.ToNotesModel();
+
                 await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
 
                 //Add Prompts -- Figure out what is system generated or manually entered
@@ -99,7 +116,7 @@ namespace StorageServiceMigration
                         break;
                 }
 
-                var adObj = await GetADName(dictionaryValue);
+                var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
 
                 if (adObj == null || adObj.Count == 0) { continue; }
 
@@ -117,24 +134,6 @@ namespace StorageServiceMigration
             var url = $"/{jobId}/contacts";
 
             await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
-        }
-
-        private static async Task<List<ADUser>> GetADName(string v)
-        {
-            Console.WriteLine("Get the Ad Name for : " + v);
-
-            var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
-            var response = await _httpClient.GetAsync(url);
-            var parsedResponse = await HandleResponse(response);
-            List<ADUser> payload = null;
-
-            try
-            {
-                payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
-            }
-            catch (Exception ex) { }
-
-            return payload;
         }
 
         private static async Task RetrieveJobsAccountAndVendor()
@@ -204,18 +203,6 @@ namespace StorageServiceMigration
 
             var token = response.AccessToken;
             _httpClient.SetBearerToken(token);
-        }
-
-        public static async Task<string> HandleResponse(HttpResponseMessage response)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(content);
-            }
-
-            return content;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace StorageServiceMigration
             return null;
         }
 
-        internal static async Task<List<CreateJobNoteRequest>> RetrieveNotesForMove(string regNumber)
+        internal static async Task<List<Notes>> RetrieveNotesForMove(string regNumber)
         {
             Console.WriteLine($"Retrieving Notes for {regNumber}");
             try
@@ -50,7 +50,7 @@ namespace StorageServiceMigration
                     var notes = await context.Notes.AsNoTracking()
                    .Where(n => n.TABLE_ID == regNumber && n.CATEGORY == null).ToListAsync();
 
-                    return notes.ToNotesModel();
+                    return notes;
                 }
             }
             catch (Exception ex)

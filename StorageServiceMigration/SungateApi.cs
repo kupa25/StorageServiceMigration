@@ -1,0 +1,46 @@
+﻿using Helix.API.Results;
+using Newtonsoft.Json;
+using Suddath.Helix.JobMgmt.Models.ResponseModels;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StorageServiceMigration
+{
+    public static class SungateApi
+    {
+        private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
+
+        public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v)
+        {
+            Console.WriteLine("Get the Ad Name for : " + v);
+
+            var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
+            var response = await _httpClient.GetAsync(url);
+            var parsedResponse = await HandleResponse(response);
+            List<ADUser> payload = null;
+
+            try
+            {
+                payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
+            }
+            catch (Exception ex) { }
+
+            return payload;
+        }
+
+        public static async Task<string> HandleResponse(HttpResponseMessage response)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(content);
+            }
+
+            return content;
+        }
+    }
+}
