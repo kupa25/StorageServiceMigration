@@ -13,22 +13,35 @@ namespace StorageServiceMigration
     {
         private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
 
+        private static Dictionary<string, List<ADUser>> cachedAdUser { get; set; } = new Dictionary<string, List<ADUser>>();
+
         public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v)
         {
+            v = v.Format();
             Console.WriteLine("Get the Ad Name for : " + v);
 
-            var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
-            var response = await _httpClient.GetAsync(url);
-            var parsedResponse = await HandleResponse(response);
-            List<ADUser> payload = null;
+            List<ADUser> adUser;
+            var found = cachedAdUser.TryGetValue(v, out adUser);
 
-            try
+            if (!found)
             {
-                payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
-            }
-            catch (Exception ex) { }
+                var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
+                var response = await _httpClient.GetAsync(url);
+                var parsedResponse = await HandleResponse(response);
+                List<ADUser> payload = null;
 
-            return payload;
+                try
+                {
+                    payload = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<SingleResult<List<ADUser>>>(parsedResponse) : null).Data;
+                }
+                catch (Exception ex) { }
+
+                cachedAdUser.Add(v, payload);
+
+                return payload;
+            }
+
+            return adUser;
         }
 
         public static async Task<string> HandleResponse(HttpResponseMessage response)
