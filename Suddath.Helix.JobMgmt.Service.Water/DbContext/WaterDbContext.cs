@@ -10,6 +10,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public virtual DbSet<MoveItem> MoveItems { get; set; }
         public virtual DbSet<MoveAgent> MoveAgents { get; set; }
         public virtual DbSet<Profile> Profiles { get; set; }
+        public virtual DbSet<Notes> Notes { get; set; }
 
         public virtual DbSet<MoveInformation> MoveInformation { get; set; }
 

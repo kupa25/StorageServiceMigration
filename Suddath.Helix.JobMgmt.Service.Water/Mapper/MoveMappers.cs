@@ -35,6 +35,13 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return obj;
         }
 
+        public static List<CreateJobNoteRequest> ToNotesModel(this List<Notes> notes)
+        {
+            var obj = notes == null ? null : Mapper.Map<List<CreateJobNoteRequest>>(notes);
+
+            return obj;
+        }
+
         public static Models.ServiceDto ToModel(this Move entity)
         {
             return entity == null ? null : Mapper.Map<Models.MoveServiceDto>(entity);
@@ -64,6 +71,53 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 return "Port to Port";
 
             return "Unknown";
+        }
+
+        internal static object GetValueFromRepo(string value)
+        {
+            var result = string.Empty;
+            NameTranslator.repo.TryGetValue(value, out result);
+
+            if (result == null)
+            {
+                result = "MigrationScript@test.com";
+            }
+
+            return result;
+        }
+
+        internal static string ToNotesCategory(Notes src)
+        {
+            var result = string.Empty;
+
+            switch (src.TABLE_NAME)
+            {
+                case "MOVE_JOBCOST":
+                    result = "JC";
+                    break;
+
+                case "CLAIMS_NOTES":
+                    result = "IC";
+                    break;
+
+                case "MOVE_AGENTS1":
+                    result = "ST";
+                    break;
+
+                case "MOVES":
+                    result = "serviceboard";
+                    break;
+
+                case "MOVE_AGENTS_7":
+                    result = "OA";
+                    break;
+
+                default:
+                    result = "serviceboard";
+                    break;
+            }
+
+            return result;
         }
 
         internal static TransfereeDto ToTransferee(Move src)

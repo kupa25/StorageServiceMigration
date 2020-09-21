@@ -30,7 +30,7 @@ namespace StorageServiceMigration
             await setApiAccessTokenAsync();
             await RetrieveJobsAccountAndVendor();
 
-            var moves = await RetrieveWaterRecords();
+            var moves = await WaterDbAccess.RetrieveWaterRecords();
 
             foreach (var move in moves)
             {
@@ -53,20 +53,17 @@ namespace StorageServiceMigration
 
                 await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, move, jobId);
 
-                await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
+                //await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
 
-                await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
+                //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
-                await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
+                //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
-                //            Add Notes
-                //--TaskMgmt-- -
-                //​/ api​ / v{ version}​/ Notes
+                //Add Notes
+                var createJobNoteRequests = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
+                await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
 
-                //Add Tasks
-                //--TaskMgmt--
-                /// api / v{ version}/ Tasks / jobs /{ jobId}
-                ///
+                //Add Prompts -- Figure out what is system generated or manually entered
             }
         }
 
@@ -145,7 +142,7 @@ namespace StorageServiceMigration
             Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
             try
             {
-                using (var context = new JobDbContext())
+                using (var context = new JobDbContext(JobsDbAccess.connectionString))
                 {
                     _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
                     _vendor = await context.Vendor.AsNoTracking().ToListAsync();
@@ -207,34 +204,6 @@ namespace StorageServiceMigration
 
             var token = response.AccessToken;
             _httpClient.SetBearerToken(token);
-        }
-
-        private static async Task<List<Move>> RetrieveWaterRecords()
-        {
-            Console.WriteLine("Retrieving Legacy moves");
-            try
-            {
-                using (var context = new WaterDbContext())
-                {
-                    var moves = await context.Moves
-                   .Include(v => v.Profile)
-                   .Include(v => v.Account)
-                   .Include(v => v.Names)
-                   .Include(v => v.MoveItems)
-                   .Include(v => v.MoveAgents)
-                       .ThenInclude(v => v.Name)
-                   .AsNoTracking()
-                   .Where(m => m.RegNumber == "255950").ToListAsync();
-
-                    return moves;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return null;
         }
 
         public static async Task<string> HandleResponse(HttpResponseMessage response)

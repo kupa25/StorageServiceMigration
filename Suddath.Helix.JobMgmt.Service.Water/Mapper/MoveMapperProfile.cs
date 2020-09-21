@@ -1,5 +1,6 @@
 ﻿using Suddath.Helix.JobMgmt.Models;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
+using System.Reflection;
 
 namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
 {
@@ -26,6 +27,14 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForMember(d => d.MoveType, opt => opt.MapFrom(src => "Door-to-Door"))
                 .ForMember(d => d.AuthPoNum, opt => opt.MapFrom(src => src.PONumber))
                 .ForMember(d => d.BranchName, opt => opt.MapFrom(src => MoveMappers.ToBranchName(src.BRANCH_CODE)))
+                ;
+
+            CreateMap<Notes, CreateJobNoteRequest>()
+                .ForMember(d => d.Module, opt => opt.MapFrom(src => "JOB"))
+                .ForMember(d => d.Message, opt => opt.MapFrom(src => src.NOTE))
+                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => MoveMappers.GetValueFromRepo(src.ENTERED_BY)))
+                .ForMember(d => d.Category, opt => opt.MapFrom(src => MoveMappers.ToNotesCategory(src)))
+
                 ;
         }
     }

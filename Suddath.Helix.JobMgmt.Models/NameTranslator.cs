@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace StorageServiceMigration
+namespace Suddath.Helix.JobMgmt.Models
 {
     public static class NameTranslator
     {
