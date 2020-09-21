@@ -23,11 +23,9 @@ namespace StorageServiceMigration
         private static List<AccountEntity> _accountEntities;
         private static List<Vendor> _vendor;
 
-        private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
-
         private static async Task Main(string[] args)
         {
-            await setApiAccessTokenAsync();
+            await SungateApi.setApiAccessTokenAsync(_httpClient);
             await RetrieveJobsAccountAndVendor();
 
             var moves = await WaterDbAccess.RetrieveWaterRecords();
@@ -185,24 +183,6 @@ namespace StorageServiceMigration
 
             Console.WriteLine($"Job added {parsedResponse}");
             return int.Parse(parsedResponse);
-        }
-
-        private static async Task setApiAccessTokenAsync()
-        {
-            Console.WriteLine("Getting the Sungate Token");
-
-            var response = await _httpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-            {
-                Address = $"{_sugGateBaseUrl}/connect/token",
-                ClientId = "utility.ccrf",
-                GrantType = "client_credentials",
-                ClientSecret = "E5NDJlMDQzM2QwNjFiNTBlN2ZkZjA0YTgzYTc1ZGYiLCJzY29wZSI6WyJhZGd4",
-                Scope = "jobsapi taskapi adapi "
-            });
-            if (response.IsError) throw new Exception(response.Error);
-
-            var token = response.AccessToken;
-            _httpClient.SetBearerToken(token);
         }
     }
 }

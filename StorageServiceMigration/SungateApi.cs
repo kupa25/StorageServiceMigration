@@ -1,4 +1,5 @@
 ﻿using Helix.API.Results;
+using IdentityModel.Client;
 using Newtonsoft.Json;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
 using System;
@@ -14,6 +15,26 @@ namespace StorageServiceMigration
         private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
 
         private static Dictionary<string, List<ADUser>> cachedAdUser { get; set; } = new Dictionary<string, List<ADUser>>();
+
+        public static async Task<HttpClient> setApiAccessTokenAsync(HttpClient _httpClient)
+        {
+            Console.WriteLine("Getting the Sungate Token");
+
+            var response = await _httpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+            {
+                Address = $"{_sugGateBaseUrl}/connect/token",
+                ClientId = "utility.ccrf",
+                GrantType = "client_credentials",
+                ClientSecret = "E5NDJlMDQzM2QwNjFiNTBlN2ZkZjA0YTgzYTc1ZGYiLCJzY29wZSI6WyJhZGd4",
+                Scope = "jobsapi taskapi adapi "
+            });
+            if (response.IsError) throw new Exception(response.Error);
+
+            var token = response.AccessToken;
+            _httpClient.SetBearerToken(token);
+
+            return _httpClient;
+        }
 
         public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v)
         {
