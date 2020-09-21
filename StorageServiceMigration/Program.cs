@@ -58,28 +58,33 @@ namespace StorageServiceMigration
                 //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
                 //Add Notes
-                var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
-
-                foreach (var note in notesEntity)
-                {
-                    var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
-
-                    if (adObj != null && adObj.Count > 0)
-                    {
-                        note.ENTERED_BY = adObj.FirstOrDefault().email;
-                    }
-                    else
-                    {
-                        note.ENTERED_BY = "MigrationScript@test.com";
-                    }
-                }
-
-                var createJobNoteRequests = notesEntity.ToNotesModel();
-
-                await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
+                await AddNotesFromGmmsToArive(move, jobId);
 
                 //Add Prompts -- Figure out what is system generated or manually entered
             }
+        }
+
+        private static async Task AddNotesFromGmmsToArive(Move move, int jobId)
+        {
+            var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
+
+            foreach (var note in notesEntity)
+            {
+                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
+
+                if (adObj != null && adObj.Count > 0)
+                {
+                    note.ENTERED_BY = adObj.FirstOrDefault().email;
+                }
+                else
+                {
+                    note.ENTERED_BY = "MigrationScript@test.com";
+                }
+            }
+
+            var createJobNoteRequests = notesEntity.ToNotesModel();
+
+            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
         }
 
         private static async Task addJobContacts(Move move, int jobId)
