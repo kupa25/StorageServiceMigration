@@ -55,7 +55,7 @@ namespace StorageServiceMigration
 
                 //await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
 
-                //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
+                //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
                 //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
@@ -85,7 +85,7 @@ namespace StorageServiceMigration
 
                     case 1:
                         contactType = "Move Consultant";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format(), "TBuracchio@suddath.com");
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format(), "Trevor Buracchio");
                         break;
 
                     case 2:
@@ -101,7 +101,7 @@ namespace StorageServiceMigration
 
                 var adObj = await GetADName(dictionaryValue);
 
-                if (adObj == null) { continue; }
+                if (adObj == null || adObj.Count == 0) { continue; }
 
                 jobContactList.Add(new CreateJobContactDto
                 {

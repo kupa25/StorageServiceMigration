@@ -66,20 +66,6 @@ namespace StorageServiceMigration
 
         #endregion Jobs Api call
 
-        #region Storage
-
-        internal static Task UpdateStorageMilestone(HttpClient httpClient, int id, Move move, int jobId)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion Storage
-
-        internal static Task UpdateJobCostMilestone(HttpClient httpClient, int id, Move move, int jobId)
-        {
-            throw new NotImplementedException();
-        }
-
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId)
         {
             Console.WriteLine("Creating Storage SSO");
@@ -97,6 +83,8 @@ namespace StorageServiceMigration
 
             return response;
         }
+
+        #region Update MileStone
 
         internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
@@ -146,6 +134,27 @@ namespace StorageServiceMigration
                 await Patch(httpClient, soUrl, patch);
             }
         }
+
+        #region Storage
+
+        internal static Task UpdateStorageMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Storage
+
+        internal static Task UpdateICtMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Task UpdateJobCostMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Update MileStone
 
         private static T Convert<T>(string parsedResponse)
         {
