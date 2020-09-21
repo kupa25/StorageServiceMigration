@@ -89,7 +89,9 @@ namespace StorageServiceMigration
         internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("ORIGIN"));
+            var storageEntity = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("STORAGE"));
 
+            bool modified = false;
             var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
 
             var original = await CallJobsApi(httpClient, soUrl, null);
@@ -101,8 +103,21 @@ namespace StorageServiceMigration
             //All docs received.
             if (origin != null && origin.DOCS_RCV_DATE != null)
             {
-                modifiedObj.IsAllDocumentsReceived = true;
+                modified = true;
 
+                modifiedObj.IsAllDocumentsReceived = true;
+            }
+
+            if (storageEntity.SITinDate.HasValue)
+            {
+                modified = true;
+
+                modifiedObj.ActualPickupStartDate = storageEntity.SITinDate.Value;
+                modifiedObj.ActualPickupEndDate = storageEntity.SITinDate.Value;
+            }
+
+            if (modified)
+            {
                 var patch = new JsonPatchDocument();
                 FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
 
@@ -137,8 +152,13 @@ namespace StorageServiceMigration
 
         #region Storage
 
-        internal static Task UpdateStorageMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        internal static Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
+            var legacyStorageEntity = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("STORAGE"));
+
+            var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=ST";
+            var soQAUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
+
             throw new NotImplementedException();
         }
 

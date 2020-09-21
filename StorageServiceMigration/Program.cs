@@ -32,35 +32,43 @@ namespace StorageServiceMigration
 
             foreach (var move in moves)
             {
-                //Add the job
-                var jobId = await addStorageJob(move);
+                try
+                {
+                    //Add the job
+                    var jobId = await addStorageJob(move);
 
-                //update datecreated on the job
-                JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow));
+                    //update datecreated on the job
+                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow));
 
-                //Add JobContacts
-                await addJobContacts(move, jobId);
+                    //Add JobContacts
+                    await addJobContacts(move, jobId);
 
-                //Add SuperService
-                await JobsApi.CreateStorageSSO(_httpClient, jobId);
+                    //Add SuperService
+                    await JobsApi.CreateStorageSSO(_httpClient, jobId);
 
-                //Update Milestone Pages
-                var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
+                    //Update Milestone Pages
+                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
 
-                await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, move, jobId);
+                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, move, jobId);
 
-                await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, move, jobId);
+                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, move, jobId);
 
-                //await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
+                    await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
 
-                //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
+                    //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
-                //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
+                    //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
-                //Add Notes
-                await AddNotesFromGmmsToArive(move, jobId);
+                    //Add Notes
+                    await AddNotesFromGmmsToArive(move, jobId);
 
-                //Add Prompts -- Figure out what is system generated or manually entered
+                    //Add Prompts -- Figure out what is system generated or manually entered
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"**** ERROR ****");
+                    Console.WriteLine($"{ex.Message}");
+                }
             }
         }
 
