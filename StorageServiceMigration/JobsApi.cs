@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
+using Suddath.Helix.JobMgmt.Models.Constant;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrder;
+using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrderStorage;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using System;
 using System.Collections.Generic;
@@ -92,6 +94,14 @@ namespace StorageServiceMigration
             catch (Exception ex) { Console.WriteLine("*********ERROR parsing response**"); }
 
             return default(T);
+        }
+
+        private static async Task GenerateAndPatch(HttpClient httpClient, string soSTUrl, dynamic origObj, dynamic modifiedObj)
+        {
+            var patch = new JsonPatchDocument();
+            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+            await Patch(httpClient, soSTUrl, patch);
         }
 
         #endregion Jobs Api call
@@ -209,11 +219,7 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
-
-            var patch = new JsonPatchDocument();
-            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
-
-            await Patch(httpClient, soSTUrl, patch);
+            await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
         }
 
         internal static async Task<int> AddStorageRevRecord(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
@@ -222,6 +228,27 @@ namespace StorageServiceMigration
             var result = await PostToJobsApi<int>(httpClient, soSTUrl, null);
 
             return result;
+        }
+
+        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId)
+        {
+            Console.WriteLine("Update ST Rev Record");
+
+            var url = $"/{jobId}/services/orders/{soId}/storage/revenues";
+            var legacyStorageEntity = move.StorageAgent;
+
+            var original = await CallJobsApi(httpClient, url, null);
+            var copyOfOriginal = original;
+
+            var origObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(original).Data.FirstOrDefault();
+            var modifiedObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(copyOfOriginal).Data.FirstOrDefault();
+
+            var freePeriodId = legacyStorageEntity.EXAM_AMOUNT1;
+
+            modifiedObj.FreePeriodStartDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
+            modifiedObj.FreePeriodEndDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
+
+            await GenerateAndPatch(httpClient, url + $"/{origObj.Id}", origObj, modifiedObj);
         }
 
         #endregion Storage

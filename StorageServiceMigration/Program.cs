@@ -78,9 +78,13 @@ namespace StorageServiceMigration
 
             var vendorAccountingId = move.StorageAgent.VendorNameId;
             var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
-            await JobsApi.UpdateStorageMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId, vendorEntity);
+            var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
 
-            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id, move, jobId);
+            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity);
+
+            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId);
+
+            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId);
         }
 
         private static async Task AddNotesFromGmmsToArive(Move move, int jobId)
