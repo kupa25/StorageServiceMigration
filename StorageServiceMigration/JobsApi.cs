@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Helix.API.Results;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -42,6 +43,23 @@ namespace StorageServiceMigration
             }
         }
 
+        public static async Task<T> PostToJobsApi<T>(HttpClient _httpClient, string url, dynamic model)
+        {
+            url = _jobsBaseUrl + url;
+            string payload = string.Empty;
+
+            if (model != null)
+            {
+                payload = JsonConvert.SerializeObject(model);
+            }
+
+            var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
+            var parsedResponse = await HandleResponse(response);
+
+            var result = Convert<SingleResult<T>>(parsedResponse);
+            return result.Data;
+        }
+
         public static async Task<string> Patch(HttpClient _httpClient, string url, dynamic model)
         {
             url = _jobsBaseUrl + url;
@@ -62,6 +80,18 @@ namespace StorageServiceMigration
             }
 
             return content;
+        }
+
+        private static T Convert<T>(string parsedResponse)
+        {
+            try
+            {
+                var result = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<T>(parsedResponse) : default(T));
+                return result;
+            }
+            catch (Exception ex) { Console.WriteLine("*********ERROR parsing response**"); }
+
+            return default(T);
         }
 
         #endregion Jobs Api call
@@ -88,8 +118,10 @@ namespace StorageServiceMigration
 
         internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
-            var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("ORIGIN"));
-            var storageEntity = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("STORAGE"));
+            Console.WriteLine("Updating OA");
+
+            var origin = move.OriginAgent;
+            var storageEntity = move.StorageAgent;
 
             bool modified = false;
             var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
@@ -116,6 +148,14 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPickupEndDate = storageEntity.SITinDate.Value;
             }
 
+            //currentweight - if null on ma ..m.weight - da.weight.
+            if (storageEntity.SurveyWeight.HasValue)
+            {
+                modified = true;
+
+                modifiedObj.NetWeightLb = storageEntity.SurveyWeight.Value;
+            }
+
             if (modified)
             {
                 var patch = new JsonPatchDocument();
@@ -127,6 +167,8 @@ namespace StorageServiceMigration
 
         internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
+            Console.WriteLine("Updating DA");
+
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
 
             var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=DA";
@@ -154,7 +196,7 @@ namespace StorageServiceMigration
 
         internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity)
         {
-            var legacyStorageEntity = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("STORAGE"));
+            var legacyStorageEntity = move.StorageAgent;
 
             var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=ST";
 
@@ -165,11 +207,21 @@ namespace StorageServiceMigration
             var modifiedObj = Convert<GetServiceOrderStorageResponse>(copyOfOriginal);
 
             modifiedObj.VendorId = vendorEntity?.Id;
+            modifiedObj.StorageCostRate = legacyStorageEntity.COST;
+            modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
 
             var patch = new JsonPatchDocument();
             FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
 
             await Patch(httpClient, soSTUrl, patch);
+        }
+
+        internal static async Task<int> AddStorageRevRecord(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        {
+            var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}/storage/revenues";
+            var result = await PostToJobsApi<int>(httpClient, soSTUrl, null);
+
+            return result;
         }
 
         #endregion Storage
@@ -185,17 +237,6 @@ namespace StorageServiceMigration
         }
 
         #endregion Update MileStone
-
-        private static T Convert<T>(string parsedResponse)
-        {
-            try
-            {
-                return ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<T>(parsedResponse) : default(T));
-            }
-            catch (Exception ex) { Console.WriteLine("*********ERROR**"); }
-
-            return default(T);
-        }
 
         private static void FillPatchForObject(JObject orig, JObject mod, JsonPatchDocument patch, string path)
         {

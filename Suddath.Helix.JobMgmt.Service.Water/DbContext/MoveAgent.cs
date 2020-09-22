@@ -16,6 +16,8 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public string VendorNameId { get; set; }
 
         public DateTime? DOCS_RCV_DATE { get; set; }
+        public decimal? COST { get; set; }
+        public string DELY_DOCS { get; set; }
 
         [Key]
         [Column("JOB_CATEGORY", Order = 2)]
