@@ -152,14 +152,24 @@ namespace StorageServiceMigration
 
         #region Storage
 
-        internal static Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity)
         {
             var legacyStorageEntity = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("STORAGE"));
 
             var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=ST";
-            var soQAUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
 
-            throw new NotImplementedException();
+            var original = await CallJobsApi(httpClient, soSTUrl, null);
+            var copyOfOriginal = original;
+
+            var origObj = Convert<GetServiceOrderStorageResponse>(original);
+            var modifiedObj = Convert<GetServiceOrderStorageResponse>(copyOfOriginal);
+
+            modifiedObj.VendorId = vendorEntity?.Id;
+
+            var patch = new JsonPatchDocument();
+            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+            await Patch(httpClient, soSTUrl, patch);
         }
 
         #endregion Storage

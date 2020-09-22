@@ -7,6 +7,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
     public partial class Move
     {
         private Name _originShipper;
+
         public Name OriginShipper
         {
             get
@@ -21,6 +22,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private Name _destinationShipper;
+
         public Name DestinationShipper
         {
             get
@@ -33,6 +35,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
                 return _destinationShipper;
             }
         }
+
         public string FirstName
         {
             get
@@ -66,6 +69,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private MoveAgent _originAgent;
+
         public MoveAgent OriginAgent
         {
             get
@@ -80,6 +84,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private bool? _hasDestinationAgent;
+
         public bool HasDestinationAgent
         {
             get
@@ -94,6 +99,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private bool? _hasOriginAgent;
+
         public bool HasOriginAgent
         {
             get
@@ -108,6 +114,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private MoveAgent _destinationAgent;
+
         public MoveAgent DestinationAgent
         {
             get
@@ -121,7 +128,23 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
             }
         }
 
+        private MoveAgent _storageAgent;
+
+        public MoveAgent StorageAgent
+        {
+            get
+            {
+                if (_storageAgent == null)
+                {
+                    _storageAgent = MoveAgents.Where(ma => ma.JobCategory == MoveAgentJobCategory.Storage).FirstOrDefault();
+                }
+
+                return _storageAgent;
+            }
+        }
+
         private DateTime? _packDate;
+
         public DateTime? PackDate
         {
             get
@@ -140,6 +163,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _departureDate;
+
         public DateTime? DepatureDate
         {
             get
@@ -166,6 +190,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _actualDepartureDate;
+
         public DateTime? ActualDepatureDate
         {
             get
@@ -184,6 +209,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _estimatedDepartureDate;
+
         public DateTime? EstimatedDepatureDate
         {
             get
@@ -202,6 +228,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _loadDate;
+
         public DateTime? LoadDate
         {
             get
@@ -228,6 +255,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _requiredDeliveryDate;
+
         public DateTime? RequiredDeliveryDate
         {
             get
@@ -246,6 +274,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _serveyDate;
+
         public DateTime? SurveyDate
         {
             get
@@ -271,6 +300,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _actualDeliveryDate;
+
         public DateTime? ActualDeliveryDate
         {
             get
@@ -294,6 +324,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
                 return _actualDeliveryDate;
             }
         }
+
         public DateTime? DeliveryOutOfStorageActualDate
         {
             get
@@ -303,6 +334,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _originSITinDate;
+
         public DateTime? OrignSITinDate
         {
             get
@@ -321,6 +353,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _orignSIToutDate;
+
         public DateTime? OrignSIToutDate
         {
             get
@@ -339,6 +372,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _storageSITinDate;
+
         public DateTime? StorageSITinDate
         {
             get
@@ -357,6 +391,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _storageSIToutDate;
+
         public DateTime? StorageSIToutDate
         {
             get
@@ -375,6 +410,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _destSITinDate;
+
         public DateTime? DestSITinDate
         {
             get
@@ -393,6 +429,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _destSIToutDate;
+
         public DateTime? DestSIToutDate
         {
             get
@@ -411,6 +448,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _customsInDate;
+
         public DateTime? CustomsInDate
         {
             get
@@ -429,6 +467,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private DateTime? _customsOutDate;
+
         public DateTime? CustomsOutDate
         {
             get
@@ -447,6 +486,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         }
 
         private MoveAgent _inLandMoveAgent;
+
         public MoveAgent InlandMoveAgent
         {
             get
@@ -467,6 +507,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
                 return InlandMoveAgent?.EstArrivalDate1;
             }
         }
+
         public DateTime? InlandEtaEnd
         {
             get
@@ -474,14 +515,15 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
                 return InlandMoveAgent?.EstArrivalDate2;
             }
         }
+
         public DateTime? InlandEstPickupDate1
         {
             get { return InlandMoveAgent?.EST_PU_DATE1; }
         }
+
         public DateTime? InlandEstPickupDate2
         {
             get { return InlandMoveAgent?.EST_PU_DATE2; }
         }
-
     }
 }
