@@ -45,10 +45,9 @@ namespace StorageServiceMigration
 
                     //Add SuperService
                     await JobsApi.CreateStorageSSO(_httpClient, jobId);
-
-                    //Update Milestone Pages
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
 
+                    //Update Milestone Pages
                     await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, move, jobId);
 
                     await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, move, jobId);
@@ -58,6 +57,9 @@ namespace StorageServiceMigration
                     //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
+
+                    await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, paymentSends, jobId, serviceOrders.FirstOrDefault(so => so.ServiceId == 29));
+
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
 
                     //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);

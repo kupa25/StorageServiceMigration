@@ -72,6 +72,12 @@ namespace StorageServiceMigration
             return parsedResponse;
         }
 
+        internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends, int jobId, ServiceOrder serviceOrder)
+        {
+            Console.WriteLine("Starting JC creation");
+            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
+        }
+
         public static async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
