@@ -57,6 +57,9 @@ namespace StorageServiceMigration
 
                     //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
+                    var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
+                    var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
+
                     //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
 
                     //Add Notes

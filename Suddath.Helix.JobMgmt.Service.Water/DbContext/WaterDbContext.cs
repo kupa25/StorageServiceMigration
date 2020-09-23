@@ -11,6 +11,8 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public virtual DbSet<MoveAgent> MoveAgents { get; set; }
         public virtual DbSet<Profile> Profiles { get; set; }
         public virtual DbSet<Notes> Notes { get; set; }
+        public virtual DbSet<PaymentSent> PaymentSent { get; set; }
+        public virtual DbSet<PaymentReceived> PaymentReceived { get; set; }
 
         public virtual DbSet<MoveInformation> MoveInformation { get; set; }
 
@@ -42,6 +44,12 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
                 .HasOne(x => x.Profile)
                 .WithOne()
                 .HasForeignKey<Move>(m => m.AccountId);
+
+            modelBuilder.Entity<PaymentSent>()
+                .HasKey(ps => new { ps.MOVES_ID, ps.NAMES_ID });
+
+            modelBuilder.Entity<PaymentReceived>()
+                .HasKey(ps => new { ps.MOVES_ID, ps.NAMES_ID });
         }
     }
 }

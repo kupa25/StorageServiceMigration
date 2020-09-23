@@ -60,5 +60,53 @@ namespace StorageServiceMigration
 
             return null;
         }
+
+        internal static async Task<List<PaymentSent>> RetrieveJobCostExpense(string regNumber)
+        {
+            Console.WriteLine($"Retrieving Payment_send for {regNumber}");
+            try
+            {
+                using (var context = new WaterDbContext())
+                {
+                    var paymentSends = await context.PaymentSent.AsNoTracking()
+                   .Where(n => n.MOVES_ID == regNumber)
+                   .OrderByDescending(n => n.DATE_BILLED)
+                   .Take(4).
+                   ToListAsync();
+
+                    return paymentSends;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return null;
+        }
+
+        internal static async Task<List<PaymentReceived>> RetrieveJobCostRevenue(string regNumber)
+        {
+            Console.WriteLine($"Retrieving Payment_received for {regNumber}");
+            try
+            {
+                using (var context = new WaterDbContext())
+                {
+                    var paymentSends = await context.PaymentReceived.AsNoTracking()
+                   .Where(n => n.MOVES_ID == regNumber)
+                   .OrderByDescending(n => n.DATE_BILLED)
+                   .Take(4).
+                   ToListAsync();
+
+                    return paymentSends;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return null;
+        }
     }
 }
