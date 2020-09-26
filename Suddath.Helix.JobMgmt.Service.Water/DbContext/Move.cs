@@ -19,6 +19,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Column("MOVES_ID")]
         public string Id { get; set; }
 
+        public string MOVE_MANAGER { get; set; }
         public string MOVE_COORDINATOR { get; set; }
         public string TRAFFIC_MANAGER { get; set; }
         public string BILLER { get; set; }
@@ -56,7 +57,6 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public string SERVICE { get; set; }
 
         public string TYPE_OF_MOVE { get; set; }
-        public string MOVE_MANAGER { get; set; }
 
         [NotMapped]
         public string MOVE_MANAGER_EMAIL { get; set; }

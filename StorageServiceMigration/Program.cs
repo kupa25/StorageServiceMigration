@@ -134,7 +134,25 @@ namespace StorageServiceMigration
 
                     case 1:
                         contactType = "Move Consultant";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.MOVE_COORDINATOR.Format(), "Trevor Buracchio");
+                        var nameToUse = string.Empty;
+
+                        if (!string.IsNullOrEmpty(move.MOVE_MANAGER))
+                        {
+                            nameToUse = move.MOVE_MANAGER.Format();
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(move.MOVE_COORDINATOR))
+                            {
+                                nameToUse = move.MOVE_COORDINATOR.Format();
+                            }
+                            else
+                            {
+                                nameToUse = "Trevor Buracchio";
+                            }
+                        }
+
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(nameToUse);
                         break;
 
                     case 2:
