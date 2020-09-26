@@ -12,9 +12,9 @@ namespace StorageServiceMigration
 {
     public static class WaterDbAccess
     {
-        public static async Task<List<Move>> RetrieveWaterRecords()
+        public static async Task<Move> RetrieveWaterRecords(string regNumber)
         {
-            Console.WriteLine("Retrieving Legacy moves");
+            Console.WriteLine($"Retrieving Legacy move {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
@@ -27,7 +27,7 @@ namespace StorageServiceMigration
                    .Include(v => v.MoveAgents)
                        .ThenInclude(v => v.Name)
                    .AsNoTracking()
-                   .Where(m => m.RegNumber == "274486").ToListAsync();
+                   .Where(m => m.RegNumber == regNumber).FirstOrDefaultAsync();
 
                     return moves;
                 }
