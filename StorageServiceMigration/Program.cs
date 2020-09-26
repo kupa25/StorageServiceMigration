@@ -45,7 +45,6 @@ namespace StorageServiceMigration
 
                     //Add SuperService
                     var result = await JobsApi.CreateStorageSSO(_httpClient, jobId);
-
                     JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
 
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
