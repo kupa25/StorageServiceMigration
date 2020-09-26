@@ -28,9 +28,9 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            //isDebug = false;
+            isDebug = false;
 
-            SetConsoleWriteLine(isDebug);
+            //SetConsoleWriteLine(isDebug);
             SetMovesToImport(isDebug);
 
             await SungateApi.setApiAccessTokenAsync(_httpClient);
@@ -81,8 +81,6 @@ namespace StorageServiceMigration
                 {
                     Console.WriteLine($"**** ERROR ****");
                     Console.WriteLine($"{ex.Message}");
-
-                    Console.WriteLine("-----------------------------------------------------------------------------------");
                 }
             }
         }
