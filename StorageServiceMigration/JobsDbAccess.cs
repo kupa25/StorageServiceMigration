@@ -40,5 +40,17 @@ namespace StorageServiceMigration
 
             return result;
         }
+
+        internal static void ChangeDisplayName(int ssoId, string regNumber)
+        {
+            Console.WriteLine($"Changing Storage DisplayName to {regNumber}");
+            using (var context = new JobDbContext(connectionString))
+            {
+                var createdJob = context.SuperServiceOrder.Find(ssoId);
+
+                createdJob.DisplayId = regNumber;
+                context.SaveChanges();
+            }
+        }
     }
 }

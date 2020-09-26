@@ -7,6 +7,7 @@ using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.Constant;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
+using Suddath.Helix.JobMgmt.Models.ResponseModels.JobCost;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrder;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrderStorage;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
@@ -76,6 +77,17 @@ namespace StorageServiceMigration
         {
             Console.WriteLine("Starting JC creation");
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
+
+            foreach (var legacyJC in paymentSends)
+            {
+                var orignal = await PostToJobsApi<GetBillableItemResponse>(httpClient, url, null);
+                var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
+                var duplicateObj = Convert<GetBillableItemResponse>(duplicateObjString);
+
+                duplicateObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT;
+
+                await GenerateAndPatch(httpClient, url, orignal, duplicateObj);
+            }
         }
 
         public static async Task<string> HandleResponse(HttpResponseMessage response)
