@@ -154,6 +154,15 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             var origin = move.OriginShipper;
             var destination = move.DestinationShipper;
 
+            if (origin == null)
+            {
+                throw new Exception($"origin is null on the moves table. Group_CODE probably doesn't match");
+            }
+            if (destination == null)
+            {
+                throw new Exception($"destination is null on the moves table. Group_CODE probably doesn't match");
+            }
+
             var dto = new JobInfoDto
             {
                 OriginAddressLabel = $"{origin.Street} {origin.City}, {origin.State} {origin.Zip}",

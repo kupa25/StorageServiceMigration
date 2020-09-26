@@ -41,6 +41,11 @@ namespace StorageServiceMigration
                 try
                 {
                     var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
+
+                    if (move == null)
+                    {
+                        continue;
+                    }
                     //Add the job
                     var jobId = await addStorageJob(move);
 
@@ -83,6 +88,176 @@ namespace StorageServiceMigration
                     Console.WriteLine($"{ex.Message}");
                 }
             }
+        }
+
+        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders)
+        {
+            Console.WriteLine("Updating ST");
+
+            var vendorAccountingId = move.StorageAgent.VendorNameId;
+            var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
+            var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
+
+            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity);
+
+            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId);
+
+            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId);
+        }
+
+        private static async Task AddNotesFromGmmsToArive(Move move, int jobId)
+        {
+            var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
+
+            foreach (var note in notesEntity)
+            {
+                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
+
+                if (adObj != null && adObj.Count > 0)
+                {
+                    note.ENTERED_BY = adObj.FirstOrDefault().email;
+                }
+                else
+                {
+                    note.ENTERED_BY = "MigrationScript@test.com";
+                }
+            }
+
+            var createJobNoteRequests = notesEntity.ToNotesModel();
+
+            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
+        }
+
+        private static async Task addJobContacts(Move move, int jobId)
+        {
+            var jobContactList = new List<CreateJobContactDto>();
+
+            for (int i = 0; i < 4; i++) // we are only mapping 5 people.. since thats in the datamap
+            {
+                var dictionaryValue = string.Empty;
+                var contactType = string.Empty;
+
+                switch (i)
+                {
+                    case 0:
+                        contactType = "Biller Contact";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.BILLER.Format());
+                        break;
+
+                    case 1:
+                        contactType = "Move Consultant";
+                        var nameToUse = string.Empty;
+
+                        if (!string.IsNullOrEmpty(move.MOVE_MANAGER) && !move.MOVE_MANAGER.Equals("STORAGE"))
+                        {
+                            nameToUse = move.MOVE_MANAGER.Format();
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(move.MOVE_COORDINATOR) && !move.MOVE_COORDINATOR.Equals("STORAGE"))
+                            {
+                                nameToUse = move.MOVE_COORDINATOR.Format();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
+                                nameToUse = "TBURACCHIO";
+                            }
+                        }
+
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(nameToUse);
+                        break;
+
+                    case 2:
+                        contactType = "Traffic Consultant";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.TRAFFIC_MANAGER.Format());
+                        break;
+
+                    case 3:
+                        contactType = "Pricing Consultant";
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.QUOTED_BY.Format());
+                        break;
+                }
+
+                var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
+
+                if (adObj == null || adObj.Count == 0) { continue; }
+
+                jobContactList.Add(new CreateJobContactDto
+                {
+                    ContactType = contactType,
+                    Email = adObj.FirstOrDefault().email,
+                    FullName = adObj.FirstOrDefault().fullName,
+                    Phone = adObj.FirstOrDefault().phone
+                });
+            }
+
+            Console.WriteLine("Adding Job Contacts");
+
+            var url = $"/{jobId}/contacts";
+
+            await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
+        }
+
+        private static async Task RetrieveJobsAccountAndVendor()
+        {
+            Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+            try
+            {
+                using (var context = new JobDbContext(JobsDbAccess.connectionString))
+                {
+                    _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
+                    _vendor = await context.Vendor.AsNoTracking().ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private static async Task<int> addStorageJob(Move move)
+        {
+            Console.WriteLine("Creating a job");
+
+            var url = string.Empty;
+
+            var movesAccount = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.AccountId));
+            var movesBooker = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.Booker));
+
+            if (movesAccount == null)
+            {
+                throw new Exception($"Missing Account in Arive {move.AccountId}");
+            }
+
+            dynamic billTo = null;
+            var billToLabel = string.Empty;
+            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
+
+            if (billTo != null)
+            {
+                billToLabel = "Account";
+            }
+            else
+            {
+                billTo = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
+
+                if (billTo != null)
+                {
+                    billToLabel = "Vendor";
+                }
+            }
+
+            if (billTo == null)
+            {
+                throw new Exception($"Missing BillTo in Arive {move.BILL}");
+            }
+
+            var model = move.ToJobModel(movesAccount.Id, movesBooker.Id, (int?)billTo?.Id, billToLabel);
+            string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
+
+            Console.WriteLine($"Job added {parsedResponse}");
+            return int.Parse(parsedResponse);
         }
 
         private static void SetMovesToImport(bool isDebug)
@@ -523,165 +698,6 @@ namespace StorageServiceMigration
             {
                 Console.SetOut(writer);
             }
-        }
-
-        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders)
-        {
-            Console.WriteLine("Updating ST");
-
-            var vendorAccountingId = move.StorageAgent.VendorNameId;
-            var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
-            var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
-
-            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity);
-
-            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId);
-
-            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId);
-        }
-
-        private static async Task AddNotesFromGmmsToArive(Move move, int jobId)
-        {
-            var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
-
-            foreach (var note in notesEntity)
-            {
-                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
-
-                if (adObj != null && adObj.Count > 0)
-                {
-                    note.ENTERED_BY = adObj.FirstOrDefault().email;
-                }
-                else
-                {
-                    note.ENTERED_BY = "MigrationScript@test.com";
-                }
-            }
-
-            var createJobNoteRequests = notesEntity.ToNotesModel();
-
-            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
-        }
-
-        private static async Task addJobContacts(Move move, int jobId)
-        {
-            var jobContactList = new List<CreateJobContactDto>();
-
-            for (int i = 0; i < 4; i++) // we are only mapping 5 people.. since thats in the datamap
-            {
-                var dictionaryValue = string.Empty;
-                var contactType = string.Empty;
-
-                switch (i)
-                {
-                    case 0:
-                        contactType = "Biller Contact";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.BILLER.Format());
-                        break;
-
-                    case 1:
-                        contactType = "Move Consultant";
-                        var nameToUse = string.Empty;
-
-                        if (!string.IsNullOrEmpty(move.MOVE_MANAGER))
-                        {
-                            nameToUse = move.MOVE_MANAGER.Format();
-                        }
-                        else
-                        {
-                            if (!string.IsNullOrEmpty(move.MOVE_COORDINATOR))
-                            {
-                                nameToUse = move.MOVE_COORDINATOR.Format();
-                            }
-                            else
-                            {
-                                nameToUse = "Trevor Buracchio";
-                            }
-                        }
-
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(nameToUse);
-                        break;
-
-                    case 2:
-                        contactType = "Traffic Consultant";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.TRAFFIC_MANAGER.Format());
-                        break;
-
-                    case 3:
-                        contactType = "Pricing Consultant";
-                        dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.QUOTED_BY.Format());
-                        break;
-                }
-
-                var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
-
-                if (adObj == null || adObj.Count == 0) { continue; }
-
-                jobContactList.Add(new CreateJobContactDto
-                {
-                    ContactType = contactType,
-                    Email = adObj.FirstOrDefault().email,
-                    FullName = adObj.FirstOrDefault().fullName,
-                    Phone = adObj.FirstOrDefault().phone
-                });
-            }
-
-            Console.WriteLine("Adding Job Contacts");
-
-            var url = $"/{jobId}/contacts";
-
-            await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
-        }
-
-        private static async Task RetrieveJobsAccountAndVendor()
-        {
-            Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
-            try
-            {
-                using (var context = new JobDbContext(JobsDbAccess.connectionString))
-                {
-                    _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
-                    _vendor = await context.Vendor.AsNoTracking().ToListAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-
-        private static async Task<int> addStorageJob(Move move)
-        {
-            Console.WriteLine("Creating a job");
-
-            var url = string.Empty;
-
-            var movesAccount = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.AccountId));
-            var movesBooker = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.Booker));
-
-            dynamic billTo = null;
-            var billToLabel = string.Empty;
-            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
-
-            if (billTo != null)
-            {
-                billToLabel = "Account";
-            }
-            else
-            {
-                billTo = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
-
-                if (billTo != null)
-                {
-                    billToLabel = "Vendor";
-                }
-            }
-
-            var model = move.ToJobModel(movesAccount.Id, movesBooker.Id, (int?)billTo?.Id, billToLabel);
-            string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
-
-            Console.WriteLine($"Job added {parsedResponse}");
-            return int.Parse(parsedResponse);
         }
     }
 }

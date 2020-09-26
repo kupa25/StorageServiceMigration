@@ -28,14 +28,14 @@ namespace StorageServiceMigration
                    .Include(v => v.MoveAgents)
                        .ThenInclude(v => v.Name)
                    .AsNoTracking()
-                   .Where(m => m.RegNumber == regNumber).FirstOrDefaultAsync();
+                   .Where(m => m.RegNumber == regNumber).SingleAsync();
 
                     return moves;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine($"No moves retrieved for {regNumber}", ex);
             }
 
             return null;
