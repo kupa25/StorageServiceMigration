@@ -61,12 +61,16 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                     result = "IC";
                     break;
 
-                case "MOVE_AGENTS1":
+                case "MOVES":
+                    result = "serviceboard";
+                    break;
+
+                case "MOVE_AGENTS6":
                     result = "ST";
                     break;
 
-                case "MOVES":
-                    result = "serviceboard";
+                case "MOVE_AGENTS1":
+                    result = "DA";
                     break;
 
                 case "MOVE_AGENTS_7":
