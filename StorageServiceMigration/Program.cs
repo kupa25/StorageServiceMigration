@@ -47,6 +47,7 @@ namespace StorageServiceMigration
                     {
                         continue;
                     }
+
                     //Add the job
                     var jobId = await addStorageJob(move);
 
@@ -284,9 +285,9 @@ namespace StorageServiceMigration
             return int.Parse(parsedResponse);
         }
 
-        private static void SetMovesToImport(bool isDebug)
+        private static void SetMovesToImport(bool loadAllRecords)
         {
-            if (isDebug)
+            if (!loadAllRecords)
             {
                 movesToImport.Add("274486");
             }

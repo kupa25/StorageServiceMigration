@@ -344,6 +344,12 @@ namespace StorageServiceMigration
                 modifiedObj.PayableRateType = "Per 1000 Insured";
             }
 
+            //******************************** CLAIMS SECTION ****************
+
+            modifiedObj.ClaimNumber = record.CLAIM_NUMBER;
+            modifiedObj.ClaimedAmount = record.AMOUNT_PAID;
+            modifiedObj.ClaimantDocsCreatedDate = record.CLAIMANT_DOCS;
+
             await GenerateAndPatch(httpClient, url, origObj, modifiedObj);
         }
 

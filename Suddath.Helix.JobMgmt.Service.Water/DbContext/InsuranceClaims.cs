@@ -24,5 +24,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
 
         [Column("POLICY#")]
         public string POLICY_NUMBER { get; set; }
+
+        public DateTime? CLAIMANT_DOCS { get; set; }
+        public string CLAIM_NUMBER { get; set; }
+        public decimal? AMOUNT_PAID { get; set; }
     }
 }
