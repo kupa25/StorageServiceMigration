@@ -98,6 +98,30 @@ namespace StorageServiceMigration
             return null;
         }
 
+        internal static async Task<List<InsuranceClaims>> RetrieveInsuranceClaims(string regNumber)
+        {
+            Console.WriteLine($"Retrieving Insurance & Claims for {regNumber}");
+            Trace.WriteLine($"Retrieving Insurance & Claims for {regNumber}");
+            try
+            {
+                using (var context = new WaterDbContext())
+                {
+                    var insurance = await context.InsuranceClaims.AsNoTracking()
+                   .Where(n => n.MOVES_ID == regNumber)
+                   .ToListAsync();
+
+                    return insurance;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Trace.WriteLine(ex);
+            }
+
+            return null;
+        }
+
         internal static async Task<List<PaymentReceived>> RetrieveJobCostRevenue(string regNumber)
         {
             Console.WriteLine($"Retrieving Payment_received for {regNumber}");

@@ -13,6 +13,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public virtual DbSet<Notes> Notes { get; set; }
         public virtual DbSet<PaymentSent> PaymentSent { get; set; }
         public virtual DbSet<PaymentReceived> PaymentReceived { get; set; }
+        public virtual DbSet<InsuranceClaims> InsuranceClaims { get; set; }
 
         public virtual DbSet<MoveInformation> MoveInformation { get; set; }
 

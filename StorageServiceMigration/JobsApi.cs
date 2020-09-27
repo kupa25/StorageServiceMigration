@@ -7,6 +7,7 @@ using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.Constant;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
+using Suddath.Helix.JobMgmt.Models.ResponseModels.InsuranceClaim;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.JobCost;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrder;
 using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrderStorage;
@@ -290,14 +291,26 @@ namespace StorageServiceMigration
 
         #endregion Storage
 
-        internal static Task UpdateICtMilestone(HttpClient httpClient, int id, Move move, int jobId)
+        internal static async Task UpdateICtMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, List<InsuranceClaims> legacyInsuranceClaims)
         {
-            throw new NotImplementedException();
-        }
+            Console.WriteLine("Updating IC");
+            Trace.WriteLine("Updating IC");
 
-        internal static Task UpdateJobCostMilestone(HttpClient httpClient, int id, Move move, int jobId)
-        {
-            throw new NotImplementedException();
+            var url = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=IC";
+
+            var original = await CallJobsApi(httpClient, url, null);
+            var copyOfOriginal = original;
+
+            var origObj = Convert<GetServiceOrderInsuranceClaimResponse>(original);
+            var modifiedObj = Convert<GetServiceOrderInsuranceClaimResponse>(copyOfOriginal);
+
+            var record = legacyInsuranceClaims.FirstOrDefault();
+
+            modifiedObj.HHGAmount = record.REQ_AMOUNT;
+            modifiedObj.HighValueAmount = record.HIGH_VALUE_AMOUNT;
+            modifiedObj.VehicleAmount = record.VEHICLE_AMOUNT;
+
+            await GenerateAndPatch(httpClient, url, origObj, modifiedObj);
         }
 
         #endregion Update MileStone

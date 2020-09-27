@@ -69,7 +69,10 @@ namespace StorageServiceMigration
 
                     await updateStorageJob(move, jobId, serviceOrders);
 
-                    //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
+                    var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
+                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims);
+
+                    #region JobCost
 
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
                     var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes();
@@ -78,7 +81,7 @@ namespace StorageServiceMigration
 
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
 
-                    //await JobsApi.UpdateJobCostMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 29).Id, move, jobId);
+                    #endregion JobCost
 
                     //Add Notes
                     await AddNotesFromGmmsToArive(move, jobId);
