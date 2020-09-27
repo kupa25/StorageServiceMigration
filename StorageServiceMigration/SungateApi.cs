@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Suddath.Helix.JobMgmt.Models.ResponseModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace StorageServiceMigration
         public static async Task<HttpClient> setApiAccessTokenAsync(HttpClient _httpClient)
         {
             Console.WriteLine("Getting the Sungate Token");
+            Trace.WriteLine("Getting the Sungate Token");
 
             var response = await _httpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
@@ -40,6 +42,7 @@ namespace StorageServiceMigration
         {
             v = v.Format();
             Console.WriteLine("Get the Ad Name for : " + v);
+            Trace.WriteLine("Get the Ad Name for : " + v);
 
             List<ADUser> adUser;
             var found = cachedAdUser.TryGetValue(v, out adUser);

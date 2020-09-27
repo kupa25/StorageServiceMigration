@@ -13,6 +13,7 @@ using Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrderStorage;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -76,6 +77,8 @@ namespace StorageServiceMigration
         internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends, int jobId, ServiceOrder serviceOrder)
         {
             Console.WriteLine("Starting JC creation");
+            Trace.WriteLine("Starting JC creation");
+
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
 
             foreach (var legacyJC in paymentSends)
@@ -109,7 +112,11 @@ namespace StorageServiceMigration
                 var result = ((!string.IsNullOrEmpty(parsedResponse)) ? JsonConvert.DeserializeObject<T>(parsedResponse) : default(T));
                 return result;
             }
-            catch (Exception ex) { Console.WriteLine("*********ERROR parsing response**"); }
+            catch (Exception ex)
+            {
+                Console.WriteLine("*********ERROR parsing response**");
+                Trace.WriteLine("*********ERROR parsing response**");
+            }
 
             return default(T);
         }
@@ -127,6 +134,8 @@ namespace StorageServiceMigration
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId)
         {
             Console.WriteLine("Creating Storage SSO");
+            Trace.WriteLine("Creating Storage SSO");
+
             var url = $"/{jobId}/superServices/order";
             var model = new CreateSuperServiceOrderRequest { SuperServiceId = 4 };
             var parsedResponse = await CallJobsApi(_httpClient, url, model);
@@ -147,6 +156,7 @@ namespace StorageServiceMigration
         internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
             Console.WriteLine("Updating OA");
+            Trace.WriteLine("Updating OA");
 
             var origin = move.OriginAgent;
             var storageEntity = move.StorageAgent;
@@ -196,6 +206,7 @@ namespace StorageServiceMigration
         internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
         {
             Console.WriteLine("Updating DA");
+            Trace.WriteLine("Updating DA");
 
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
 
@@ -251,6 +262,7 @@ namespace StorageServiceMigration
         internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId)
         {
             Console.WriteLine("Update ST Rev Record");
+            Trace.WriteLine("Update ST Rev Record");
 
             var url = $"/{jobId}/services/orders/{soId}/storage/revenues";
             var legacyStorageEntity = move.StorageAgent;

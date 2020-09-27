@@ -2,6 +2,7 @@
 using Suddath.Helix.JobMgmt.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace StorageServiceMigration
         internal static async Task CreateNotes(HttpClient httpClient, List<CreateJobNoteRequest> createJobNoteRequests, int jobId)
         {
             Console.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
+            Trace.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
 
             //string url = "​Notes"; //TODO: figure out why this isn't working
             string url = $"Notes/jobs/{jobId}";

@@ -10,6 +10,7 @@ using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using Suddath.Helix.JobMgmt.Services.Water.Mapper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -28,9 +29,9 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            isDebug = false;
+            isDebug = true;
 
-            //SetConsoleWriteLine(isDebug);
+            SetConsoleWriteLine();
             SetMovesToImport(isDebug);
 
             await SungateApi.setApiAccessTokenAsync(_httpClient);
@@ -84,6 +85,9 @@ namespace StorageServiceMigration
                 }
                 catch (Exception ex)
                 {
+                    Trace.WriteLine($"*** ERROR ***");
+                    Trace.WriteLine(ex.Message);
+
                     Console.WriteLine($"**** ERROR ****");
                     Console.WriteLine($"{ex.Message}");
                 }
@@ -93,6 +97,7 @@ namespace StorageServiceMigration
         private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders)
         {
             Console.WriteLine("Updating ST");
+            Trace.WriteLine("Updating ST");
 
             var vendorAccountingId = move.StorageAgent.VendorNameId;
             var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
@@ -161,6 +166,7 @@ namespace StorageServiceMigration
                             else
                             {
                                 Console.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
+                                Trace.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
                                 nameToUse = "TBURACCHIO";
                             }
                         }
@@ -193,6 +199,7 @@ namespace StorageServiceMigration
             }
 
             Console.WriteLine("Adding Job Contacts");
+            Trace.WriteLine("Adding Job Contacts");
 
             var url = $"/{jobId}/contacts";
 
@@ -202,6 +209,7 @@ namespace StorageServiceMigration
         private static async Task RetrieveJobsAccountAndVendor()
         {
             Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+            Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
             try
             {
                 using (var context = new JobDbContext(JobsDbAccess.connectionString))
@@ -213,12 +221,14 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                Trace.WriteLine(ex);
             }
         }
 
         private static async Task<int> addStorageJob(Move move)
         {
             Console.WriteLine("Creating a job");
+            Trace.WriteLine("Creating a job");
 
             var url = string.Empty;
 
@@ -257,6 +267,7 @@ namespace StorageServiceMigration
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job added {parsedResponse}");
+            Trace.WriteLine($"Job added {parsedResponse}");
             return int.Parse(parsedResponse);
         }
 
@@ -677,27 +688,10 @@ namespace StorageServiceMigration
             }
         }
 
-        private static void SetConsoleWriteLine(bool isDebug)
+        private static void SetConsoleWriteLine()
         {
-            FileStream ostrm;
-            StreamWriter writer;
-            TextWriter oldOut = Console.Out;
-            try
-            {
-                ostrm = new FileStream("./MigrationLog.txt", FileMode.OpenOrCreate, FileAccess.Write);
-                writer = new StreamWriter(ostrm);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Cannot open MigrationLog.txt for writing");
-                Console.WriteLine(e.Message);
-                return;
-            }
-
-            if (!isDebug)
-            {
-                Console.SetOut(writer);
-            }
+            Trace.Listeners.Add(new TextWriterTraceListener($"Migration{Guid.NewGuid()}.txt"));
+            Trace.AutoFlush = true;
         }
     }
 }
