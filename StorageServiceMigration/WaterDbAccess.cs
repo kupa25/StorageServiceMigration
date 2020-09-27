@@ -17,6 +17,7 @@ namespace StorageServiceMigration
         {
             Console.WriteLine("-----------------------------------------------------------------------------------");
             Trace.WriteLine("-----------------------------------------------------------------------------------");
+            Trace.WriteLine($"StartTime: {DateTime.Now}");
 
             Console.WriteLine($"Retrieving Legacy move {regNumber}");
             Trace.WriteLine($"Retrieving Legacy move {regNumber}");
@@ -55,7 +56,7 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var notes = await context.Notes.AsNoTracking()
-                   .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
+                   .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS") && !string.IsNullOrEmpty(n.NOTE)).ToListAsync();
 
                     return notes;
                 }

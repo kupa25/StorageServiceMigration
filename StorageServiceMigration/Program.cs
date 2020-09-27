@@ -24,12 +24,12 @@ namespace StorageServiceMigration
         private static HttpClient _httpClient = new HttpClient();
         private static List<AccountEntity> _accountEntities;
         private static List<Vendor> _vendor;
-        private static bool isDebug = true;
+        private static bool isDebug = false;
         private static List<string> movesToImport = new List<string>();
 
         private static async Task Main(string[] args)
         {
-            isDebug = true;
+            //isDebug = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(isDebug);
@@ -82,6 +82,8 @@ namespace StorageServiceMigration
                     await AddNotesFromGmmsToArive(move, jobId);
 
                     //Add Prompts -- Figure out what is system generated or manually entered
+
+                    Trace.WriteLine($"EndTime: {DateTime.Now}");
                 }
                 catch (Exception ex)
                 {
@@ -91,6 +93,8 @@ namespace StorageServiceMigration
                     Console.WriteLine($"**** ERROR ****");
                     Console.WriteLine($"{ex.Message}");
                 }
+
+                Trace.Flush();
             }
         }
 
