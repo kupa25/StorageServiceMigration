@@ -306,9 +306,43 @@ namespace StorageServiceMigration
 
             var record = legacyInsuranceClaims.FirstOrDefault();
 
+            switch (record.CARRIER)
+            {
+                case "3892":
+                    modifiedObj.InsuranceCarrierName = "Pac Global Insurance";
+                    break;
+
+                case "CL4":
+                    modifiedObj.InsuranceCarrierName = "Account";
+                    break;
+
+                case "CL5":
+                    modifiedObj.InsuranceCarrierName = "Agent";
+                    break;
+
+                default:
+                    Trace.WriteLine("Couldn't get the CarrierName");
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(record.TYPE_OF_POLICY) && record.TYPE_OF_POLICY.Equals("FULL", StringComparison.InvariantCultureIgnoreCase))
+            {
+                modifiedObj.InsuranceType = "Full Value Inventory";
+            }
+
+            modifiedObj.Declaration = record.POLICY_NUMBER;
             modifiedObj.HHGAmount = record.REQ_AMOUNT;
             modifiedObj.HighValueAmount = record.HIGH_VALUE_AMOUNT;
             modifiedObj.VehicleAmount = record.VEHICLE_AMOUNT;
+            modifiedObj.TotalInsuranceAmount = record.REQ_AMOUNT.GetValueOrDefault() + record.HIGH_VALUE_AMOUNT.GetValueOrDefault() + record.VEHICLE_AMOUNT.GetValueOrDefault();
+            modifiedObj.DeductibleAmount = record.DEDUCTIBLE;
+            modifiedObj.QuotedRate = record.PREMIUM_RATE;
+            modifiedObj.PayableRate = record.PREMIUM_COST;
+
+            if (record.PREMIUM_COST_TYPE.Equals("THOUSAND", StringComparison.InvariantCultureIgnoreCase))
+            {
+                modifiedObj.PayableRateType = "Per 1000 Insured";
+            }
 
             await GenerateAndPatch(httpClient, url, origObj, modifiedObj);
         }
