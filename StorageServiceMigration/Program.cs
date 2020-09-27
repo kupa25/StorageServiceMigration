@@ -24,15 +24,15 @@ namespace StorageServiceMigration
         private static HttpClient _httpClient = new HttpClient();
         private static List<AccountEntity> _accountEntities;
         private static List<Vendor> _vendor;
-        private static bool isDebug = false;
+        private static bool loadAllRecords = false;
         private static List<string> movesToImport = new List<string>();
 
         private static async Task Main(string[] args)
         {
-            isDebug = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
-            SetMovesToImport(isDebug);
+            SetMovesToImport(loadAllRecords);
 
             await SungateApi.setApiAccessTokenAsync(_httpClient);
             await RetrieveJobsAccountAndVendor();
