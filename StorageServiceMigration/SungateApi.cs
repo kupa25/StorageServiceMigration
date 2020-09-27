@@ -41,14 +41,15 @@ namespace StorageServiceMigration
         public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v)
         {
             v = v.Format();
-            Console.WriteLine("Get the Ad Name for : " + v);
-            Trace.WriteLine("Get the Ad Name for : " + v);
 
             List<ADUser> adUser;
             var found = cachedAdUser.TryGetValue(v, out adUser);
 
             if (!found)
             {
+                Console.WriteLine("Get the Ad Name for : " + v);
+                Trace.WriteLine("Get the Ad Name for : " + v);
+
                 var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
                 var response = await _httpClient.GetAsync(url);
                 var parsedResponse = await HandleResponse(response);
