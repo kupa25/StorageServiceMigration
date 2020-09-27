@@ -56,9 +56,10 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var notes = await context.Notes.AsNoTracking()
-                   .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS") && !string.IsNullOrEmpty(n.NOTE)).ToListAsync();
+                   .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
 
-                    return notes;
+                    var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();
+                    return result;
                 }
             }
             catch (Exception ex)

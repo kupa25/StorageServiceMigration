@@ -29,7 +29,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            //isDebug = true;
+            isDebug = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(isDebug);
@@ -88,6 +88,7 @@ namespace StorageServiceMigration
                 catch (Exception ex)
                 {
                     Trace.WriteLine($"*** ERROR ***");
+                    Trace.WriteLine(ex.InnerException);
                     Trace.WriteLine(ex.Message);
 
                     Console.WriteLine($"**** ERROR ****");
@@ -189,17 +190,20 @@ namespace StorageServiceMigration
                         break;
                 }
 
-                var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
-
-                if (adObj == null || adObj.Count == 0) { continue; }
-
-                jobContactList.Add(new CreateJobContactDto
+                if (!string.IsNullOrEmpty(dictionaryValue))
                 {
-                    ContactType = contactType,
-                    Email = adObj.FirstOrDefault().email,
-                    FullName = adObj.FirstOrDefault().fullName,
-                    Phone = adObj.FirstOrDefault().phone
-                });
+                    var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
+
+                    if (adObj == null || adObj.Count == 0) { continue; }
+
+                    jobContactList.Add(new CreateJobContactDto
+                    {
+                        ContactType = contactType,
+                        Email = adObj.FirstOrDefault().email,
+                        FullName = adObj.FirstOrDefault().fullName,
+                        Phone = adObj.FirstOrDefault().phone
+                    });
+                }
             }
 
             Console.WriteLine("Adding Job Contacts");
