@@ -26,6 +26,8 @@ namespace StorageServiceMigration
         //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
         private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
 
+        private static List<BillableItemType> billableItemTypes = new List<BillableItemType>();
+
         #region Jobs Api call
 
         public static async Task<string> CallJobsApi(HttpClient _httpClient, string url, dynamic model)
@@ -74,22 +76,27 @@ namespace StorageServiceMigration
             return parsedResponse;
         }
 
-        internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends, int jobId, ServiceOrder serviceOrder)
+        internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
+            List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder)
         {
             Console.WriteLine("Starting JC creation");
             Trace.WriteLine("Starting JC creation");
 
-            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
+            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
 
             foreach (var legacyJC in paymentSends)
             {
-                var orignal = await PostToJobsApi<GetBillableItemResponse>(httpClient, url, null);
+                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null);
                 var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
-                var duplicateObj = Convert<GetBillableItemResponse>(duplicateObjString);
+                var duplicateObj = Convert<GetPayableItemResponse>(duplicateObjString);
 
-                duplicateObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT;
+                duplicateObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
 
-                await GenerateAndPatch(httpClient, url, orignal, duplicateObj);
+                //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
+                //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
+                //duplicateObj.BillFromType = "Vendor"; //TODO: is this true???
+
+                //await GenerateAndPatch(httpClient, url + $"/{orignal.Id}", orignal, duplicateObj);
             }
         }
 

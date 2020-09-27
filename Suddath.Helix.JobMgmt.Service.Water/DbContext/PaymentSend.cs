@@ -25,6 +25,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Column("CHECK#")]
         public string CHECK { get; set; }
 
+        [Column("INVOICE#")]
+        public string INVOICE_NUMBER { get; set; }
+
         public DateTime? ACTUAL_POSTED { get; set; }
         public DateTime? ACCTG_DATE { get; set; }
         public decimal? ADJ_EST_AMOUNT { get; set; }

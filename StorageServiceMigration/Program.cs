@@ -72,7 +72,9 @@ namespace StorageServiceMigration
                     //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId);
 
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
-                    //await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, paymentSends, jobId, serviceOrders.FirstOrDefault(so => so.ServiceId == 29));
+                    var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes();
+                    await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
+                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29));
 
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
 

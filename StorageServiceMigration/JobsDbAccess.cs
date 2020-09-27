@@ -15,6 +15,8 @@ namespace StorageServiceMigration
         public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Jobs;trusted_connection=yes;";
         //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
 
+        private static List<BillableItemType> _billableItemTypes;
+
         public static void ChangeDateCreated(int jobId, DateTime date)
         {
             Console.WriteLine($"Updating Jobs Created Date to {date}");
@@ -56,6 +58,22 @@ namespace StorageServiceMigration
                 createdJob.DisplayId = regNumber;
                 context.SaveChanges();
             }
+        }
+
+        internal static async Task<List<BillableItemType>> RetrieveBillableItemTypes()
+        {
+            Console.WriteLine($"Retrieve JC BillableItemTypes");
+            Trace.WriteLine($"Retrieve JC BillableItemTypes");
+
+            if (_billableItemTypes == null || _billableItemTypes.Count == 0)
+            {
+                using (var context = new JobDbContext(connectionString))
+                {
+                    _billableItemTypes = await context.BillableItemType.AsNoTracking().Where(bi => bi.IsActive.Value).ToListAsync();
+                }
+            }
+
+            return _billableItemTypes;
         }
     }
 }
