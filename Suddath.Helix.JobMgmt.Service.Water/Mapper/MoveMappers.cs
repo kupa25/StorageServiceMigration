@@ -70,11 +70,11 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                     break;
 
                 case "MOVE_AGENTS1":
-                    result = "DA";
+                    result = "OA";
                     break;
 
-                case "MOVE_AGENTS_7":
-                    result = "OA";
+                case "MOVE_AGENTS2":
+                    result = "DA";
                     break;
 
                 default:

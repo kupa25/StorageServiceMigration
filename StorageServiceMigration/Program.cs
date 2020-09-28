@@ -29,7 +29,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            //loadAllRecords = true;
+            loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -220,25 +220,6 @@ namespace StorageServiceMigration
             await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
         }
 
-        private static async Task RetrieveJobsAccountAndVendor()
-        {
-            Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
-            Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
-            try
-            {
-                using (var context = new JobDbContext(JobsDbAccess.connectionString))
-                {
-                    _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
-                    _vendor = await context.Vendor.AsNoTracking().ToListAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                Trace.WriteLine(ex);
-            }
-        }
-
         private static async Task<int> addStorageJob(Move move)
         {
             Console.WriteLine("Creating a job");
@@ -283,6 +264,27 @@ namespace StorageServiceMigration
             Console.WriteLine($"Job added {parsedResponse}");
             Trace.WriteLine($"Job added {parsedResponse}");
             return int.Parse(parsedResponse);
+        }
+
+        #region Helpers
+
+        private static async Task RetrieveJobsAccountAndVendor()
+        {
+            Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+            Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+            try
+            {
+                using (var context = new JobDbContext(JobsDbAccess.connectionString))
+                {
+                    _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
+                    _vendor = await context.Vendor.AsNoTracking().ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Trace.WriteLine(ex);
+            }
         }
 
         private static void SetMovesToImport(bool loadAllRecords)
@@ -707,5 +709,7 @@ namespace StorageServiceMigration
             Trace.Listeners.Add(new TextWriterTraceListener($"Migration{Guid.NewGuid()}.txt"));
             Trace.AutoFlush = true;
         }
+
+        #endregion Helpers
     }
 }
