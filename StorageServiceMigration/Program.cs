@@ -29,7 +29,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -64,9 +64,12 @@ namespace StorageServiceMigration
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
 
                     //Update Milestone Pages
-                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, move, jobId);
 
-                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, move, jobId);
+                    var oaVendor = _vendor.Find(v => v.AccountingId.Equals(move.OriginAgent.VendorNameId));
+                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId);
+
+                    var daVendor = _vendor.Find(v => v.AccountingId.Equals(move.DestinationAgent.VendorNameId));
+                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId);
 
                     await updateStorageJob(move, jobId, serviceOrders);
 

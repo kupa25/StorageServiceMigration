@@ -161,15 +161,20 @@ namespace StorageServiceMigration
 
         #region Update MileStone
 
-        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Vendor oaVendor, Move move, int jobId)
         {
             Console.WriteLine("Updating OA");
             Trace.WriteLine("Updating OA");
 
+            if (oaVendor == null)
+            {
+                Console.WriteLine("OA Vendor not found");
+                Trace.WriteLine("OA Vendor not found");
+            }
+
             var origin = move.OriginAgent;
             var storageEntity = move.StorageAgent;
 
-            bool modified = false;
             var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
 
             var original = await CallJobsApi(httpClient, soUrl, null);
@@ -178,40 +183,31 @@ namespace StorageServiceMigration
             var origObj = Convert<GetServiceOrderOriginAgentResponse>(original);
             var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal);
 
-            //All docs received.
-            if (origin != null && origin.DOCS_RCV_DATE != null)
-            {
-                modified = true;
+            modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
+            modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
+            modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
+            modifiedObj.NetWeightLb = origin.SurveyWeight;
 
-                modifiedObj.IsAllDocumentsReceived = true;
+            if (oaVendor == null)
+            {
+                Console.WriteLine("OA Vendor not found");
+                Trace.WriteLine("OA Vendor not found");
             }
-
-            if (storageEntity.SITinDate.HasValue)
+            else
             {
-                modified = true;
-
-                modifiedObj.ActualPickupStartDate = storageEntity.SITinDate.Value;
-                modifiedObj.ActualPickupEndDate = storageEntity.SITinDate.Value;
+                modifiedObj.VendorId = oaVendor.Id;
             }
 
             //currentweight - if null on ma ..m.weight - da.weight.
-            if (storageEntity.SurveyWeight.HasValue)
-            {
-                modified = true;
+            modifiedObj.NetWeightLb = storageEntity.SurveyWeight.Value;
 
-                modifiedObj.NetWeightLb = storageEntity.SurveyWeight.Value;
-            }
+            var patch = new JsonPatchDocument();
+            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
 
-            if (modified)
-            {
-                var patch = new JsonPatchDocument();
-                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
-
-                await Patch(httpClient, soUrl, patch);
-            }
+            await Patch(httpClient, soUrl, patch);
         }
 
-        internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Vendor daVendor, Move move, int jobId)
         {
             Console.WriteLine("Updating DA");
             Trace.WriteLine("Updating DA");
@@ -231,12 +227,22 @@ namespace StorageServiceMigration
             {
                 //TODO: do we need to implement this in the api??
                 //modifiedObj.IsAllDocumentsReceived = true;
-
-                var patch = new JsonPatchDocument();
-                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
-
-                await Patch(httpClient, soUrl, patch);
             }
+
+            if (daVendor == null)
+            {
+                Console.WriteLine("DA Vendor not found");
+                Trace.WriteLine("DA Vendor not found");
+            }
+            else
+            {
+                modifiedObj.VendorId = daVendor.Id;
+            }
+
+            var patch = new JsonPatchDocument();
+            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+            await Patch(httpClient, soUrl, patch);
         }
 
         #region Storage
