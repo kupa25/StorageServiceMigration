@@ -49,54 +49,54 @@ namespace StorageServiceMigration
                     }
 
                     //Add the job
-                    var jobId = await addStorageJob(move);
+                    var jobId = await addStorageJob(move, regNumber);
 
                     //update datecreated on the job
-                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow));
+                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
 
                     //Add JobContacts
-                    await addJobContacts(move, jobId);
+                    await addJobContacts(move, jobId, regNumber);
 
                     //Add SuperService
-                    var result = await JobsApi.CreateStorageSSO(_httpClient, jobId);
+                    var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
                     JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
 
-                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId);
+                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
 
                     //Update Milestone Pages
 
                     var oaVendor = _vendor.Find(v => v.AccountingId.Equals(move.OriginAgent.VendorNameId));
-                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId);
+                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId, regNumber);
 
                     var daVendor = _vendor.Find(v => v.AccountingId.Equals(move.DestinationAgent.VendorNameId));
-                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId);
+                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
 
-                    await updateStorageJob(move, jobId, serviceOrders);
+                    await updateStorageJob(move, jobId, serviceOrders, regNumber);
 
                     var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
-                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims);
+                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
 
                     #region JobCost
 
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
-                    var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes();
+                    var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
                     await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
-                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29));
+                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
 
                     #endregion JobCost
 
                     //Add Notes
-                    await AddNotesFromGmmsToArive(move, jobId);
+                    await AddNotesFromGmmsToArive(move, jobId, regNumber);
 
                     //Add Prompts -- Figure out what is system generated or manually entered
 
-                    Trace.WriteLine($"EndTime: {DateTime.Now}");
+                    Trace.WriteLine($"{regNumber}, EndTime: {DateTime.Now}");
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"*** ERROR ***");
+                    Trace.WriteLine($"{regNumber}, *** ERROR ***");
                     Trace.WriteLine(ex.InnerException);
                     Trace.WriteLine(ex.Message);
 
@@ -108,29 +108,29 @@ namespace StorageServiceMigration
             }
         }
 
-        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders)
+        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber)
         {
             Console.WriteLine("Updating ST");
-            Trace.WriteLine("Updating ST");
+            Trace.WriteLine($"{regNumber}, Updating ST");
 
             var vendorAccountingId = move.StorageAgent.VendorNameId;
             var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
             var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
 
-            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity);
+            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber);
 
-            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId);
+            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId, regNumber);
 
-            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId);
+            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber);
         }
 
-        private static async Task AddNotesFromGmmsToArive(Move move, int jobId)
+        private static async Task AddNotesFromGmmsToArive(Move move, int jobId, string regNumber)
         {
             var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
 
             foreach (var note in notesEntity)
             {
-                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY));
+                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY), regNumber);
 
                 if (adObj != null && adObj.Count > 0)
                 {
@@ -144,10 +144,10 @@ namespace StorageServiceMigration
 
             var createJobNoteRequests = notesEntity.ToNotesModel();
 
-            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId);
+            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId, regNumber);
         }
 
-        private static async Task addJobContacts(Move move, int jobId)
+        private static async Task addJobContacts(Move move, int jobId, string regNumber)
         {
             var jobContactList = new List<CreateJobContactDto>();
 
@@ -180,7 +180,7 @@ namespace StorageServiceMigration
                             else
                             {
                                 Console.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
-                                Trace.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
+                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Trevor, due to bad data");
                                 nameToUse = "TBURACCHIO";
                             }
                         }
@@ -201,7 +201,7 @@ namespace StorageServiceMigration
 
                 if (!string.IsNullOrEmpty(dictionaryValue))
                 {
-                    var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue);
+                    var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue, regNumber);
 
                     if (adObj == null || adObj.Count == 0) { continue; }
 
@@ -216,17 +216,17 @@ namespace StorageServiceMigration
             }
 
             Console.WriteLine("Adding Job Contacts");
-            Trace.WriteLine("Adding Job Contacts");
+            Trace.WriteLine($"{regNumber}, Adding Job Contacts");
 
             var url = $"/{jobId}/contacts";
 
             await JobsApi.CallJobsApi(_httpClient, url, jobContactList);
         }
 
-        private static async Task<int> addStorageJob(Move move)
+        private static async Task<int> addStorageJob(Move move, string regNumber)
         {
             Console.WriteLine("Creating a job");
-            Trace.WriteLine("Creating a job");
+            Trace.WriteLine($"{regNumber}, Creating a job");
 
             var url = string.Empty;
 
@@ -265,7 +265,7 @@ namespace StorageServiceMigration
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job added {parsedResponse}");
-            Trace.WriteLine($"Job added {parsedResponse}");
+            Trace.WriteLine($"{regNumber}, Job added {parsedResponse}");
             return int.Parse(parsedResponse);
         }
 
@@ -274,7 +274,7 @@ namespace StorageServiceMigration
         private static async Task RetrieveJobsAccountAndVendor()
         {
             Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
-            Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+            //Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
             try
             {
                 using (var context = new JobDbContext(JobsDbAccess.connectionString))
@@ -295,6 +295,7 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 movesToImport.Add("274486");
+                movesToImport.Add("274527");
             }
             else
             {
@@ -709,7 +710,7 @@ namespace StorageServiceMigration
 
         private static void SetConsoleWriteLine()
         {
-            Trace.Listeners.Add(new TextWriterTraceListener($"Migration{Guid.NewGuid()}.txt"));
+            Trace.Listeners.Add(new TextWriterTraceListener($"Migration{Guid.NewGuid()}.csv"));
             Trace.AutoFlush = true;
         }
 

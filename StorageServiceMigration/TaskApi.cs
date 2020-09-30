@@ -40,10 +40,10 @@ namespace StorageServiceMigration
 
         #endregion Task Api call
 
-        internal static async Task CreateNotes(HttpClient httpClient, List<CreateJobNoteRequest> createJobNoteRequests, int jobId)
+        internal static async Task CreateNotes(HttpClient httpClient, List<CreateJobNoteRequest> createJobNoteRequests, int jobId, string regNumber)
         {
             Console.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
-            Trace.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
+            Trace.WriteLine($"{regNumber}, Adding {createJobNoteRequests.Count} Notes to Task");
 
             //string url = "​Notes"; //TODO: figure out why this isn't working
             string url = $"Notes/jobs/{jobId}";
@@ -57,7 +57,7 @@ namespace StorageServiceMigration
                 var note = JsonConvert.DeserializeObject<NoteResponseModel>(noteId);
 
                 //call taskdb and update the datecreated
-                TaskDbAccess.ChangeDateCreated(note.Id, createJobNote.DateCreated);
+                TaskDbAccess.ChangeDateCreated(note.Id, createJobNote.DateCreated, regNumber);
             }
         }
     }

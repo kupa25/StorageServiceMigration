@@ -16,11 +16,11 @@ namespace StorageServiceMigration
         public static async Task<Move> RetrieveWaterRecords(string regNumber)
         {
             Console.WriteLine("-----------------------------------------------------------------------------------");
-            Trace.WriteLine("-----------------------------------------------------------------------------------");
-            Trace.WriteLine($"StartTime: {DateTime.Now}");
+            //Trace.WriteLine("-----------------------------------------------------------------------------------");
+            Trace.WriteLine($"{regNumber},  StartTime: {DateTime.Now}");
 
             Console.WriteLine($"Retrieving Legacy move {regNumber}");
-            Trace.WriteLine($"Retrieving Legacy move {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Legacy move {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
@@ -41,7 +41,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"No moves retrieved for {regNumber}", ex);
-                Trace.WriteLine($"No moves retrieved for {regNumber}" + ex);
+                Trace.WriteLine($"{regNumber}, No moves retrieved for {regNumber}" + ex);
             }
 
             return null;
@@ -50,7 +50,7 @@ namespace StorageServiceMigration
         internal static async Task<List<Notes>> RetrieveNotesForMove(string regNumber)
         {
             Console.WriteLine($"Retrieving Notes for {regNumber}");
-            Trace.WriteLine($"Retrieving Notes for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Notes for {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
@@ -74,7 +74,7 @@ namespace StorageServiceMigration
         internal static async Task<List<PaymentSent>> RetrieveJobCostExpense(string regNumber)
         {
             Console.WriteLine($"Retrieving Payment_send for {regNumber}");
-            Trace.WriteLine($"Retrieving Payment_send for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Payment_send for {regNumber}");
 
             try
             {
@@ -101,7 +101,7 @@ namespace StorageServiceMigration
         internal static async Task<List<InsuranceClaims>> RetrieveInsuranceClaims(string regNumber)
         {
             Console.WriteLine($"Retrieving Insurance & Claims for {regNumber}");
-            Trace.WriteLine($"Retrieving Insurance & Claims for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Insurance & Claims for {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
@@ -125,7 +125,7 @@ namespace StorageServiceMigration
         internal static async Task<List<PaymentReceived>> RetrieveJobCostRevenue(string regNumber)
         {
             Console.WriteLine($"Retrieving Payment_received for {regNumber}");
-            Trace.WriteLine($"Retrieving Payment_received for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Payment_received for {regNumber}");
 
             try
             {

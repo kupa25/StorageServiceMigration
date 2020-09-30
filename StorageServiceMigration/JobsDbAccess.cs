@@ -17,10 +17,10 @@ namespace StorageServiceMigration
 
         private static List<BillableItemType> _billableItemTypes;
 
-        public static void ChangeDateCreated(int jobId, DateTime date)
+        public static void ChangeDateCreated(int jobId, DateTime date, string regNumber)
         {
             Console.WriteLine($"Updating Jobs Created Date to {date}");
-            Trace.WriteLine($"Updating Jobs Created Date to {date}");
+            Trace.WriteLine($"{regNumber}, Updating Jobs Created Date to {date}");
             using (var context = new JobDbContext(connectionString))
             {
                 var createdJob = context.Job.Find(jobId);
@@ -30,10 +30,10 @@ namespace StorageServiceMigration
             }
         }
 
-        internal static async Task<List<ServiceOrder>> GetServiceOrderForJobs(int jobId)
+        internal static async Task<List<ServiceOrder>> GetServiceOrderForJobs(int jobId, string regNumber)
         {
             Console.WriteLine($"Retrieve all the ServiceOrders Created");
-            Trace.WriteLine($"Retrieve all the ServiceOrders Created");
+            Trace.WriteLine($"{regNumber}, Retrieve all the ServiceOrders Created");
 
             List<ServiceOrder> result;
             using (var context = new JobDbContext(connectionString))
@@ -49,7 +49,7 @@ namespace StorageServiceMigration
         internal static void ChangeDisplayName(int ssoId, string regNumber)
         {
             Console.WriteLine($"Changing Storage DisplayName to {regNumber}");
-            Trace.WriteLine($"Changing Storage DisplayName to {regNumber}");
+            Trace.WriteLine($"{regNumber}, Changing Storage DisplayName to {regNumber}");
 
             using (var context = new JobDbContext(connectionString))
             {
@@ -60,10 +60,10 @@ namespace StorageServiceMigration
             }
         }
 
-        internal static async Task<List<BillableItemType>> RetrieveBillableItemTypes()
+        internal static async Task<List<BillableItemType>> RetrieveBillableItemTypes(string regNumber)
         {
             Console.WriteLine($"Retrieve JC BillableItemTypes");
-            Trace.WriteLine($"Retrieve JC BillableItemTypes");
+            Trace.WriteLine($"{regNumber}, Retrieve JC BillableItemTypes");
 
             if (_billableItemTypes == null || _billableItemTypes.Count == 0)
             {

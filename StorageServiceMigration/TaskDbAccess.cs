@@ -11,10 +11,10 @@ namespace StorageServiceMigration
         public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Tasks;trusted_connection=yes;";
         //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
 
-        public static void ChangeDateCreated(int noteId, DateTime date)
+        public static void ChangeDateCreated(int noteId, DateTime date, string regNumber)
         {
             Console.WriteLine($"Updating Notes Created Date to {date}");
-            Trace.WriteLine($"Updating Notes Created Date to {date}");
+            Trace.WriteLine($"{regNumber}, Updating Notes Created Date to {date}");
             using (var context = new TaskMgmtDbContext(connectionString))
             {
                 var createdNote = context.Note.Find(noteId);

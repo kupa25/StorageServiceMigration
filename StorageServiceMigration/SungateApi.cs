@@ -20,7 +20,7 @@ namespace StorageServiceMigration
         public static async Task<HttpClient> setApiAccessTokenAsync(HttpClient _httpClient)
         {
             Console.WriteLine("Getting the Sungate Token");
-            Trace.WriteLine("Getting the Sungate Token");
+            //Trace.WriteLine("Getting the Sungate Token");
 
             var response = await _httpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
@@ -38,7 +38,7 @@ namespace StorageServiceMigration
             return _httpClient;
         }
 
-        public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v)
+        public static async Task<List<ADUser>> GetADName(HttpClient _httpClient, string v, string regNumber)
         {
             v = v.Format();
 
@@ -48,7 +48,7 @@ namespace StorageServiceMigration
             if (!found)
             {
                 Console.WriteLine("Get the Ad Name for : " + v);
-                Trace.WriteLine("Get the Ad Name for : " + v);
+                Trace.WriteLine($"{regNumber}, Get the Ad Name for : " + v);
 
                 var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
                 var response = await _httpClient.GetAsync(url);

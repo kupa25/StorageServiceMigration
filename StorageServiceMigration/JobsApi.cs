@@ -50,7 +50,7 @@ namespace StorageServiceMigration
             }
         }
 
-        public static async Task<T> PostToJobsApi<T>(HttpClient _httpClient, string url, dynamic model)
+        public static async Task<T> PostToJobsApi<T>(HttpClient _httpClient, string url, dynamic model, string regNumber)
         {
             url = _jobsBaseUrl + url;
             string payload = string.Empty;
@@ -63,7 +63,7 @@ namespace StorageServiceMigration
             var response = await _httpClient.PostAsync(url, new StringContent(payload, Encoding.UTF8, "application/json"));
             var parsedResponse = await HandleResponse(response);
 
-            var result = Convert<SingleResult<T>>(parsedResponse);
+            var result = Convert<SingleResult<T>>(parsedResponse, regNumber);
             return result.Data;
         }
 
@@ -78,18 +78,18 @@ namespace StorageServiceMigration
         }
 
         internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
-            List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder)
+            List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
         {
             Console.WriteLine("Starting JC creation");
-            Trace.WriteLine("Starting JC creation");
+            Trace.WriteLine($"{regNumber}, Starting JC creation");
 
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
 
             foreach (var legacyJC in paymentSends)
             {
-                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null);
+                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
                 var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
-                var duplicateObj = Convert<GetPayableItemResponse>(duplicateObjString);
+                var duplicateObj = Convert<GetPayableItemResponse>(duplicateObjString, regNumber);
 
                 duplicateObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
 
@@ -113,7 +113,7 @@ namespace StorageServiceMigration
             return content;
         }
 
-        private static T Convert<T>(string parsedResponse)
+        private static T Convert<T>(string parsedResponse, string regNumber)
         {
             try
             {
@@ -123,7 +123,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("*********ERROR parsing response**");
-                Trace.WriteLine("*********ERROR parsing response**");
+                Trace.WriteLine($"{regNumber}, *********ERROR parsing response**");
             }
 
             return default(T);
@@ -139,10 +139,10 @@ namespace StorageServiceMigration
 
         #endregion Jobs Api call
 
-        internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId)
+        internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId, string regNumber)
         {
             Console.WriteLine("Creating Storage SSO");
-            Trace.WriteLine("Creating Storage SSO");
+            Trace.WriteLine($"{regNumber}, Creating Storage SSO");
 
             var url = $"/{jobId}/superServices/order";
             var model = new CreateSuperServiceOrderRequest { SuperServiceId = 4 };
@@ -161,15 +161,15 @@ namespace StorageServiceMigration
 
         #region Update MileStone
 
-        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Vendor oaVendor, Move move, int jobId)
+        internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Vendor oaVendor, Move move, int jobId, string regNumber)
         {
             Console.WriteLine("Updating OA");
-            Trace.WriteLine("Updating OA");
+            Trace.WriteLine($"{regNumber}, Updating OA");
 
             if (oaVendor == null)
             {
                 Console.WriteLine("OA Vendor not found");
-                Trace.WriteLine("OA Vendor not found");
+                Trace.WriteLine($"{regNumber}, OA Vendor not found");
             }
 
             var origin = move.OriginAgent;
@@ -180,8 +180,8 @@ namespace StorageServiceMigration
             var original = await CallJobsApi(httpClient, soUrl, null);
             var copyOfOriginal = original;
 
-            var origObj = Convert<GetServiceOrderOriginAgentResponse>(original);
-            var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal);
+            var origObj = Convert<GetServiceOrderOriginAgentResponse>(original, regNumber);
+            var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal, regNumber);
 
             modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
             modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
@@ -191,7 +191,7 @@ namespace StorageServiceMigration
             if (oaVendor == null)
             {
                 Console.WriteLine("OA Vendor not found");
-                Trace.WriteLine("OA Vendor not found");
+                Trace.WriteLine($"{regNumber}, OA Vendor not found");
             }
             else
             {
@@ -207,10 +207,10 @@ namespace StorageServiceMigration
             await Patch(httpClient, soUrl, patch);
         }
 
-        internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Vendor daVendor, Move move, int jobId)
+        internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Vendor daVendor, Move move, int jobId, string regNumber)
         {
             Console.WriteLine("Updating DA");
-            Trace.WriteLine("Updating DA");
+            Trace.WriteLine($"{regNumber}, Updating DA");
 
             var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
 
@@ -219,8 +219,8 @@ namespace StorageServiceMigration
             var original = await CallJobsApi(httpClient, soUrl, null);
             var copyOfOriginal = original;
 
-            var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original);
-            var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal);
+            var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original, regNumber);
+            var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal, regNumber);
 
             //All docs received.
             if (origin != null && origin.DOCS_RCV_DATE != null)
@@ -232,7 +232,7 @@ namespace StorageServiceMigration
             if (daVendor == null)
             {
                 Console.WriteLine("DA Vendor not found");
-                Trace.WriteLine("DA Vendor not found");
+                Trace.WriteLine($"{regNumber}, DA Vendor not found");
             }
             else
             {
@@ -247,7 +247,7 @@ namespace StorageServiceMigration
 
         #region Storage
 
-        internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity)
+        internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity, string regNumber)
         {
             var legacyStorageEntity = move.StorageAgent;
 
@@ -256,8 +256,8 @@ namespace StorageServiceMigration
             var original = await CallJobsApi(httpClient, soSTUrl, null);
             var copyOfOriginal = original;
 
-            var origObj = Convert<GetServiceOrderStorageResponse>(original);
-            var modifiedObj = Convert<GetServiceOrderStorageResponse>(copyOfOriginal);
+            var origObj = Convert<GetServiceOrderStorageResponse>(original, regNumber);
+            var modifiedObj = Convert<GetServiceOrderStorageResponse>(copyOfOriginal, regNumber);
 
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
@@ -265,18 +265,18 @@ namespace StorageServiceMigration
             await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
         }
 
-        internal static async Task<int> AddStorageRevRecord(HttpClient httpClient, int serviceOrderId, Move move, int jobId)
+        internal static async Task<int> AddStorageRevRecord(HttpClient httpClient, int serviceOrderId, Move move, int jobId, string regNumber)
         {
             var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}/storage/revenues";
-            var result = await PostToJobsApi<int>(httpClient, soSTUrl, null);
+            var result = await PostToJobsApi<int>(httpClient, soSTUrl, null, regNumber);
 
             return result;
         }
 
-        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId)
+        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber)
         {
             Console.WriteLine("Update ST Rev Record");
-            Trace.WriteLine("Update ST Rev Record");
+            Trace.WriteLine($"{regNumber}, Update ST Rev Record");
 
             var url = $"/{jobId}/services/orders/{soId}/storage/revenues";
             var legacyStorageEntity = move.StorageAgent;
@@ -284,8 +284,8 @@ namespace StorageServiceMigration
             var original = await CallJobsApi(httpClient, url, null);
             var copyOfOriginal = original;
 
-            var origObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(original).Data.FirstOrDefault();
-            var modifiedObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(copyOfOriginal).Data.FirstOrDefault();
+            var origObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(original, regNumber).Data.FirstOrDefault();
+            var modifiedObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(copyOfOriginal, regNumber).Data.FirstOrDefault();
 
             var freePeriodId = legacyStorageEntity.EXAM_AMOUNT1;
 
@@ -297,18 +297,18 @@ namespace StorageServiceMigration
 
         #endregion Storage
 
-        internal static async Task UpdateICtMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, List<InsuranceClaims> legacyInsuranceClaims)
+        internal static async Task UpdateICtMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, List<InsuranceClaims> legacyInsuranceClaims, string regNumber)
         {
             Console.WriteLine("Updating IC");
-            Trace.WriteLine("Updating IC");
+            Trace.WriteLine($"{regNumber}, Updating IC");
 
             var url = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=IC";
 
             var original = await CallJobsApi(httpClient, url, null);
             var copyOfOriginal = original;
 
-            var origObj = Convert<GetServiceOrderInsuranceClaimResponse>(original);
-            var modifiedObj = Convert<GetServiceOrderInsuranceClaimResponse>(copyOfOriginal);
+            var origObj = Convert<GetServiceOrderInsuranceClaimResponse>(original, regNumber);
+            var modifiedObj = Convert<GetServiceOrderInsuranceClaimResponse>(copyOfOriginal, regNumber);
 
             var record = legacyInsuranceClaims.FirstOrDefault();
 
@@ -327,7 +327,7 @@ namespace StorageServiceMigration
                     break;
 
                 default:
-                    Trace.WriteLine("Couldn't get the CarrierName");
+                    Trace.WriteLine($"{regNumber}, Couldn't get the CarrierName");
                     break;
             }
 
