@@ -14,6 +14,7 @@ namespace Suddath.Helix.JobMgmt.Models
         public string Message { get; set; }
         public bool IsCritical { get; set; } = false;
         public string AssignedTo { get; set; }
+        public DateTime DateCreated { get; set; }
 
         /// <summary>
         /// Add the Id that the user would want to see to know where the note was added from.

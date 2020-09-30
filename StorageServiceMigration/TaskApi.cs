@@ -53,7 +53,11 @@ namespace StorageServiceMigration
                 createJobNote.JobId = jobId;
                 createJobNote.ReferenceId = jobId;
 
-                await PostToTaskApi(httpClient, url, createJobNote);
+                var noteId = await PostToTaskApi(httpClient, url, createJobNote);
+                var note = JsonConvert.DeserializeObject<NoteResponseModel>(noteId);
+
+                //call taskdb and update the datecreated
+                TaskDbAccess.ChangeDateCreated(note.Id, createJobNote.DateCreated);
             }
         }
     }
