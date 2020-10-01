@@ -189,7 +189,7 @@ namespace StorageServiceMigration
 
                         if (string.IsNullOrEmpty(dictionaryValue))
                         {
-                            Trace.WriteLine($"{regNumber}, Move Consultant from GMMS {nameToUse} couldn't be found in Arive, thus Defaulting to Angela La Fronza");
+                            Trace.WriteLine($"{regNumber}, Move Consultant from GMMS {nameToUse} couldn't be found in Arive thus Defaulting to Angela La Fronza");
                             dictionaryValue = NameTranslator.repo.GetValueOrDefault("Angela.Lafronza");
                         }
                         break;
