@@ -255,7 +255,8 @@ namespace Suddath.Helix.JobMgmt.Models
             {"SSAWANT","Christine Anthony"},
             {"DDATTA","Carolyn Perez"},
             {"DCLEMENTS","Leda Olivos"},
-            {"ANNETTECRAWFORD","Annette Crawford"}
+            {"ANNETTECRAWFORD","Annette Crawford"},
+            {"Angela.Lafronza", "Angela.Lafronza" }
         };
     }
 }

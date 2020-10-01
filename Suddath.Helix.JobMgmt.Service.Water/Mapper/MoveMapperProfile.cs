@@ -23,7 +23,6 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForPath(d => d.Account.Id, opt => opt.MapFrom(src => 1))
                 .ForPath(d => d.Booker.Id, opt => opt.MapFrom(src => 1))
 
-                .ForMember(d => d.RevenueType, opt => opt.MapFrom(src => "House Account"))
                 .ForMember(d => d.MoveType, opt => opt.MapFrom(src => "Door-to-Door"))
                 .ForMember(d => d.AuthPoNum, opt => opt.MapFrom(src => src.PONumber))
                 .ForMember(d => d.BranchName, opt => opt.MapFrom(src => MoveMappers.ToBranchName(src.BRANCH_CODE)))

@@ -13,8 +13,6 @@ namespace StorageServiceMigration
 
         public static void ChangeDateCreated(int noteId, DateTime date, string regNumber)
         {
-            Console.WriteLine($"Updating Notes Created Date to {date}");
-            Trace.WriteLine($"{regNumber}, Updating Notes Created Date to {date}");
             using (var context = new TaskMgmtDbContext(connectionString))
             {
                 var createdNote = context.Note.Find(noteId);

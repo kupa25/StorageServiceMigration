@@ -32,6 +32,11 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             obj.Job.BillToType = billToLabel;
             obj.Job.BillTo.Id = billToId.GetValueOrDefault();
 
+            var translatedRevType = string.Empty;
+
+            RevenueTypeTranslator.repo.TryGetValue(entity.SHIPMENT_TYPE.Trim(), out translatedRevType);
+            obj.Job.RevenueType = translatedRevType;
+
             return obj;
         }
 

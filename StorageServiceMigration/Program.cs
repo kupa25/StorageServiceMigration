@@ -179,13 +179,19 @@ namespace StorageServiceMigration
                             }
                             else
                             {
-                                Console.WriteLine("Defaulting MoveConsultant to Trevor, due to bad data");
-                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Trevor, due to bad data");
-                                nameToUse = "TBURACCHIO";
+                                Console.WriteLine("Defaulting MoveConsultant to Angela La Fronza, due to bad data");
+                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Angela La Fronza, due to bad data");
+                                nameToUse = "Angela.Lafronza";
                             }
                         }
 
                         dictionaryValue = NameTranslator.repo.GetValueOrDefault(nameToUse);
+
+                        if (string.IsNullOrEmpty(dictionaryValue))
+                        {
+                            Trace.WriteLine($"{regNumber}, Move Consultant from GMMS {nameToUse} couldn't be found in Arive, thus Defaulting to Angela La Fronza");
+                            dictionaryValue = NameTranslator.repo.GetValueOrDefault("Angela.Lafronza");
+                        }
                         break;
 
                     case 2:
@@ -203,7 +209,10 @@ namespace StorageServiceMigration
                 {
                     var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue, regNumber);
 
-                    if (adObj == null || adObj.Count == 0) { continue; }
+                    if (adObj == null || adObj.Count == 0)
+                    {
+                        continue;
+                    }
 
                     jobContactList.Add(new CreateJobContactDto
                     {
@@ -294,7 +303,7 @@ namespace StorageServiceMigration
         {
             if (!loadAllRecords)
             {
-                movesToImport.Add("274486");
+                //movesToImport.Add("274486");
                 movesToImport.Add("274527");
             }
             else
