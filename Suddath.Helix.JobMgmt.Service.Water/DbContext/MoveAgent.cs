@@ -15,10 +15,15 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         [Column("NAMES_ID", Order = 1)]
         public string VendorNameId { get; set; }
 
+        public string PORT_IN { get; set; }
+
         public DateTime? DOCS_RCV_DATE { get; set; }
         public decimal? COST { get; set; }
         public string DELY_DOCS { get; set; }
         public int? EXAM_AMOUNT1 { get; set; }
+        public int? QUOTED { get; set; }
+        public string QUOTE_REF { get; set; }
+        public string HOW_SENT { get; set; }
 
         [Key]
         [Column("JOB_CATEGORY", Order = 2)]

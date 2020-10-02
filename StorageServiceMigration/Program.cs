@@ -121,7 +121,30 @@ namespace StorageServiceMigration
 
             var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId, regNumber);
 
-            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber);
+            dynamic billTo = null;
+            var billToLabel = string.Empty;
+            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.StorageAgent.HOW_SENT));
+
+            if (billTo != null)
+            {
+                billToLabel = "Account";
+            }
+            else
+            {
+                billTo = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.StorageAgent.HOW_SENT));
+
+                if (billTo != null)
+                {
+                    billToLabel = "Vendor";
+                }
+            }
+
+            if (billTo == null)
+            {
+                throw new Exception($"Missing BillTo in Arive {move.StorageAgent.HOW_SENT}");
+            }
+
+            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel);
         }
 
         private static async Task AddNotesFromGmmsToArive(Move move, int jobId, string regNumber)

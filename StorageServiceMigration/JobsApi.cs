@@ -287,7 +287,7 @@ namespace StorageServiceMigration
             return result;
         }
 
-        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber)
+        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber, dynamic billTo, string billToLabel)
         {
             Console.WriteLine("Update ST Rev Record");
             Trace.WriteLine($"{regNumber}, Update ST Rev Record");
@@ -302,9 +302,13 @@ namespace StorageServiceMigration
             var modifiedObj = Convert<SingleResult<List<GetStorageRevenueResponse>>>(copyOfOriginal, regNumber).Data.FirstOrDefault();
 
             var freePeriodId = legacyStorageEntity.EXAM_AMOUNT1;
-
             modifiedObj.FreePeriodStartDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
             modifiedObj.FreePeriodEndDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
+            modifiedObj.BillingCycle = legacyStorageEntity.PORT_IN;
+            modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
+            modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
+            modifiedObj.BillToId = billTo.Id;
+            modifiedObj.BillToType = billToLabel;
 
             await GenerateAndPatch(httpClient, url + $"/{origObj.Id}", origObj, modifiedObj);
         }
