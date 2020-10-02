@@ -23,7 +23,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
 
         internal static IMapper Mapper { get; }
 
-        public static Job2Dto ToJobModel(this Move entity, int accountid, int vendorid, int? billToId, string billToLabel)
+        public static Job2Dto ToJobModel(this Move entity, int accountid, int? vendorid, int? billToId, string billToLabel)
         {
             var obj = entity == null ? null : Mapper.Map<Job2Dto>(entity);
 
@@ -146,10 +146,14 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             {
                 FirstName = origin.FirstName,
                 LastName = origin.LastName,
-                IsVip = origin.IsVip.Equals("YES", StringComparison.CurrentCultureIgnoreCase),
                 Emails = emailList,
                 OriginPhones = phoneList
             };
+
+            if (!string.IsNullOrEmpty(origin.IsVip))
+            {
+                dto.IsVip = origin.IsVip.Equals("YES", StringComparison.CurrentCultureIgnoreCase);
+            }
 
             return dto;
         }
@@ -221,6 +225,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 case "05-026-00":
                     result = "UNIGROUP_UNITED_FORWARDING";
                     break;
+
+                default:
+                    throw new Exception($"Invalid Branch Code {bRANCH_CODE}");
             }
 
             return result;

@@ -7,7 +7,7 @@ namespace Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrderStorage
     public class GetStoragePartialDeliveryResponse
     {
         public int Id { get; set; }
-        public int? NetWeightLb { get; set; }
+        public string NetWeightLb { get; set; }
         public DateTime? DateIn { get; set; }
         public DateTime? DateOut { get; set; }
         public int? TotalWeightLb { get; set; }

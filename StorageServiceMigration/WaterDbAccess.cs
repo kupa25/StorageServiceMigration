@@ -41,7 +41,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"No moves retrieved for {regNumber}", ex);
-                Trace.WriteLine($"{regNumber}, No moves retrieved for {regNumber}" + ex);
+                Trace.WriteLine($"{regNumber}, No moves retrieved for {regNumber}");
             }
 
             return null;

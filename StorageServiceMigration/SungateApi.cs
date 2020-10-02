@@ -45,7 +45,7 @@ namespace StorageServiceMigration
             List<ADUser> adUser;
             var found = cachedAdUser.TryGetValue(v, out adUser);
 
-            if (!found)
+            if (!found && !string.IsNullOrEmpty(v))
             {
                 Console.WriteLine("Get the Ad Name for : " + v);
                 Trace.WriteLine($"{regNumber}, Get the Ad Name for : " + v);

@@ -1,20 +1,14 @@
-﻿using Helix.API.Results;
-using IdentityModel.Client;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
 using Suddath.Helix.JobMgmt.Infrastructure;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models;
-using Suddath.Helix.JobMgmt.Models.ResponseModels;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
 using Suddath.Helix.JobMgmt.Services.Water.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace StorageServiceMigration
@@ -97,8 +91,14 @@ namespace StorageServiceMigration
                 catch (Exception ex)
                 {
                     Trace.WriteLine($"{regNumber}, *** ERROR ***");
-                    Trace.WriteLine(ex.InnerException);
-                    Trace.WriteLine(ex.Message);
+                    if (ex.InnerException != null)
+                    {
+                        Trace.WriteLine($"{regNumber}, {ex.InnerException.Message}");
+                    }
+                    else
+                    {
+                        Trace.WriteLine($"{regNumber}, {ex.Message}");
+                    }
 
                     Console.WriteLine($"**** ERROR ****");
                     Console.WriteLine($"{ex.Message}");
@@ -270,7 +270,7 @@ namespace StorageServiceMigration
                 throw new Exception($"Missing BillTo in Arive {move.BILL}");
             }
 
-            var model = move.ToJobModel(movesAccount.Id, movesBooker.Id, (int?)billTo?.Id, billToLabel);
+            var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, (int?)billTo?.Id, billToLabel);
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job added {parsedResponse}");
@@ -304,7 +304,8 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 //movesToImport.Add("274486");
-                movesToImport.Add("274527");
+                movesToImport.Add("274527"); // GOOD one to import according to heather
+                //movesToImport.Add("121356");
             }
             else
             {
@@ -720,6 +721,7 @@ namespace StorageServiceMigration
         private static void SetConsoleWriteLine()
         {
             Trace.Listeners.Add(new TextWriterTraceListener($"Migration{Guid.NewGuid()}.csv"));
+            Trace.WriteLine(""); // Insert a blank line
             Trace.AutoFlush = true;
         }
 

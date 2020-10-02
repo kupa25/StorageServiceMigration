@@ -186,7 +186,7 @@ namespace StorageServiceMigration
             modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
             modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
             modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
-            modifiedObj.NetWeightLb = origin.SurveyWeight;
+            modifiedObj.NetWeightLb = storageEntity.SurveyWeight;
 
             if (oaVendor == null)
             {
@@ -197,9 +197,6 @@ namespace StorageServiceMigration
             {
                 modifiedObj.VendorId = oaVendor.Id;
             }
-
-            //currentweight - if null on ma ..m.weight - da.weight.
-            modifiedObj.NetWeightLb = storageEntity.SurveyWeight.Value;
 
             var patch = new JsonPatchDocument();
             FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
@@ -212,7 +209,7 @@ namespace StorageServiceMigration
             Console.WriteLine("Updating DA");
             Trace.WriteLine($"{regNumber}, Updating DA");
 
-            var origin = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
+            var destination = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
 
             var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=DA";
 
@@ -221,13 +218,6 @@ namespace StorageServiceMigration
 
             var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original, regNumber);
             var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal, regNumber);
-
-            //All docs received.
-            if (origin != null && origin.DOCS_RCV_DATE != null)
-            {
-                //TODO: do we need to implement this in the api??
-                //modifiedObj.IsAllDocumentsReceived = true;
-            }
 
             if (daVendor == null)
             {
@@ -262,7 +252,31 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
+
+            //create a partial delivery entry
+            var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
             await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
+
+            //update the partial delivery record
+            var pdurl = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
+
+            var originalPartialDeliv = await CallJobsApi(httpClient, pdurl, null);
+            var copyOfOriginalPartialDeliv = originalPartialDeliv;
+
+            var origPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(originalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+            var modifiedPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(copyOfOriginalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+
+            modifiedPdObj.NetWeightLb = legacyStorageEntity.SurveyWeight.ToString();
+            modifiedPdObj.DateIn = legacyStorageEntity.PartialDeliveryDateIn;
+
+            await GenerateAndPatch(httpClient, pdurl + $"/{pdId}", origPdObj, modifiedPdObj);
+        }
+
+        private static async Task<int> CreatePartialDelivery(HttpClient httpClient, int jobId, int serviceOrderId, string regNumber)
+        {
+            var url = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
+            var result = await PostToJobsApi<int>(httpClient, url, null, regNumber);
+            return result;
         }
 
         internal static async Task<int> AddStorageRevRecord(HttpClient httpClient, int serviceOrderId, Move move, int jobId, string regNumber)
