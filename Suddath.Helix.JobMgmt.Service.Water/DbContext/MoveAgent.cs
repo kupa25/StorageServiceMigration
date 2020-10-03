@@ -24,6 +24,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public int? QUOTED { get; set; }
         public string QUOTE_REF { get; set; }
         public string HOW_SENT { get; set; }
+        public string E_MAIL { get; set; }
+        public DateTime? EFFECTIVE_PS_BILL_DATE { get; set; }
+        public DateTime? EFFECTIVE_PS_RELEASE_DATE { get; set; }
 
         [Key]
         [Column("JOB_CATEGORY", Order = 2)]

@@ -309,6 +309,9 @@ namespace StorageServiceMigration
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
             modifiedObj.BillToId = billTo.Id;
             modifiedObj.BillToType = billToLabel;
+            modifiedObj.ContactEmail = legacyStorageEntity.E_MAIL;
+            modifiedObj.StorageEffectiveBillDate = legacyStorageEntity.EFFECTIVE_PS_BILL_DATE;
+            modifiedObj.BillingRecordEndDate = legacyStorageEntity.EFFECTIVE_PS_RELEASE_DATE;
 
             await GenerateAndPatch(httpClient, url + $"/{origObj.Id}", origObj, modifiedObj);
         }
