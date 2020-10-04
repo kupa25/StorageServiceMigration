@@ -153,6 +153,10 @@ namespace StorageServiceMigration
         {
             var notesEntity = await WaterDbAccess.RetrieveNotesForMove(move.RegNumber);
 
+            if (notesEntity == null)
+            {
+                Trace.WriteLine($"{regNumber}, No Available notes found in GMMS");
+            }
             foreach (var note in notesEntity)
             {
                 var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY), regNumber);
@@ -311,7 +315,7 @@ namespace StorageServiceMigration
         private static BillToResponse DetermineBillTo(string id)
         {
             dynamic billTo = null;
-            var billToLabel = string.Empty;
+            string billToLabel = null;
             billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(id));
 
             if (billTo != null)
@@ -343,7 +347,7 @@ namespace StorageServiceMigration
             {
                 //movesToImport.Add("274486");
                 //movesToImport.Add("274527"); // GOOD one to import according to heather
-                movesToImport.Add("270705");
+                movesToImport.Add("206146");
             }
             else
             {

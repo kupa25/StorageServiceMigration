@@ -346,6 +346,14 @@ namespace StorageServiceMigration
 
             var record = legacyInsuranceClaims.FirstOrDefault();
 
+            if (record == null)
+            {
+                Console.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+                Trace.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+
+                return;
+            }
+
             switch (record.CARRIER)
             {
                 case "3892":
