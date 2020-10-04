@@ -307,8 +307,13 @@ namespace StorageServiceMigration
             modifiedObj.BillingCycle = legacyStorageEntity.PORT_IN;
             modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
-            modifiedObj.BillToId = billTo.Id;
-            modifiedObj.BillToType = billToLabel;
+
+            if (billTo != null)
+            {
+                modifiedObj.BillToId = billTo.Id;
+                modifiedObj.BillToType = billToLabel;
+            }
+
             modifiedObj.ContactEmail = legacyStorageEntity.E_MAIL;
             modifiedObj.StorageEffectiveBillDate = legacyStorageEntity.EFFECTIVE_PS_BILL_DATE;
             modifiedObj.BillingRecordEndDate = legacyStorageEntity.EFFECTIVE_PS_RELEASE_DATE;
@@ -366,7 +371,7 @@ namespace StorageServiceMigration
             modifiedObj.QuotedRate = record.PREMIUM_RATE;
             modifiedObj.PayableRate = record.PREMIUM_COST;
 
-            if (record.PREMIUM_COST_TYPE.Equals("THOUSAND", StringComparison.InvariantCultureIgnoreCase))
+            if (!string.IsNullOrEmpty(record.PREMIUM_COST_TYPE) && record.PREMIUM_COST_TYPE.Equals("THOUSAND", StringComparison.InvariantCultureIgnoreCase))
             {
                 modifiedObj.PayableRateType = "Per 1000 Insured";
             }

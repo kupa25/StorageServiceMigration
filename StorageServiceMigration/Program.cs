@@ -27,14 +27,13 @@ namespace StorageServiceMigration
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
-
-            await SungateApi.setApiAccessTokenAsync(_httpClient);
             await RetrieveJobsAccountAndVendor();
 
             foreach (var regNumber in movesToImport)
             {
                 try
                 {
+                    await SungateApi.setApiAccessTokenAsync(_httpClient);
                     var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
 
                     if (move == null)
@@ -137,11 +136,6 @@ namespace StorageServiceMigration
                 {
                     billToLabel = "Vendor";
                 }
-            }
-
-            if (billTo == null)
-            {
-                throw new Exception($"Missing BillTo in Arive {move.StorageAgent.HOW_SENT}");
             }
 
             await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel);
@@ -327,8 +321,8 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 //movesToImport.Add("274486");
-                movesToImport.Add("274527"); // GOOD one to import according to heather
-                //movesToImport.Add("121356");
+                //movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("270705");
             }
             else
             {
