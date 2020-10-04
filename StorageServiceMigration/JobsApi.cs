@@ -125,17 +125,23 @@ namespace StorageServiceMigration
 
             foreach (var legacyJC in paymentSends)
             {
-                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
-                var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
-                var modifiedObj = Convert<GetPayableItemResponse>(duplicateObjString, regNumber);
+                var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
+                var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
+                var duplicateObjString = originalString;
 
-                modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                var originalObj = Convert<SingleResult<GetPayableItemResponse>>(originalString, regNumber).Data;
+                var modifiedObj = Convert<SingleResult<GetPayableItemResponse>>(duplicateObjString, regNumber).Data;
+
+                if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                {
+                    modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                }
 
                 //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
                 //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
                 //duplicateObj.BillFromType = "Vendor"; //TODO: is this true???
 
-                //await GenerateAndPatch(httpClient, url + $"/{orignal.Id}", orignal, duplicateObj);
+                await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
             }
         }
 
