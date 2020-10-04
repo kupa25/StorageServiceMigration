@@ -22,6 +22,12 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public DateTime? DATE_BILLED { get; set; }
         public DateTime? DATE_PAID { get; set; }
 
+        [NotMapped]
+        public int? VendorID { get; set; }
+
+        [NotMapped]
+        public string BillToLable { get; set; }
+
         [Column("CHECK#")]
         public string CHECK { get; set; }
 

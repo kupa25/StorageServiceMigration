@@ -73,6 +73,14 @@ namespace StorageServiceMigration
 
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
                     var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
+
+                    foreach (var legacyJC in paymentSends)
+                    {
+                        var response = DetermineBillTo(legacyJC.NAMES_ID);
+
+                        legacyJC.VendorID = response.BilltoId;
+                        legacyJC.BillToLable = response.BilltoType;
+                    }
                     await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
                         serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
@@ -264,30 +272,14 @@ namespace StorageServiceMigration
                 throw new Exception($"Missing Account in Arive {move.AccountId}");
             }
 
-            dynamic billTo = null;
-            var billToLabel = string.Empty;
-            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
+            var response = DetermineBillTo(move.BILL);
 
-            if (billTo != null)
-            {
-                billToLabel = "Account";
-            }
-            else
-            {
-                billTo = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.BILL));
-
-                if (billTo != null)
-                {
-                    billToLabel = "Vendor";
-                }
-            }
-
-            if (billTo == null)
+            if (response.BilltoId == null)
             {
                 throw new Exception($"Missing BillTo in Arive {move.BILL}");
             }
 
-            var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, (int?)billTo?.Id, billToLabel);
+            var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, response.BilltoId, response.BilltoType);
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job added {parsedResponse}");
@@ -314,6 +306,35 @@ namespace StorageServiceMigration
                 Console.WriteLine(ex);
                 Trace.WriteLine(ex);
             }
+        }
+
+        private static BillToResponse DetermineBillTo(string id)
+        {
+            dynamic billTo = null;
+            var billToLabel = string.Empty;
+            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(id));
+
+            if (billTo != null)
+            {
+                billToLabel = "Account";
+            }
+            else
+            {
+                billTo = _vendor.FirstOrDefault(v => v.AccountingId.Equals(id));
+
+                if (billTo != null)
+                {
+                    billToLabel = "Vendor";
+                }
+            }
+
+            var response = new BillToResponse
+            {
+                BilltoId = billTo?.Id,
+                BilltoType = billToLabel
+            };
+
+            return response;
         }
 
         private static void SetMovesToImport(bool loadAllRecords)

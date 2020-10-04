@@ -136,6 +136,8 @@ namespace StorageServiceMigration
                 {
                     modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
                 }
+                modifiedObj.BillFromId = legacyJC.VendorID;
+                modifiedObj.BillFromType = legacyJC.BillToLable;
 
                 //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
                 //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
