@@ -77,30 +77,6 @@ namespace StorageServiceMigration
             return parsedResponse;
         }
 
-        internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
-            List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
-        {
-            Console.WriteLine("Starting JC creation");
-            Trace.WriteLine($"{regNumber}, Starting JC creation");
-
-            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
-
-            foreach (var legacyJC in paymentSends)
-            {
-                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
-                var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
-                var duplicateObj = Convert<GetPayableItemResponse>(duplicateObjString, regNumber);
-
-                duplicateObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
-
-                //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
-                //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
-                //duplicateObj.BillFromType = "Vendor"; //TODO: is this true???
-
-                //await GenerateAndPatch(httpClient, url + $"/{orignal.Id}", orignal, duplicateObj);
-            }
-        }
-
         public static async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
@@ -138,6 +114,30 @@ namespace StorageServiceMigration
         }
 
         #endregion Jobs Api call
+
+        internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
+    List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
+        {
+            Console.WriteLine("Starting JC creation");
+            Trace.WriteLine($"{regNumber}, Starting JC creation");
+
+            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
+
+            foreach (var legacyJC in paymentSends)
+            {
+                var orignal = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
+                var duplicateObjString = await CallJobsApi(httpClient, url + $"/{orignal.Id}", null);
+                var modifiedObj = Convert<GetPayableItemResponse>(duplicateObjString, regNumber);
+
+                modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+
+                //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
+                //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
+                //duplicateObj.BillFromType = "Vendor"; //TODO: is this true???
+
+                //await GenerateAndPatch(httpClient, url + $"/{orignal.Id}", orignal, duplicateObj);
+            }
+        }
 
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId, string regNumber)
         {
