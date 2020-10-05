@@ -273,14 +273,25 @@ namespace StorageServiceMigration
 
             if (movesAccount == null)
             {
-                throw new Exception($"Missing Account in Arive {move.AccountId}");
+                if (move.AccountId.Equals("1674")) //Shipper Direct
+                {
+                    Trace.WriteLine($"{regNumber}, Missing Account in Arive {move.AccountId}, thus Defaulting Shipper Direct");
+                    movesAccount = _accountEntities.FirstOrDefault(ae => ae.Id == 283);
+                }
+                else
+                {
+                    throw new Exception($"Missing Account in Arive {move.AccountId}");
+                }
             }
 
             var response = DetermineBillTo(move.BILL);
 
             if (response.BilltoId == null)
             {
-                throw new Exception($"Missing BillTo in Arive {move.BILL}");
+                Trace.WriteLine($"{regNumber}, Missing BillTo in Arive {move.BILL}");
+                Trace.WriteLine($"{regNumber}, Defaulting BillTo as Shipper Direct");
+                response.BilltoId = 283;
+                response.BilltoType = "Account";
             }
 
             var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, response.BilltoId, response.BilltoType);
@@ -347,7 +358,8 @@ namespace StorageServiceMigration
             {
                 //movesToImport.Add("274486");
                 //movesToImport.Add("274527"); // GOOD one to import according to heather
-                movesToImport.Add("206146");
+                //movesToImport.Add("266185"); // missing account
+                movesToImport.Add("270059"); // bill to is transferee
             }
             else
             {

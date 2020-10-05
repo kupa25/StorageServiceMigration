@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
 using Suddath.Helix.Common.Extensions;
@@ -204,7 +205,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return dto;
         }
 
-        internal static string ToBranchName(string bRANCH_CODE)
+        internal static string ToBranchName(string regnumber, string bRANCH_CODE)
         {
             var result = string.Empty;
 
@@ -227,7 +228,11 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                     break;
 
                 default:
-                    throw new Exception($"Invalid Branch Code {bRANCH_CODE}");
+                    Trace.WriteLine($"{regnumber}, Invalid Branch Code {bRANCH_CODE}");
+                    Trace.WriteLine($"{regnumber}, Defaulting to SUDDATH_INTERNATIONAL");
+
+                    result = "SUDDATH_INTERNATIONAL";
+                    break;
             }
 
             return result;
