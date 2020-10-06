@@ -58,10 +58,10 @@ namespace StorageServiceMigration
 
                     //Update Milestone Pages
 
-                    var oaVendor = _vendor.Find(v => v.AccountingId.Equals(move.OriginAgent.VendorNameId));
+                    var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
                     await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId, regNumber);
 
-                    var daVendor = _vendor.Find(v => v.AccountingId.Equals(move.DestinationAgent.VendorNameId));
+                    var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
                     await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
 
                     await updateStorageJob(move, jobId, serviceOrders, regNumber);
@@ -121,7 +121,7 @@ namespace StorageServiceMigration
             Trace.WriteLine($"{regNumber}, Updating ST");
 
             var vendorAccountingId = move.StorageAgent.VendorNameId;
-            var vendorEntity = _vendor.FirstOrDefault(v => v.AccountingId == vendorAccountingId);
+            var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == vendorAccountingId);
             var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
 
             await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber);
@@ -138,7 +138,7 @@ namespace StorageServiceMigration
             }
             else
             {
-                billTo = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.StorageAgent.HOW_SENT));
+                billTo = _vendor.FirstOrDefault(ae => ae.Accounting_SI_Code.Equals(move.StorageAgent.HOW_SENT));
 
                 if (billTo != null)
                 {
@@ -269,7 +269,7 @@ namespace StorageServiceMigration
             var url = string.Empty;
 
             var movesAccount = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.AccountId));
-            var movesBooker = _vendor.FirstOrDefault(ae => ae.AccountingId.Equals(move.Booker));
+            var movesBooker = _vendor.FirstOrDefault(ae => ae.Accounting_SI_Code.Equals(move.Booker));
 
             if (movesAccount == null)
             {
@@ -335,7 +335,7 @@ namespace StorageServiceMigration
             }
             else
             {
-                billTo = _vendor.FirstOrDefault(v => v.AccountingId.Equals(id));
+                billTo = _vendor.FirstOrDefault(v => v.Accounting_SI_Code.Equals(id));
 
                 if (billTo != null)
                 {
