@@ -313,7 +313,7 @@ namespace StorageServiceMigration
                 using (var context = new JobDbContext(JobsDbAccess.connectionString))
                 {
                     _accountEntities = await context.AccountEntity.AsNoTracking().ToListAsync();
-                    _vendor = await context.Vendor.AsNoTracking().ToListAsync();
+                    _vendor = await context.Vendor.AsNoTracking().Where(v => !string.IsNullOrEmpty(v.Accounting_SI_Code)).ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -357,9 +357,9 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 //movesToImport.Add("274486");
-                //movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("274527"); // GOOD one to import according to heather
                 //movesToImport.Add("266185"); // missing account
-                movesToImport.Add("270059"); // bill to is transferee
+                //movesToImport.Add("270059"); // bill to is transferee
             }
             else
             {
