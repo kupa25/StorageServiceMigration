@@ -173,6 +173,14 @@ namespace StorageServiceMigration
 
             var createJobNoteRequests = notesEntity.ToNotesModel();
 
+            foreach (var noteobj in createJobNoteRequests)
+            {
+                if (!noteobj.Category.Equals("serviceboard"))
+                {
+                    noteobj.DisplayId = regNumber;
+                }
+            }
+
             await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId, regNumber);
         }
 
