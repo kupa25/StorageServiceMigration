@@ -43,6 +43,7 @@ namespace StorageServiceMigration
 
                     //Add the job
                     var jobId = await addStorageJob(move, regNumber);
+                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
 
                     //update datecreated on the job
                     JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
@@ -64,7 +65,7 @@ namespace StorageServiceMigration
                     var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
                     await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
 
-                    await updateStorageJob(move, jobId, serviceOrders, regNumber);
+                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity);
 
                     var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
                     await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
@@ -115,7 +116,7 @@ namespace StorageServiceMigration
             }
         }
 
-        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber)
+        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee)
         {
             Console.WriteLine("Updating ST");
             Trace.WriteLine($"{regNumber}, Updating ST");
@@ -145,7 +146,22 @@ namespace StorageServiceMigration
                     billToLabel = "Vendor";
                 }
             }
-            //TODO: this could be transferee.. so check that too
+            if (billTo == null)
+            {
+                //check to see if billto is transferee
+                var NamesRecord = await WaterDbAccess.GetNames(move.StorageAgent.HOW_SENT);
+                if (NamesRecord != null && NamesRecord.FirstName.Equals(transferee.FirstName, StringComparison.CurrentCultureIgnoreCase)
+                    && NamesRecord.LastName.Equals(transferee.LastName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    billTo = transferee;
+                    billToLabel = "Transferee";
+                }
+                else
+                {
+                    Console.WriteLine($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                    Trace.Write($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                }
+            }
 
             if (!string.IsNullOrEmpty(move.StorageAgent.HOW_SENT) && billTo == null)
             {

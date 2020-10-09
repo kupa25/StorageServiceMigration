@@ -148,5 +148,26 @@ namespace StorageServiceMigration
 
             return null;
         }
+
+        internal static async Task<Name> GetNames(string names_id)
+        {
+            try
+            {
+                using (var context = new WaterDbContext())
+                {
+                    var name = await context.Names.AsNoTracking()
+                   .SingleOrDefaultAsync(n => n.Id == names_id);
+
+                    return name;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Trace.WriteLine(ex);
+            }
+
+            return null;
+        }
     }
 }

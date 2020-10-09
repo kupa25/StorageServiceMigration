@@ -46,6 +46,20 @@ namespace StorageServiceMigration
             return result;
         }
 
+        internal static async Task<Transferee> GetJobsTransfereeId(int jobId)
+        {
+            Transferee transfereeEntity;
+
+            using (var context = new JobDbContext(connectionString))
+            {
+                transfereeEntity = context.Job.AsNoTracking().Include(j => j.Transferee)
+                                              .Single(j => j.Id == jobId)
+                                              .Transferee;
+            }
+
+            return transfereeEntity;
+        }
+
         internal static void ChangeDisplayName(int ssoId, string regNumber)
         {
             Console.WriteLine($"Changing Storage DisplayName to {regNumber}");
