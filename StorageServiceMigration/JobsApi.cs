@@ -194,7 +194,7 @@ namespace StorageServiceMigration
             modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
             modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
             modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
-            modifiedObj.NetWeightLb = storageEntity.SurveyWeight;
+            modifiedObj.NetWeightLb = move.NET_WEIGHT;
 
             if (oaVendor == null)
             {
@@ -237,6 +237,9 @@ namespace StorageServiceMigration
                 modifiedObj.VendorId = daVendor.Id;
             }
 
+            modifiedObj.ActualDeliveryStartDate = DateTime.UtcNow; // TODO: only default to UTCnow if a dbcolumn is null
+            modifiedObj.TotalWeightDeliveredLb = destination.SurveyWeight;
+
             var patch = new JsonPatchDocument();
             FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
 
@@ -260,6 +263,7 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
+            //modifiedObj.InsuranceCostRate =
 
             //create a partial delivery entry
             var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);

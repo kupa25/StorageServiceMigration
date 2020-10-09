@@ -145,6 +145,12 @@ namespace StorageServiceMigration
                     billToLabel = "Vendor";
                 }
             }
+            //TODO: this could be transferee.. so check that too
+
+            if (!string.IsNullOrEmpty(move.StorageAgent.HOW_SENT) && billTo == null)
+            {
+                Trace.WriteLine($"{regNumber}, Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
+            }
 
             await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel);
         }

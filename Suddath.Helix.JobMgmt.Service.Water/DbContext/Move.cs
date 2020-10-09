@@ -65,6 +65,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public string MOVE_MANAGER_PHONE { get; set; }
 
         public int? AUTHORIZED_WEIGHT { get; set; }
+        public int? NET_WEIGHT { get; set; }
 
         [Column("CORPORATE")]
         public string AccountId { get; set; }
