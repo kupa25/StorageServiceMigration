@@ -274,28 +274,29 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
-            modifiedObj.InsuranceCostRate = icRecord.PREMIUM_COST * (icRecord.TOTAL_INSURANCE / 1000);
+            modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_COST * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
             modifiedObj.InsuranceCostUnit = "Monthly";
 
             Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
 
-            //create a partial delivery entry
-            var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
             await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
 
-            //update the partial delivery record
-            var pdurl = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
+            //TODO: Validate that we don't need this entry in the partial storage table.  Rather we need the survey weight in the rev section
+            //create a partial delivery entry
+            //var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
+            ////update the partial delivery record
+            //var pdurl = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
 
-            var originalPartialDeliv = await CallJobsApi(httpClient, pdurl, null);
-            var copyOfOriginalPartialDeliv = originalPartialDeliv;
+            //var originalPartialDeliv = await CallJobsApi(httpClient, pdurl, null);
+            //var copyOfOriginalPartialDeliv = originalPartialDeliv;
 
-            var origPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(originalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
-            var modifiedPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(copyOfOriginalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+            //var origPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(originalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+            //var modifiedPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(copyOfOriginalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
 
-            modifiedPdObj.NetWeightLb = legacyStorageEntity.SurveyWeight.ToString();
-            modifiedPdObj.DateIn = legacyStorageEntity.PartialDeliveryDateIn;
+            //modifiedPdObj.NetWeightLb = legacyStorageEntity.SurveyWeight.ToString();
+            //modifiedPdObj.DateIn = legacyStorageEntity.PartialDeliveryDateIn;
 
-            await GenerateAndPatch(httpClient, pdurl + $"/{pdId}", origPdObj, modifiedPdObj);
+            //await GenerateAndPatch(httpClient, pdurl + $"/{pdId}", origPdObj, modifiedPdObj);
         }
 
         private static async Task<int> CreatePartialDelivery(HttpClient httpClient, int jobId, int serviceOrderId, string regNumber)
@@ -334,7 +335,7 @@ namespace StorageServiceMigration
             modifiedObj.BillingCycle = legacyStorageEntity.PORT_IN;
             modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
-            modifiedObj.InsuranceCostRate = icRecord.PREMIUM_RATE * (icRecord.TOTAL_INSURANCE / 1000);
+            modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_RATE * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
             modifiedObj.InsuranceCostUnit = "Monthly";
 
             Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
@@ -348,6 +349,7 @@ namespace StorageServiceMigration
             modifiedObj.ContactEmail = legacyStorageEntity.E_MAIL;
             modifiedObj.StorageEffectiveBillDate = legacyStorageEntity.EFFECTIVE_PS_BILL_DATE;
             modifiedObj.BillingRecordEndDate = legacyStorageEntity.EFFECTIVE_PS_RELEASE_DATE;
+            modifiedObj.StorageBillableWeightLb = legacyStorageEntity.SurveyWeight;
 
             await GenerateAndPatch(httpClient, url + $"/{origObj.Id}", origObj, modifiedObj);
         }
