@@ -28,5 +28,14 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public DateTime? CLAIMANT_DOCS { get; set; }
         public string CLAIM_NUMBER { get; set; }
         public decimal? AMOUNT_PAID { get; set; }
+
+        [NotMapped]
+        public decimal? TOTAL_INSURANCE
+        {
+            get
+            {
+                return HIGH_VALUE_AMOUNT.GetValueOrDefault() + VEHICLE_AMOUNT.GetValueOrDefault() + REQ_AMOUNT.GetValueOrDefault();
+            }
+        }
     }
 }

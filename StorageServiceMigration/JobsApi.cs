@@ -237,7 +237,17 @@ namespace StorageServiceMigration
                 modifiedObj.VendorId = daVendor.Id;
             }
 
-            modifiedObj.ActualDeliveryStartDate = DateTime.UtcNow; // TODO: only default to UTCnow if a dbcolumn is null
+            var partialDeliveryDate = DateTime.UtcNow;
+            if (destination.PartialDeliveryDateIn.HasValue)
+            {
+                partialDeliveryDate = destination.PartialDeliveryDateIn.Value;
+            }
+            else
+            {
+                Trace.WriteLine($"{regNumber}, Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
+            }
+
+            modifiedObj.ActualDeliveryStartDate = modifiedObj.ActualDeliveryEndDate = partialDeliveryDate;
             modifiedObj.TotalWeightDeliveredLb = destination.SurveyWeight;
 
             var patch = new JsonPatchDocument();
@@ -248,9 +258,10 @@ namespace StorageServiceMigration
 
         #region Storage
 
-        internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity, string regNumber)
+        internal static async Task UpdateStorageMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, Vendor vendorEntity, string regNumber, List<InsuranceClaims> legacyInsuranceClaims)
         {
             var legacyStorageEntity = move.StorageAgent;
+            var icRecord = legacyInsuranceClaims.FirstOrDefault();
 
             var soSTUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=ST";
 
@@ -263,7 +274,10 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
-            //modifiedObj.InsuranceCostRate =
+            modifiedObj.InsuranceCostRate = icRecord.PREMIUM_COST * (icRecord.TOTAL_INSURANCE / 1000);
+            modifiedObj.InsuranceCostUnit = "Monthly";
+
+            Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
 
             //create a partial delivery entry
             var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
@@ -299,12 +313,13 @@ namespace StorageServiceMigration
             return result;
         }
 
-        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber, dynamic billTo, string billToLabel)
+        internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber, dynamic billTo, string billToLabel, List<InsuranceClaims> legacyInsuranceClaims)
         {
             Console.WriteLine("Update ST Rev Record");
             Trace.WriteLine($"{regNumber}, Update ST Rev Record");
 
             var url = $"/{jobId}/services/orders/{soId}/storage/revenues";
+            var icRecord = legacyInsuranceClaims.FirstOrDefault();
             var legacyStorageEntity = move.StorageAgent;
 
             var original = await CallJobsApi(httpClient, url, null);
@@ -319,6 +334,10 @@ namespace StorageServiceMigration
             modifiedObj.BillingCycle = legacyStorageEntity.PORT_IN;
             modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
+            modifiedObj.InsuranceCostRate = icRecord.PREMIUM_RATE * (icRecord.TOTAL_INSURANCE / 1000);
+            modifiedObj.InsuranceCostUnit = "Monthly";
+
+            Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
 
             if (billTo != null)
             {

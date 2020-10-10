@@ -57,17 +57,20 @@ namespace StorageServiceMigration
 
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
 
-                    //Update Milestone Pages
-
+                    // ORIGIN
                     var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
                     await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId, regNumber);
 
+                    // DESTINATION
                     var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
                     await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
 
-                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity);
-
                     var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
+
+                    // STORAGE
+                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims);
+
+                    // INSURANCE
                     await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
 
                     #region JobCost
@@ -116,16 +119,15 @@ namespace StorageServiceMigration
             }
         }
 
-        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee)
+        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee, List<InsuranceClaims> legacyInsuranceClaims)
         {
             Console.WriteLine("Updating ST");
             Trace.WriteLine($"{regNumber}, Updating ST");
 
-            var vendorAccountingId = move.StorageAgent.VendorNameId;
-            var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == vendorAccountingId);
+            var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == move.StorageAgent.VendorNameId);
             var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
 
-            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber);
+            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber, legacyInsuranceClaims);
 
             var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId, regNumber);
 
@@ -168,7 +170,7 @@ namespace StorageServiceMigration
                 Trace.WriteLine($"{regNumber}, Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
             }
 
-            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel);
+            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel, legacyInsuranceClaims);
         }
 
         private static async Task AddNotesFromGmmsToArive(Move move, int jobId, string regNumber)
