@@ -136,12 +136,15 @@ namespace StorageServiceMigration
                 {
                     modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
                 }
+
+                modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillFromId = legacyJC.VendorID;
                 modifiedObj.BillFromType = legacyJC.BillToLable;
-
-                //duplicateObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER; // Probably.
-                //duplicateObj.CheckWireNumber = legacyJC.CHECK; //TODO: have to create vendor invoice record.. Arghh
-                //duplicateObj.BillFromType = "Vendor"; //TODO: is this true???
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT;
+                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT;
+                modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
+                modifiedObj.CheckWireNumber = legacyJC.CHECK;
+                modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
             }
