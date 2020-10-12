@@ -75,20 +75,31 @@ namespace StorageServiceMigration
 
                     #region JobCost
 
-                    var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
                     var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
 
+                    var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
                     foreach (var legacyJC in paymentSends)
                     {
                         var response = DetermineBillTo(legacyJC.NAMES_ID);
 
                         legacyJC.VendorID = response.BilltoId;
-                        legacyJC.BillToLable = response.BilltoType;
+                        legacyJC.BillToLabel = response.BilltoType;
                     }
+
                     await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
                         serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
+                    foreach (var legacyJC in paymentReceived)
+                    {
+                        var response = DetermineBillTo(legacyJC.NAMES_ID);
+
+                        legacyJC.VendorID = response.BilltoId;
+                        legacyJC.BillToLabel = response.BilltoType;
+                    }
+
+                    await JobsApi.CreateAndUpdateJobCostRevenue(_httpClient, _vendor, paymentReceived, billableItemTypes, jobId,
+                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     #endregion JobCost
 

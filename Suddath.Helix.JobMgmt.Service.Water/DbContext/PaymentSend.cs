@@ -26,7 +26,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public int? VendorID { get; set; }
 
         [NotMapped]
-        public string BillToLable { get; set; }
+        public string BillToLabel { get; set; }
 
         [Column("CHECK#")]
         public string CHECK { get; set; }

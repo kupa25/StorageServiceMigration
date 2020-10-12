@@ -118,8 +118,8 @@ namespace StorageServiceMigration
         internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
     List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
         {
-            Console.WriteLine("Starting JC creation");
-            Trace.WriteLine($"{regNumber}, Starting JC creation");
+            Console.WriteLine("Starting JC Expense creation");
+            Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
 
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
 
@@ -139,12 +139,44 @@ namespace StorageServiceMigration
 
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillFromId = legacyJC.VendorID;
-                modifiedObj.BillFromType = legacyJC.BillToLable;
+                modifiedObj.BillFromType = legacyJC.BillToLabel;
                 modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT;
                 modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT;
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
                 modifiedObj.CheckWireNumber = legacyJC.CHECK;
                 modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
+
+                await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+            }
+        }
+
+        internal static async Task CreateAndUpdateJobCostRevenue(HttpClient httpClient, List<Vendor> vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentReceived> paymentReceived, List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
+        {
+            Console.WriteLine("Starting JC Revenue creation");
+            Trace.WriteLine($"{regNumber}, Starting JC Revenue creation");
+
+            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
+
+            foreach (var legacyJC in paymentReceived)
+            {
+                var original = await PostToJobsApi<CreateBillableItemResponse>(httpClient, url, null, regNumber);
+                var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
+                var duplicateObjString = originalString;
+
+                var originalObj = Convert<SingleResult<GetBillableItemResponse>>(originalString, regNumber).Data;
+                var modifiedObj = Convert<SingleResult<GetBillableItemResponse>>(duplicateObjString, regNumber).Data;
+
+                if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                {
+                    modifiedObj.BillableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                }
+
+                modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
+                modifiedObj.BillToId = legacyJC.VendorID;
+                modifiedObj.BillToType = legacyJC.BillToLabel;
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT;
+                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT;
+                modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
             }
