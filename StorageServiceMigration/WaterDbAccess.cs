@@ -15,8 +15,6 @@ namespace StorageServiceMigration
     {
         public static async Task<Move> RetrieveWaterRecords(string regNumber)
         {
-            Console.WriteLine("-----------------------------------------------------------------------------------");
-            //Trace.WriteLine("-----------------------------------------------------------------------------------");
             Trace.WriteLine($"{regNumber},  StartTime: {DateTime.Now}");
 
             Console.WriteLine($"Retrieving Legacy move {regNumber}");

@@ -140,8 +140,8 @@ namespace StorageServiceMigration
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillFromId = legacyJC.VendorID;
                 modifiedObj.BillFromType = legacyJC.BillToLabel;
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT;
-                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT;
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault();
+                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
                 modifiedObj.CheckWireNumber = legacyJC.CHECK;
                 modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
@@ -174,8 +174,8 @@ namespace StorageServiceMigration
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillToId = legacyJC.VendorID;
                 modifiedObj.BillToType = legacyJC.BillToLabel;
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT;
-                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT;
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault();
+                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);

@@ -33,6 +33,9 @@ namespace StorageServiceMigration
             {
                 try
                 {
+                    Console.WriteLine("-----------------------------------------------------------------------------------");
+                    Trace.WriteLine($"{regNumber}, -----------------------------------------------------------------------------------");
+
                     await SungateApi.setApiAccessTokenAsync(_httpClient);
                     var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
 
@@ -80,7 +83,7 @@ namespace StorageServiceMigration
                     var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
                     foreach (var legacyJC in paymentSends)
                     {
-                        var response = DetermineBillTo(legacyJC.NAMES_ID);
+                        var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
 
                         legacyJC.VendorID = response.BilltoId;
                         legacyJC.BillToLabel = response.BilltoType;
@@ -92,7 +95,7 @@ namespace StorageServiceMigration
                     var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
                     foreach (var legacyJC in paymentReceived)
                     {
-                        var response = DetermineBillTo(legacyJC.NAMES_ID);
+                        var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
 
                         legacyJC.VendorID = response.BilltoId;
                         legacyJC.BillToLabel = response.BilltoType;
@@ -327,7 +330,7 @@ namespace StorageServiceMigration
                 }
             }
 
-            var response = DetermineBillTo(move.BILL);
+            var response = await DetermineBillTo(move.BILL, null, regNumber);
 
             if (response.BilltoId == null)
             {
@@ -366,7 +369,7 @@ namespace StorageServiceMigration
             }
         }
 
-        private static BillToResponse DetermineBillTo(string id)
+        private static async Task<BillToResponse> DetermineBillTo(string id, Transferee transferee, string regNumber)
         {
             dynamic billTo = null;
             string billToLabel = null;
@@ -374,7 +377,7 @@ namespace StorageServiceMigration
 
             if (billTo != null)
             {
-                billToLabel = "Account";
+                billToLabel = "ACCOUNT";
             }
             else
             {
@@ -382,7 +385,23 @@ namespace StorageServiceMigration
 
                 if (billTo != null)
                 {
-                    billToLabel = "Vendor";
+                    billToLabel = "VENDOR";
+                }
+            }
+            if (billTo == null && transferee != null)
+            {
+                //check to see if billto is transferee
+                var NamesRecord = await WaterDbAccess.GetNames(id);
+                if (NamesRecord != null && NamesRecord.FirstName.Equals(transferee.FirstName, StringComparison.CurrentCultureIgnoreCase)
+                    && NamesRecord.LastName.Equals(transferee.LastName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    billTo = transferee;
+                    billToLabel = "TRANSFEREE";
+                }
+                else
+                {
+                    Console.WriteLine($"{regNumber}, Cant find the billto for Storage");
+                    Trace.Write($"{regNumber}, Cant find the billto for Storage");
                 }
             }
 
