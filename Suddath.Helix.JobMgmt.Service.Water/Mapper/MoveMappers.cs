@@ -177,8 +177,8 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             {
                 OriginAddressLabel = $"{origin.Street} {origin.City}, {origin.State} {origin.Zip}",
                 OriginAddressAdditionalInfo = origin.Appartment,
-                DestinationAddressAdditionalInfo = $"{destination.Street} {destination.City}, {destination.State} {destination.Zip}",
-                DestinationAddressLabel = destination.Appartment,
+                DestinationAddressLabel = $"{destination.Street} {destination.City}, {destination.State} {destination.Zip}",
+                DestinationAddressAdditionalInfo = destination.Appartment,
                 Addresses = new List<AddressDto>
                 {
                     new AddressDto
@@ -188,7 +188,8 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                         City = origin.City,
                         State = origin.State,
                         PostalCode = origin.Zip,
-                        AdditionalAddressInfo = origin.Appartment
+                        AdditionalAddressInfo = origin.Appartment,
+                        Country = origin.Country
                     },
                     new AddressDto
                     {
@@ -197,10 +198,25 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                         City = destination.City,
                         State = destination.State,
                         PostalCode = destination.Zip,
-                        AdditionalAddressInfo = destination.Appartment
+                        AdditionalAddressInfo = destination.Appartment,
+                        Country = destination.Country
                     }
                 }
             };
+
+            //clean origin label
+
+            if (string.IsNullOrEmpty(origin.City))
+            {
+                dto.OriginAddressLabel = $"{origin.State}";
+            }
+
+            //clean destination label
+
+            if (string.IsNullOrEmpty(destination.City))
+            {
+                dto.DestinationAddressLabel = $"{destination.State}";
+            }
 
             return dto;
         }
