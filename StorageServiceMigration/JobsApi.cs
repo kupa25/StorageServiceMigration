@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Suddath.Helix.JobMgmt.Infrastructure.Constants;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.Constant;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
@@ -140,13 +141,24 @@ namespace StorageServiceMigration
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillFromId = legacyJC.VendorID;
                 modifiedObj.BillFromType = legacyJC.BillToLabel;
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault();
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT;
                 modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
                 modifiedObj.CheckWireNumber = legacyJC.CHECK;
                 modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                if (legacyJC.DATE_BILLED != null)
+                {
+                    await JobsDbAccess.ChangePayableItemStatus(PayableItemStatusIdentifier.ACTUAL_POSTED, original.Id, regNumber);
+
+                    // if check wirenumber is there we have to create a vendor invoice record
+                    //if (!string.IsNullOrEmpty(legacyJC.CHECK))
+                    //{
+                    //    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID);
+                    //}
+                }
             }
         }
 
@@ -174,11 +186,18 @@ namespace StorageServiceMigration
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillToId = legacyJC.VendorID;
                 modifiedObj.BillToType = legacyJC.BillToLabel;
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault();
+                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                if (legacyJC.DATE_BILLED != null)
+                {
+                    await JobsDbAccess.ChangeBillableItemStatus(BillableItemStatusIdentifier.ACTUAL_POSTED, original.Id, regNumber);
+
+                    // if check wirenumber is there we have to create a vendor invoice record
+                }
             }
         }
 

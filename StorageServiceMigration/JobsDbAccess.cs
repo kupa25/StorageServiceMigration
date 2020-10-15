@@ -89,5 +89,49 @@ namespace StorageServiceMigration
 
             return _billableItemTypes;
         }
+
+        internal static async Task ChangePayableItemStatus(string status, int pisId, string regNumber)
+        {
+            Console.WriteLine($"Changing Status of JC Expense record {regNumber}");
+            Trace.WriteLine($"{regNumber}, Changing Status of JC Expense record ");
+
+            using (var context = new JobDbContext(connectionString))
+            {
+                var pitem = context.PayableItem.Find(pisId);
+
+                pitem.PayableItemStatusIdentifier = status;
+                context.SaveChanges();
+            }
+        }
+
+        internal static async Task ChangeBillableItemStatus(string status, int bid, string regNumber)
+        {
+            Console.WriteLine($"Changing Status of JC Rev record {regNumber}");
+            Trace.WriteLine($"{regNumber}, Changing Status of JC Rev record ");
+
+            using (var context = new JobDbContext(connectionString))
+            {
+                var pitem = context.BillableItem.Find(bid);
+
+                pitem.BillableItemStatusIdentifier = status;
+                context.SaveChanges();
+            }
+        }
+
+        internal static async Task CreateVendorInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID)
+        {
+            Console.WriteLine($"Adding Vendor Invoice Record for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Adding Vendor Invoice Record for ");
+
+            using (var context = new JobDbContext(connectionString))
+            {
+                //var vendorInvoice = new VendorInvoice
+                //{
+                //}
+
+                //pitem.PayableItemStatusIdentifier = status;
+                //context.SaveChanges();
+            }
+        }
     }
 }
