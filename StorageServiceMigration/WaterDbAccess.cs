@@ -166,13 +166,25 @@ namespace StorageServiceMigration
             {
                 using (var context = new WaterDbContext())
                 {
-                    var paymentSends = await context.PaymentReceived.AsNoTracking()
-                   .Where(n => n.MOVES_ID == regNumber)
-                   .OrderByDescending(n => n.DATE_BILLED)
-                   .Take(4).
-                   ToListAsync();
+                    // open accrual records
 
-                    return paymentSends;
+                    var openAccrualRecords = await context.PaymentReceived.AsNoTracking()
+                   .Where(n => n.MOVES_ID == regNumber &&
+                          (
+                            (n.DATE_BILLED == null && n.ESTIMATED_AMOUNT != null) ||
+                            (n.DATE_BILLED == null && n.ADJ_EST_AMOUNT != null)
+                          ))
+                   .ToListAsync();
+
+                    var regularRecords = await context.PaymentReceived.AsNoTracking()
+                   .Where(n => n.MOVES_ID == regNumber && n.DATE_BILLED != null)
+                   .OrderByDescending(n => n.DATE_BILLED)
+                   .Take(4)
+                   .ToListAsync();
+
+                    var paymentReceived = openAccrualRecords.Union(regularRecords).ToList();
+
+                    return paymentReceived;
                 }
             }
             catch (Exception ex)
