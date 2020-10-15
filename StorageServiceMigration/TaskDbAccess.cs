@@ -28,8 +28,10 @@ namespace StorageServiceMigration
 
         internal static async Task AddPrompts(List<WorkflowTask> workflowTasksToAdd, string regNumber, int jobId)
         {
-            Console.WriteLine($"Adding {workflowTasksToAdd.Count} Prompts");
-            Trace.WriteLine($"{regNumber},Processing {workflowTasksToAdd.Count} Prompts");
+            var originalTaskToAddCount = workflowTasksToAdd.Count;
+
+            Console.WriteLine($"Adding {originalTaskToAddCount} Prompts");
+            Trace.WriteLine($"{regNumber},Processing {originalTaskToAddCount} Prompts");
 
             using (var context = new TaskMgmtDbContext(connectionString))
             {
@@ -41,6 +43,13 @@ namespace StorageServiceMigration
                 {
                     workflowTasksToAdd.RemoveAll(wt => wt.Subject.Equals(wtTask.Subject,
                         StringComparison.CurrentCultureIgnoreCase));
+                }
+
+                var revisedTaskToAddCount = workflowTasksToAdd.Count;
+
+                if (revisedTaskToAddCount != originalTaskToAddCount)
+                {
+                    Trace.WriteLine($"{regNumber},Found and removed duplicate prompts");
                 }
 
                 if (workflowTasksToAdd.Count == 0)
