@@ -45,6 +45,31 @@ namespace StorageServiceMigration
             return null;
         }
 
+        internal static async Task<List<Notes>> RetrievePrompts(string regNumber)
+        {
+            Console.WriteLine($"Retrieving Prompts for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Prompts Notes for {regNumber}");
+            try
+            {
+                using (var context = new WaterDbContext())
+                {
+                    var notes = await context.Notes.AsNoTracking()
+                   .Where(n => n.TABLE_ID == regNumber && n.TABLE_NAME.Equals("PROMPTS")
+                               && n.DATE_COMPLETED == null).ToListAsync();
+
+                    var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Trace.WriteLine(ex);
+            }
+
+            return null;
+        }
+
         internal static async Task<List<Notes>> RetrieveNotesForMove(string regNumber)
         {
             Console.WriteLine($"Retrieving Notes for {regNumber}");

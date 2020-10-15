@@ -109,7 +109,8 @@ namespace StorageServiceMigration
                     //Add Notes
                     await AddNotesFromGmmsToArive(move, jobId, regNumber);
 
-                    //Add Prompts -- Figure out what is system generated or manually entered
+                    //Add Prompts
+                    await AddPromptsFromGmmsToArive(move, jobId, regNumber);
 
                     Trace.WriteLine($"{regNumber}, EndTime: {DateTime.Now}");
                 }
@@ -185,6 +186,36 @@ namespace StorageServiceMigration
             }
 
             await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel, legacyInsuranceClaims);
+        }
+
+        private static async Task AddPromptsFromGmmsToArive(Move move, int jobId, string regNumber)
+        {
+            var legacyPromptEntity = await WaterDbAccess.RetrievePrompts(move.RegNumber);
+            if (legacyPromptEntity == null)
+            {
+                Trace.WriteLine($"{regNumber}, No Available notes found in GMMS");
+            }
+            foreach (var prompt in legacyPromptEntity)
+            {
+                var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(prompt.ENTERED_BY), regNumber);
+
+                if (adObj != null && adObj.Count > 0)
+                {
+                    prompt.ENTERED_BY = adObj.FirstOrDefault().email;
+                }
+                else
+                {
+                    Console.WriteLine($"{regNumber}, Can't get Prompt created User So defaulting it to MigrationScript@test.com");
+                    Trace.WriteLine($"{regNumber}, Can't get Prompt created User So defaulting it to MigrationScript@test.com");
+                    prompt.ENTERED_BY = "MigrationScript@test.com";
+                }
+
+                prompt.JobId = jobId;
+            }
+
+            var workflowTasks = legacyPromptEntity.ToWorkFlowTask();
+
+            await TaskDbAccess.AddPrompts(workflowTasks, regNumber);
         }
 
         private static async Task AddNotesFromGmmsToArive(Move move, int jobId, string regNumber)
@@ -418,8 +449,8 @@ namespace StorageServiceMigration
         {
             if (!loadAllRecords)
             {
-                //movesToImport.Add("274486");
-                movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("274486");
+                //movesToImport.Add("274527"); // GOOD one to import according to heather
                 //movesToImport.Add("266185"); // missing account
                 //movesToImport.Add("270059"); // bill to is transferee
             }

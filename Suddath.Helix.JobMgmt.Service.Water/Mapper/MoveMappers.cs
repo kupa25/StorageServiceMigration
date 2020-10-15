@@ -48,6 +48,20 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return obj;
         }
 
+        public static List<CreateJobTaskRequest> ToPromptsModel(this List<Notes> notes)
+        {
+            var obj = notes == null ? null : Mapper.Map<List<CreateJobTaskRequest>>(notes);
+
+            return obj;
+        }
+
+        public static List<WorkflowTask> ToWorkFlowTask(this List<Notes> notes)
+        {
+            var obj = notes == null ? null : Mapper.Map<List<WorkflowTask>>(notes);
+
+            return obj;
+        }
+
         public static Models.ServiceDto ToModel(this Move entity)
         {
             return entity == null ? null : Mapper.Map<Models.MoveServiceDto>(entity);

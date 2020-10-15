@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
+using Suddath.Helix.JobMgmt.Models;
 
 namespace Suddath.Helix.TaskMgmt.Infrastructure.Domain
 {
@@ -25,6 +26,7 @@ namespace Suddath.Helix.TaskMgmt.Infrastructure.Domain
         }
 
         public virtual DbSet<Note> Note { get; set; }
+        public virtual DbSet<JobMgmt.Models.WorkflowTask> WorkflowTask { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +54,45 @@ namespace Suddath.Helix.TaskMgmt.Infrastructure.Domain
                     .HasMaxLength(255);
 
                 entity.Property(e => e.Module).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<JobMgmt.Models.WorkflowTask>(entity =>
+            {
+                entity.HasIndex(e => new { e.ReferenceId, e.Module })
+                    .HasName("IX__ReferenceID_Module");
+
+                entity.Property(e => e.AssignedTo)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Category).HasMaxLength(100);
+
+                entity.Property(e => e.CompletedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("getutcdate()");
+
+                entity.Property(e => e.DisplayId)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValueSql("'unkown'");
+
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.ModifiedDate).HasDefaultValueSql("getutcdate()");
+
+                entity.Property(e => e.Module)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Subject)
+                    .IsRequired()
+                    .HasMaxLength(200);
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -1,8 +1,10 @@
-﻿using Suddath.Helix.TaskMgmt.Infrastructure.Domain;
+﻿using Suddath.Helix.JobMgmt.Models;
+using Suddath.Helix.TaskMgmt.Infrastructure.Domain;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StorageServiceMigration
 {
@@ -18,6 +20,20 @@ namespace StorageServiceMigration
                 var createdNote = context.Note.Find(noteId);
 
                 createdNote.DateCreated = date;
+                context.SaveChanges();
+            }
+        }
+
+        internal static async Task AddPrompts(List<WorkflowTask> workflowTasks, string regNumber)
+        {
+            Console.WriteLine($"Adding {workflowTasks.Count} Prompts");
+            Trace.WriteLine($"{regNumber},Adding {workflowTasks.Count} Prompts");
+
+            //TODO look for duplicates
+
+            using (var context = new TaskMgmtDbContext(connectionString))
+            {
+                context.WorkflowTask.AddRange(workflowTasks);
                 context.SaveChanges();
             }
         }

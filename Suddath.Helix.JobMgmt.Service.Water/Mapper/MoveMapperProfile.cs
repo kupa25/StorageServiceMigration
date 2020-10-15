@@ -35,7 +35,26 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForMember(d => d.Category, opt => opt.MapFrom(src => MoveMappers.ToNotesCategory(src)))
                 .ForMember(d => d.IsCritical, opt => opt.MapFrom(src => src.CATEGORY.Equals("CRITICAL")))
                 .ForMember(d => d.DateCreated, opt => opt.MapFrom(src => src.DATE_ENTERED))
+                ;
 
+            CreateMap<Notes, CreateJobTaskRequest>()
+                .ForMember(d => d.Subject, opt => opt.MapFrom(src => src.NOTE))
+                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
+
+                .ForMember(d => d.IsCritical, opt => opt.MapFrom(src => src.CATEGORY.Equals("CRITICAL")))
+
+                ;
+
+            CreateMap<Notes, WorkflowTask>()
+                .ForMember(d => d.ReferenceId, opt => opt.MapFrom(src => src.JobId))
+                .ForMember(d => d.Module, opt => opt.MapFrom(src => "JOB"))
+                .ForMember(d => d.DisplayId, opt => opt.MapFrom(src => src.JobId.ToString()))
+                .ForMember(d => d.Subject, opt => opt.MapFrom(src => src.NOTE))
+                .ForMember(d => d.DueDate, opt => opt.MapFrom(src => src.CALLBACK_DATE))
+                .ForMember(d => d.IsCritical, opt => opt.MapFrom(src => src.CATEGORY.Equals("CRITICAL")))
+                .ForMember(d => d.AssignedTo, opt => opt.MapFrom(src => src.ENTERED_BY))
+                .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
+                .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 ;
         }
     }
