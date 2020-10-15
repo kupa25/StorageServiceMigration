@@ -1,8 +1,10 @@
-﻿using Suddath.Helix.JobMgmt.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Suddath.Helix.JobMgmt.Models;
 using Suddath.Helix.TaskMgmt.Infrastructure.Domain;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,16 +26,29 @@ namespace StorageServiceMigration
             }
         }
 
-        internal static async Task AddPrompts(List<WorkflowTask> workflowTasks, string regNumber)
+        internal static async Task AddPrompts(List<WorkflowTask> workflowTasksToAdd, string regNumber, int jobId)
         {
-            Console.WriteLine($"Adding {workflowTasks.Count} Prompts");
-            Trace.WriteLine($"{regNumber},Adding {workflowTasks.Count} Prompts");
-
-            //TODO look for duplicates
+            Console.WriteLine($"Adding {workflowTasksToAdd.Count} Prompts");
+            Trace.WriteLine($"{regNumber},Processing {workflowTasksToAdd.Count} Prompts");
 
             using (var context = new TaskMgmtDbContext(connectionString))
             {
-                context.WorkflowTask.AddRange(workflowTasks);
+                var existingTask = await context.WorkflowTask.Where(wt => wt.ReferenceId == jobId).ToListAsync();
+
+                Trace.WriteLine($"{regNumber},Looking for duplicates because Milestone pages might have already created prompts");
+
+                foreach (var wtTask in existingTask)
+                {
+                    workflowTasksToAdd.RemoveAll(wt => wt.Subject.Equals(wtTask.Subject,
+                        StringComparison.CurrentCultureIgnoreCase));
+                }
+
+                if (workflowTasksToAdd.Count == 0)
+                {
+                    return;
+                }
+
+                context.WorkflowTask.AddRange(workflowTasksToAdd);
                 context.SaveChanges();
             }
         }

@@ -191,10 +191,11 @@ namespace StorageServiceMigration
         private static async Task AddPromptsFromGmmsToArive(Move move, int jobId, string regNumber)
         {
             var legacyPromptEntity = await WaterDbAccess.RetrievePrompts(move.RegNumber);
-            if (legacyPromptEntity == null)
+            if (legacyPromptEntity == null || legacyPromptEntity.Count == 0)
             {
-                Trace.WriteLine($"{regNumber}, No Available notes found in GMMS");
+                Trace.WriteLine($"{regNumber}, No Available prompts found in GMMS");
             }
+
             foreach (var prompt in legacyPromptEntity)
             {
                 var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(prompt.ENTERED_BY), regNumber);
@@ -215,7 +216,7 @@ namespace StorageServiceMigration
 
             var workflowTasks = legacyPromptEntity.ToWorkFlowTask();
 
-            await TaskDbAccess.AddPrompts(workflowTasks, regNumber);
+            await TaskDbAccess.AddPrompts(workflowTasks, regNumber, jobId);
         }
 
         private static async Task AddNotesFromGmmsToArive(Move move, int jobId, string regNumber)
