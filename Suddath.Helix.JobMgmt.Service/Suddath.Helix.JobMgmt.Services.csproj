@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- SonarQube needs this -->
+    <ProjectGuid>{E5BB8A97-24A5-44C1-8BE9-BDC5FFFD45F1}</ProjectGuid>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Interface\**" />
+    <EmbeddedResource Remove="Interface\**" />
+    <None Remove="Interface\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="NinjaNye.SearchExtensions" Version="3.0.1" />
+    <PackageReference Include="RestSharp" Version="106.10.1" />
+    <PackageReference Include="Helix.API.Results" Version="20190415.1.0" />
+    <PackageReference Include="Suddath.Helix.Common.Infrastructure.EventBus" Version="1.1.65" />
+    <PackageReference Include="Suddath.Helix.MergeTemplates" Version="1.0.4" />
+    <PackageReference Include="SunGatePolicy.Client" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Infrastructure\Suddath.Helix.JobMgmt.Infrastructure.csproj" />
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Models\Suddath.Helix.JobMgmt.Models.csproj" />
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Service.Interfaces\Suddath.Helix.JobMgmt.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Service.Water\Suddath.Helix.JobMgmt.Services.Water.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.AspNetCore.JsonPatch">
+      <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.jsonpatch\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.JsonPatch.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

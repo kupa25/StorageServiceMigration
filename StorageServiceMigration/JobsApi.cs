@@ -149,16 +149,16 @@ namespace StorageServiceMigration
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
 
-                if (legacyJC.DATE_BILLED != null)
-                {
-                    await JobsDbAccess.ChangePayableItemStatus(PayableItemStatusIdentifier.ACTUAL_POSTED, original.Id, regNumber);
+                //if (legacyJC.DATE_BILLED != null)
+                //{
+                //    await JobsDbAccess.ChangePayableItemStatus(PayableItemStatusIdentifier.VOID, original.Id, regNumber);
 
-                    // if check wirenumber is there we have to create a vendor invoice record
-                    //if (!string.IsNullOrEmpty(legacyJC.CHECK))
-                    //{
-                    //    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID);
-                    //}
-                }
+                //    // if check wirenumber is there we have to create a vendor invoice record
+                //    //if (!string.IsNullOrEmpty(legacyJC.CHECK))
+                //    //{
+                //    //    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID);
+                //    //}
+                //}
             }
         }
 
@@ -192,12 +192,12 @@ namespace StorageServiceMigration
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
 
-                if (legacyJC.DATE_BILLED != null)
-                {
-                    await JobsDbAccess.ChangeBillableItemStatus(BillableItemStatusIdentifier.ACTUAL_POSTED, original.Id, regNumber);
+                //if (legacyJC.DATE_BILLED != null)
+                //{
+                //    await JobsDbAccess.ChangeBillableItemStatus(BillableItemStatusIdentifier.VOID, original.Id, regNumber);
 
-                    // if check wirenumber is there we have to create a vendor invoice record
-                }
+                //    // if check wirenumber is there we have to create a vendor invoice record
+                //}
             }
         }
 

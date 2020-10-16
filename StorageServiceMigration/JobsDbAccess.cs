@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Suddath.Helix.JobMgmt.Infrastructure;
+using Suddath.Helix.JobMgmt.Infrastructure.Constants;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
+using Suddath.Helix.JobMgmt.Services;
+using Suddath.Helix.JobMgmt.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -131,6 +134,65 @@ namespace StorageServiceMigration
 
                 //pitem.PayableItemStatusIdentifier = status;
                 //context.SaveChanges();
+            }
+        }
+
+        internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId)
+        {
+            Console.WriteLine($"Locking JC");
+            Trace.WriteLine($"{regNumber}, Locking JC ");
+
+            try
+            {
+                using (var _dbContext = new JobDbContext(connectionString))
+                {
+                    //BILLABLE ITEM
+                    var dateStamp = DateTime.UtcNow;
+                    string currentUser = "MigrationScript@test.com";
+
+                    var items = await _dbContext.BillableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId && bi.BillableItemStatusIdentifier == BillableItemStatusIdentifier.QUEUED).ToListAsync();
+
+                    items.ForEach(item =>
+                    {
+                        item.BillableItemStatusIdentifier = BillableItemStatusIdentifier.ACCRUAL_PENDING;
+                        item.DateModified = dateStamp;
+                        item.ModifiedBy = currentUser;
+                    });
+
+                    var superServiceOrder = _dbContext.SuperServiceOrder.Include(sso => sso.Job)
+                                                                        .FirstOrDefault(x => x.Id == superServiceOrderId);
+
+                    superServiceOrder.AccrualPendingDateTime = dateStamp;
+                    superServiceOrder.AccrualStatus = AccrualStatus.PENDING;
+
+                    if (superServiceOrder.Job.AccrualStatus != AccrualStatus.POSTED)
+                    {
+                        superServiceOrder.Job.AccrualStatus = AccrualStatus.PENDING;
+                    }
+
+                    superServiceOrder.ModifiedBy = "MigrationScript@test.com";
+                    superServiceOrder.DateModified = dateStamp;
+
+                    await _dbContext.SaveChangesAsync();
+
+                    //PAYBLE ITEM
+                    var pitems = await _dbContext.PayableItem.Where(pi => pi.SuperServiceOrderId == superServiceOrderId && pi.PayableItemStatusIdentifier == PayableItemStatusIdentifier.QUEUED).ToListAsync();
+
+                    pitems.ForEach(item =>
+                    {
+                        item.PayableItemStatusIdentifier = PayableItemStatusIdentifier.ACCRUAL_PENDING;
+                        item.DateModified = dateStamp;
+                        item.ModifiedBy = currentUser;
+                    });
+
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error While trying to lock");
+                Trace.WriteLine($"{regNumber}, Error while trying to lock");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
         }
     }
