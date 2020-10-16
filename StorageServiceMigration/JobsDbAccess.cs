@@ -121,7 +121,13 @@ namespace StorageServiceMigration
                     var bitem = context.BillableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId).ToList();
                     var pitem = context.PayableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId).ToList();
 
-                    bitem.ForEach(i => i.BillableItemStatusIdentifier = BillableItemStatusIdentifier.VOID);
+                    bitem.ForEach(i =>
+                    {
+                        i.BillableItemStatusIdentifier = BillableItemStatusIdentifier.VOID;
+                        i.VoidedBy = GetCurrentUserEmail();
+                        i.VoidedDateTime = DateTime.UtcNow;
+                    });
+
                     pitem.ForEach(i =>
                     {
                         i.PayableItemStatusIdentifier = PayableItemStatusIdentifier.VOID;
@@ -139,7 +145,7 @@ namespace StorageServiceMigration
             }
         }
 
-        internal static async Task MarkAsPosted(int superServiceOrderId, DateTime accrualFinancialPeriodDateTime, bool isOriginalAccrual, string regNumber)
+        internal static async Task MarkAsPosted(int superServiceOrderId, DateTime accrualFinancialPeriodDateTime, bool isOriginalAccrual, string regNumber, DateTime? accruedDate)
         {
             Console.WriteLine($"Marking JC as posted");
             Trace.WriteLine($"{regNumber}, Marking JC as posted ");
@@ -148,7 +154,7 @@ namespace StorageServiceMigration
             {
                 using (var _dbContext = new JobDbContext(connectionString))
                 {
-                    var dateStamp = DateTime.UtcNow;
+                    var dateStamp = accruedDate ?? DateTime.UtcNow;
                     string currentUser = GetCurrentUserEmail();
 
                     //Get list of billables that are pending accrual to validate the list we received
@@ -192,7 +198,7 @@ namespace StorageServiceMigration
             return "MigrationScript @test.com";
         }
 
-        internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId)
+        internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId, DateTime? accrueDate)
         {
             Console.WriteLine($"Locking JC");
             Trace.WriteLine($"{regNumber}, Locking JC ");
@@ -202,7 +208,7 @@ namespace StorageServiceMigration
                 using (var _dbContext = new JobDbContext(connectionString))
                 {
                     //BILLABLE ITEM
-                    var dateStamp = DateTime.UtcNow;
+                    var dateStamp = accrueDate ?? DateTime.UtcNow;
                     string currentUser = "MigrationScript@test.com";
 
                     var items = await _dbContext.BillableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId && bi.BillableItemStatusIdentifier == BillableItemStatusIdentifier.QUEUED).ToListAsync();

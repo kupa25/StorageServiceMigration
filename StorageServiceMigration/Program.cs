@@ -106,8 +106,8 @@ namespace StorageServiceMigration
 
                     var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
 
-                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId);
-                    await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber);
+                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
+                    await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
                     await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
 
                     #endregion JobCost
