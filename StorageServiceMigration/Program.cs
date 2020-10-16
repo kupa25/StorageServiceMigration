@@ -105,9 +105,10 @@ namespace StorageServiceMigration
                         serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
-                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId);
 
+                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId);
                     await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber);
+                    await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
 
                     #endregion JobCost
 
