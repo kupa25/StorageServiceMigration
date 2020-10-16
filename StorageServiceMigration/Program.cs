@@ -104,8 +104,10 @@ namespace StorageServiceMigration
                     await JobsApi.CreateAndUpdateJobCostRevenue(_httpClient, _vendor, paymentReceived, billableItemTypes, jobId,
                         serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
-                    await JobsDbAccess.LockJC(jobId, regNumber,
-                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId);
+                    var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
+                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId);
+
+                    await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber);
 
                     #endregion JobCost
 

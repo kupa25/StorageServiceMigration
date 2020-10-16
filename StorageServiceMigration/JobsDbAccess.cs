@@ -137,6 +137,59 @@ namespace StorageServiceMigration
             }
         }
 
+        internal static async Task MarkAsPosted(int superServiceOrderId, DateTime accrualFinancialPeriodDateTime, bool isOriginalAccrual, string regNumber)
+        {
+            Console.WriteLine($"Marking JC as posted");
+            Trace.WriteLine($"{regNumber}, Marking JC as posted ");
+
+            try
+            {
+                using (var _dbContext = new JobDbContext(connectionString))
+                {
+                    var dateStamp = DateTime.UtcNow;
+                    string currentUser = GetCurrentUserEmail();
+
+                    //Get list of billables that are pending accrual to validate the list we received
+                    var itemsToMark = await _dbContext.BillableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId && bi.BillableItemStatusIdentifier == BillableItemStatusIdentifier.ACCRUAL_PENDING).ToListAsync();
+
+                    itemsToMark.ForEach(item =>
+                    {
+                        item.BillableItemStatusIdentifier = BillableItemStatusIdentifier.ACCRUAL_POSTED;
+                        item.AccrualPostedBy = currentUser;
+                        item.AccrualPostedDateTime = dateStamp;
+                        item.AccrualFinancialPeriodDateTime = accrualFinancialPeriodDateTime;
+                        item.IsOriginalAccrual = isOriginalAccrual;
+                        item.OriginalAccrualAmountBillingCurrency = item.AccrualAmountBillingCurrency;
+                        item.OriginalAccrualAmountUSD = item.AccrualAmountUSD;
+                        item.OriginalAccrualPostedBy = currentUser;
+                        item.OriginalAccrualPostedDateTime = dateStamp;
+                        item.DateModified = dateStamp;
+                        item.ModifiedBy = currentUser;
+                    });
+
+                    var superServiceOrder = _dbContext.SuperServiceOrder.Include(sso => sso.Job).FirstOrDefault(x => x.Id == superServiceOrderId);
+                    superServiceOrder.AccrualPostedDateTime = dateStamp;
+
+                    superServiceOrder.ModifiedBy = GetCurrentUserEmail();
+                    superServiceOrder.DateModified = dateStamp;
+                    superServiceOrder.AccrualStatus = AccrualStatus.POSTED;
+                    superServiceOrder.Job.ModifiedBy = GetCurrentUserEmail();
+                    superServiceOrder.Job.DateModified = dateStamp;
+                    superServiceOrder.Job.AccrualStatus = AccrualStatus.POSTED;
+
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private static string GetCurrentUserEmail()
+        {
+            return "MigrationScript @test.com";
+        }
+
         internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId)
         {
             Console.WriteLine($"Locking JC");
