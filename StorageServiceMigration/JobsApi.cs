@@ -148,6 +148,11 @@ namespace StorageServiceMigration
                 modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                if (legacyJC.DATE_PAID != null)
+                {
+                    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                }
             }
         }
 

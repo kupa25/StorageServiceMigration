@@ -93,19 +93,24 @@ namespace StorageServiceMigration
             return _billableItemTypes;
         }
 
-        internal static async Task CreateVendorInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID)
+        internal static async Task CreateVendorInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID, int superServiceOrderId)
         {
             Console.WriteLine($"Adding Vendor Invoice Record for {regNumber}");
             Trace.WriteLine($"{regNumber}, Adding Vendor Invoice Record for ");
 
             using (var context = new JobDbContext(connectionString))
             {
-                //var vendorInvoice = new VendorInvoice
-                //{
-                //}
+                var vendorInvoice = new VendorInvoice
+                {
+                    SuperServiceOrderId = superServiceOrderId,
+                    VendorInvoiceNumber = iNVOICE_NUMBER,
+                    VendorInvoiceDate = dATE_PAID.GetValueOrDefault(DateTime.UtcNow),
+                    GPDocNum = "Migration",
+                    LastPaidCheckNumber = cHECK
+                };
 
-                //pitem.PayableItemStatusIdentifier = status;
-                //context.SaveChanges();
+                context.VendorInvoice.Add(vendorInvoice);
+                context.SaveChanges();
             }
         }
 
