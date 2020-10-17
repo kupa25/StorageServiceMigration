@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Suddath.Helix.JobMgmt.Services.Water.Mapper;
 
 namespace StorageServiceMigration
 {
@@ -58,6 +59,20 @@ namespace StorageServiceMigration
                 }
 
                 context.WorkflowTask.AddRange(workflowTasksToAdd);
+                context.SaveChanges();
+            }
+        }
+
+        internal static async Task AddNotes(List<CreateJobNoteRequest> createJobNoteRequests, int jobId, string regNumber)
+        {
+            Console.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
+            Trace.WriteLine($"{regNumber}, Adding {createJobNoteRequests.Count} Notes to Task");
+
+            var noteEntity = createJobNoteRequests.ToNotesEntity();
+
+            using (var context = new TaskMgmtDbContext(connectionString))
+            {
+                context.Note.AddRange(noteEntity);
                 context.SaveChanges();
             }
         }

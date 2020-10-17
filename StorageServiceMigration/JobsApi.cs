@@ -177,8 +177,13 @@ namespace StorageServiceMigration
                 }
 
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
-                modifiedObj.BillToId = legacyJC.VendorID;
-                modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
+
+                if (modifiedObj.BillToId != legacyJC.VendorID)
+                {
+                    modifiedObj.BillToId = legacyJC.VendorID;
+                    modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
+                }
+
                 modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;

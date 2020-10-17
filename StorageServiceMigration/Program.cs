@@ -265,9 +265,13 @@ namespace StorageServiceMigration
                 {
                     noteobj.DisplayId = regNumber;
                 }
+
+                noteobj.ReferenceId = jobId;
             }
 
-            await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId, regNumber);
+            await TaskDbAccess.AddNotes(createJobNoteRequests, jobId, regNumber);
+
+            //await TaskApi.CreateNotes(_httpClient, createJobNoteRequests, jobId, regNumber);
         }
 
         private static async Task addJobContacts(Move move, int jobId, string regNumber)

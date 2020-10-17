@@ -25,7 +25,7 @@ namespace Suddath.Helix.TaskMgmt.Infrastructure.Domain
         {
         }
 
-        public virtual DbSet<Note> Note { get; set; }
+        public virtual DbSet<JobMgmt.Infrastructure.Domain.Note> Note { get; set; }
         public virtual DbSet<JobMgmt.Models.WorkflowTask> WorkflowTask { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace Suddath.Helix.TaskMgmt.Infrastructure.Domain
             modelBuilder.HasAnnotation("Scaffolding:ConnectionString", "Data Source=(local);Initial Catalog=TasksDatabase;Integrated Security=true");
 
 
-            modelBuilder.Entity<Note>(entity =>
+            modelBuilder.Entity<JobMgmt.Infrastructure.Domain.Note>(entity =>
             {
                 entity.HasIndex(e => e.CreatedBy)
                     .HasName("IX_Notes_CreatedBy");

@@ -8,6 +8,7 @@ using Suddath.Helix.Common.Infrastructure.EventBus.Events;
 using Suddath.Helix.JobMgmt.Models;
 using Suddath.Helix.JobMgmt.Services.Interfaces;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
+using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Tandem.Utility;
 
 namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
@@ -48,6 +49,13 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return obj;
         }
 
+        public static List<Infrastructure.Domain.Note> ToNotesEntity(this List<CreateJobNoteRequest> notes)
+        {
+            var obj = notes == null ? null : Mapper.Map<List<Infrastructure.Domain.Note>>(notes);
+
+            return obj;
+        }
+
         public static List<CreateJobTaskRequest> ToPromptsModel(this List<Notes> notes)
         {
             var obj = notes == null ? null : Mapper.Map<List<CreateJobTaskRequest>>(notes);
@@ -55,9 +63,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             return obj;
         }
 
-        public static List<WorkflowTask> ToWorkFlowTask(this List<Notes> notes)
+        public static List<Models.WorkflowTask> ToWorkFlowTask(this List<Notes> notes)
         {
-            var obj = notes == null ? null : Mapper.Map<List<WorkflowTask>>(notes);
+            var obj = notes == null ? null : Mapper.Map<List<Models.WorkflowTask>>(notes);
 
             return obj;
         }

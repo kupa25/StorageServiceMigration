@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Suddath.Helix.JobMgmt.Infrastructure\Suddath.Helix.JobMgmt.Infrastructure.csproj" />
     <ProjectReference Include="..\Suddath.Helix.JobMgmt.Models\Suddath.Helix.JobMgmt.Models.csproj" />
     <ProjectReference Include="..\Suddath.Helix.JobMgmt.Service.Interfaces\Suddath.Helix.JobMgmt.Services.Interfaces.csproj" />
   </ItemGroup>

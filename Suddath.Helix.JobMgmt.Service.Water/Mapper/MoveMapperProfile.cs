@@ -1,5 +1,7 @@
 ﻿using Suddath.Helix.JobMgmt.Models;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
+using Suddath.Helix.JobMgmt.Infrastructure.Domain;
+using System;
 using System.Reflection;
 
 namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
@@ -45,7 +47,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
 
                 ;
 
-            CreateMap<Notes, WorkflowTask>()
+            CreateMap<Notes, Models.WorkflowTask>()
                 .ForMember(d => d.ReferenceId, opt => opt.MapFrom(src => src.JobId))
                 .ForMember(d => d.Module, opt => opt.MapFrom(src => "JOB"))
                 .ForMember(d => d.DisplayId, opt => opt.MapFrom(src => src.JobId.ToString()))
@@ -56,6 +58,9 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 ;
+
+            CreateMap<CreateJobNoteRequest, Infrastructure.Domain.Note>()
+                .ForMember(d => d.DateCreated, opt => opt.MapFrom(src => DateTime.UtcNow));
         }
     }
 }
