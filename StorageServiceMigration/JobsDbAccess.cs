@@ -36,7 +36,7 @@ namespace StorageServiceMigration
         internal static async Task<List<ServiceOrder>> GetServiceOrderForJobs(int jobId, string regNumber)
         {
             Console.WriteLine($"Retrieve all the ServiceOrders Created");
-            Trace.WriteLine($"{regNumber}, Retrieve all the ServiceOrders Created");
+            //Trace.WriteLine($"{regNumber}, Retrieve all the ServiceOrders Created");
 
             List<ServiceOrder> result;
             using (var context = new JobDbContext(connectionString))

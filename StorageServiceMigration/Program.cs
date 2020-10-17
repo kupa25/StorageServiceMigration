@@ -50,7 +50,6 @@ namespace StorageServiceMigration
 
                     //Add the job
                     var jobId = await addStorageJob(move, regNumber);
-                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
 
                     //update datecreated on the job
                     JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
@@ -75,6 +74,7 @@ namespace StorageServiceMigration
                     var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
 
                     // STORAGE
+                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
                     await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims);
 
                     // INSURANCE
@@ -207,6 +207,7 @@ namespace StorageServiceMigration
             if (legacyPromptEntity == null || legacyPromptEntity.Count == 0)
             {
                 Trace.WriteLine($"{regNumber}, No Available prompts found in GMMS");
+                return;
             }
 
             foreach (var prompt in legacyPromptEntity)
@@ -239,7 +240,9 @@ namespace StorageServiceMigration
             if (notesEntity == null)
             {
                 Trace.WriteLine($"{regNumber}, No Available notes found in GMMS");
+                return;
             }
+
             foreach (var note in notesEntity)
             {
                 var adObj = await SungateApi.GetADName(_httpClient, NameTranslator.repo.GetValueOrDefault(note.ENTERED_BY), regNumber);
@@ -271,7 +274,7 @@ namespace StorageServiceMigration
         {
             var jobContactList = new List<CreateJobContactDto>();
 
-            for (int i = 0; i < 4; i++) // we are only mapping 5 people.. since thats in the datamap
+            for (int i = 0; i < 4; i++)
             {
                 var dictionaryValue = string.Empty;
                 var contactType = string.Empty;
@@ -354,8 +357,8 @@ namespace StorageServiceMigration
 
         private static async Task<int> addStorageJob(Move move, string regNumber)
         {
-            Console.WriteLine("Creating a job");
-            Trace.WriteLine($"{regNumber}, Creating a job");
+            Console.WriteLine("Creating a job in Arive");
+            Trace.WriteLine($"{regNumber}, Creating a job in Arive");
 
             var url = string.Empty;
 
@@ -388,8 +391,8 @@ namespace StorageServiceMigration
             var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, response.BilltoId, response.BilltoType);
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
-            Console.WriteLine($"Job added {parsedResponse}");
-            Trace.WriteLine($"{regNumber}, Job added {parsedResponse}");
+            Console.WriteLine($"Job created {parsedResponse}");
+            Trace.WriteLine($"{regNumber}, Job created {parsedResponse}");
             return int.Parse(parsedResponse);
         }
 
@@ -398,7 +401,7 @@ namespace StorageServiceMigration
         private static async Task RetrieveJobsAccountAndVendor()
         {
             Console.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
-            //Trace.WriteLine("Retrieving Existing Accounts and Vendors from Jobs");
+
             try
             {
                 using (var context = new JobDbContext(JobsDbAccess.connectionString))
@@ -464,9 +467,8 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 //movesToImport.Add("274486");
-                movesToImport.Add("274527"); // GOOD one to import according to heather
-                //movesToImport.Add("266185"); // missing account
-                //movesToImport.Add("270059"); // bill to is transferee
+                //movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("106417");
             }
             else
             {

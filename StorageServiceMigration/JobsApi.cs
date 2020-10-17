@@ -178,7 +178,7 @@ namespace StorageServiceMigration
 
                 modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
                 modifiedObj.BillToId = legacyJC.VendorID;
-                modifiedObj.BillToType = legacyJC.BillToLabel;
+                modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
                 modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
@@ -189,8 +189,8 @@ namespace StorageServiceMigration
 
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId, string regNumber)
         {
-            Console.WriteLine("Creating Storage SSO");
-            Trace.WriteLine($"{regNumber}, Creating Storage SSO");
+            Console.WriteLine("Creating Storage Service");
+            Trace.WriteLine($"{regNumber}, Creating Storage Service");
 
             var url = $"/{jobId}/superServices/order";
             var model = new CreateSuperServiceOrderRequest { SuperServiceId = 4 };
@@ -314,7 +314,12 @@ namespace StorageServiceMigration
             modifiedObj.VendorId = vendorEntity?.Id;
             modifiedObj.StorageCostRate = legacyStorageEntity.COST;
             modifiedObj.StorageCostUnit = legacyStorageEntity.DELY_DOCS;
-            modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_COST * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
+
+            if (icRecord != null)
+            {
+                modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_COST * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
+            }
+
             modifiedObj.InsuranceCostUnit = "Monthly";
 
             Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
@@ -375,7 +380,12 @@ namespace StorageServiceMigration
             modifiedObj.BillingCycle = legacyStorageEntity.PORT_IN;
             modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
-            modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_RATE * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
+
+            if (icRecord != null)
+            {
+                modifiedObj.InsuranceCostRate = Math.Round((icRecord.PREMIUM_RATE * (icRecord.TOTAL_INSURANCE / 1000)).GetValueOrDefault(), 2);
+            }
+
             modifiedObj.InsuranceCostUnit = "Monthly";
 
             Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");

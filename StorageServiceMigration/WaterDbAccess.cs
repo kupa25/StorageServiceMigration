@@ -17,8 +17,8 @@ namespace StorageServiceMigration
         {
             Trace.WriteLine($"{regNumber},  StartTime: {DateTime.Now}");
 
-            Console.WriteLine($"Retrieving Legacy move {regNumber}");
-            Trace.WriteLine($"{regNumber}, Retrieving Legacy move {regNumber}");
+            Console.WriteLine($"Retrieving GMMS move {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving GMMS move {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
@@ -54,8 +54,10 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var notes = await context.Notes.AsNoTracking()
-                   .Where(n => n.TABLE_ID == regNumber && n.TABLE_NAME.Equals("PROMPTS")
-                               && n.DATE_COMPLETED == null).ToListAsync();
+                   .Where(n => n.TABLE_ID == regNumber &&
+                               !string.IsNullOrEmpty(n.TABLE_NAME) &&
+                               n.TABLE_NAME.Equals("PROMPTS") &&
+                               n.DATE_COMPLETED == null).ToListAsync();
 
                     var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();
                     return result;
@@ -79,7 +81,7 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var notes = await context.Notes.AsNoTracking()
-                   .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
+                   .Where(n => n.TABLE_ID == regNumber && !string.IsNullOrEmpty(n.TABLE_NAME) && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
 
                     var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();
                     return result;
@@ -88,7 +90,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                Trace.WriteLine(ex);
+                Trace.WriteLine(ex.Message);
             }
 
             return null;
