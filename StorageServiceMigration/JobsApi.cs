@@ -148,17 +148,6 @@ namespace StorageServiceMigration
                 modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
-
-                //if (legacyJC.DATE_BILLED != null)
-                //{
-                //    await JobsDbAccess.ChangePayableItemStatus(PayableItemStatusIdentifier.VOID, original.Id, regNumber);
-
-                //    // if check wirenumber is there we have to create a vendor invoice record
-                //    //if (!string.IsNullOrEmpty(legacyJC.CHECK))
-                //    //{
-                //    //    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID);
-                //    //}
-                //}
             }
         }
 
@@ -191,13 +180,6 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
-
-                //if (legacyJC.DATE_BILLED != null)
-                //{
-                //    await JobsDbAccess.ChangeBillableItemStatus(BillableItemStatusIdentifier.VOID, original.Id, regNumber);
-
-                //    // if check wirenumber is there we have to create a vendor invoice record
-                //}
             }
         }
 
