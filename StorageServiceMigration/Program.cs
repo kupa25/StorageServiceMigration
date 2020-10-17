@@ -29,11 +29,15 @@ namespace StorageServiceMigration
             SetMovesToImport(loadAllRecords);
             await RetrieveJobsAccountAndVendor();
 
+            int counter = 0;
             foreach (var regNumber in movesToImport)
             {
                 try
                 {
                     Console.WriteLine("-----------------------------------------------------------------------------------");
+                    Console.WriteLine($"Processing { ++counter} records of {movesToImport.Count} to import");
+
+                    Trace.WriteLine($"{regNumber}, ");
                     Trace.WriteLine($"{regNumber}, -----------------------------------------------------------------------------------");
 
                     await SungateApi.setApiAccessTokenAsync(_httpClient);
@@ -118,6 +122,9 @@ namespace StorageServiceMigration
                     //Add Prompts
                     await AddPromptsFromGmmsToArive(move, jobId, regNumber);
 
+                    decimal percentage = counter * 100 / movesToImport.Count;
+
+                    Console.WriteLine($"{ Math.Round(percentage, 2)}% Completed ");
                     Trace.WriteLine($"{regNumber}, EndTime: {DateTime.Now}");
                 }
                 catch (Exception ex)
