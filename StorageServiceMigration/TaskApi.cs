@@ -11,8 +11,8 @@ namespace StorageServiceMigration
 {
     public static class TaskApi
     {
-        //private static string _tasksBaseUrl = "https://daue2helixtaskwa01.azurewebsites.net/api/v1/";
-        private static string _tasksBaseUrl = "https://localhost:44366/api/v1/";
+        private static string _tasksBaseUrl = "https://daue2helixtaskwa01.azurewebsites.net/api/v1/";
+        //private static string _tasksBaseUrl = "https://localhost:44366/api/v1/";
 
         #region Task Api call
 

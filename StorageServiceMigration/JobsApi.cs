@@ -25,8 +25,8 @@ namespace StorageServiceMigration
 {
     public static class JobsApi
     {
-        //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
-        private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
+        private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
 
         private static List<BillableItemType> billableItemTypes = new List<BillableItemType>();
 

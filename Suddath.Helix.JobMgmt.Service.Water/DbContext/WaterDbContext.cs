@@ -21,8 +21,8 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseOracle(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=watersandbox.sudco.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL9i)));User Id=comapp_user;Password=comapp7457;Validate Connection=true");
-            //optionsBuilder.UseOracle(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=water.sudco.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL9i)));User Id=comapp_user;Password=comapp7457;Validate Connection=true");
+            //optionsBuilder.UseOracle(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=watersandbox.sudco.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL9i)));User Id=comapp_user;Password=comapp7457;Validate Connection=true");
+            optionsBuilder.UseOracle(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=water.sudco.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL9i)));User Id=comapp_user;Password=comapp7457;Validate Connection=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
