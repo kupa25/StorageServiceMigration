@@ -123,7 +123,6 @@ namespace StorageServiceMigration
             Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
 
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
-
             foreach (var legacyJC in paymentSends)
             {
                 var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);

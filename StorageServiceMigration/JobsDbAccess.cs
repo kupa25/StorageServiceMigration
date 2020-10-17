@@ -104,12 +104,16 @@ namespace StorageServiceMigration
                 {
                     SuperServiceOrderId = superServiceOrderId,
                     VendorInvoiceNumber = iNVOICE_NUMBER,
-                    VendorInvoiceDate = dATE_PAID.GetValueOrDefault(DateTime.UtcNow),
+                    LastPaidDate = dATE_PAID.GetValueOrDefault(),
                     GPDocNum = "Migration",
                     LastPaidCheckNumber = cHECK
                 };
 
                 context.VendorInvoice.Add(vendorInvoice);
+                context.SaveChanges();
+
+                var piEntity = context.PayableItem.Find(id);
+                piEntity.VendorInvoiceId = vendorInvoice.Id;
                 context.SaveChanges();
             }
         }
