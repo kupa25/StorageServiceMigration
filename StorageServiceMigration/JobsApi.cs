@@ -162,6 +162,7 @@ namespace StorageServiceMigration
 
             var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
 
+            int invoiceCounter = 0;
             foreach (var legacyJC in paymentReceived)
             {
                 var original = await PostToJobsApi<CreateBillableItemResponse>(httpClient, url, null, regNumber);
@@ -190,9 +191,9 @@ namespace StorageServiceMigration
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
 
-                if (legacyJC.DATE_PAID != null)
+                if (legacyJC.DATE_RECEIVED != null)
                 {
-                    await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
+                    await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, string.Empty, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_RECEIVED, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
                 }
             }
         }

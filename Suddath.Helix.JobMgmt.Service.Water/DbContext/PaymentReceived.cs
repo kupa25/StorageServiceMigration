@@ -24,16 +24,12 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public DateTime? ACCTG_DATE { get; set; }
         public decimal? ADJ_EST_AMOUNT { get; set; }
         public DateTime? DATE_RECEIVED { get; set; }
-        public DateTime? DATE_PAID { get; set; }
 
         [NotMapped]
         public int? VendorID { get; set; }
 
         [NotMapped]
         public string BillToLabel { get; set; }
-
-        [Column("CHECK#")]
-        public string CHECK { get; set; }
 
         [Column("INVOICE#")]
         public string INVOICE_NUMBER { get; set; }
