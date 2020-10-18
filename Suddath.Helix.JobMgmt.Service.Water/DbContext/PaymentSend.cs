@@ -20,6 +20,10 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public decimal? ESTIMATED_AMOUNT { get; set; }
         public decimal? AMOUNT { get; set; }
         public DateTime? DATE_BILLED { get; set; }
+        public DateTime? ACTUAL_POSTED { get; set; }
+        public DateTime? ACCTG_DATE { get; set; }
+        public decimal? ADJ_EST_AMOUNT { get; set; }
+        public DateTime? DATE_RECEIVED { get; set; }
         public DateTime? DATE_PAID { get; set; }
 
         [NotMapped]
@@ -33,9 +37,5 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
 
         [Column("INVOICE#")]
         public string INVOICE_NUMBER { get; set; }
-
-        public DateTime? ACTUAL_POSTED { get; set; }
-        public DateTime? ACCTG_DATE { get; set; }
-        public decimal? ADJ_EST_AMOUNT { get; set; }
     }
 }

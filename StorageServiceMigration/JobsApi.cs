@@ -189,6 +189,11 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
 
                 await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                if (legacyJC.DATE_PAID != null)
+                {
+                    await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
+                }
             }
         }
 

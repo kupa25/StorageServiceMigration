@@ -265,5 +265,31 @@ namespace StorageServiceMigration
                 Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
         }
+
+        internal static async Task CreateInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID, DateTime? aCTUAL_POSTED, int superServiceOrderId)
+        {
+            Console.WriteLine($"Adding Invoice Record for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Adding Invoice Record for ");
+
+            using (var context = new JobDbContext(connectionString))
+            {
+                var invoice = new Invoice
+                {
+                    SuperServiceOrderId = superServiceOrderId,
+                    InvoiceNumber = iNVOICE_NUMBER,
+                    LastPaidDate = dATE_PAID.GetValueOrDefault(),
+                    LastPaidCheckNumber = cHECK,
+                    BillToType = "Account",
+                    InvoiceDate = aCTUAL_POSTED.GetValueOrDefault(DateTime.UtcNow)
+                };
+
+                context.Invoice.Add(invoice);
+                context.SaveChanges();
+
+                var piEntity = context.BillableItem.Find(id);
+                piEntity.InvoiceId = invoice.Id;
+                context.SaveChanges();
+            }
+        }
     }
 }

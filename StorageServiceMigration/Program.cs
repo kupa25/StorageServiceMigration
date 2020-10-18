@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -122,7 +122,7 @@ namespace StorageServiceMigration
                     //Add Prompts
                     await AddPromptsFromGmmsToArive(move, jobId, regNumber);
 
-                    decimal percentage = counter * 100 / movesToImport.Count;
+                    decimal percentage = (decimal)(counter * 100) / movesToImport.Count;
 
                     Console.WriteLine($"{ Math.Round(percentage, 2)}% Completed ");
                     Trace.WriteLine($"{regNumber}, EndTime: {DateTime.Now}");
