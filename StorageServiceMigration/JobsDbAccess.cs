@@ -269,7 +269,7 @@ namespace StorageServiceMigration
         internal static async Task CreateInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID, DateTime? aCTUAL_POSTED, int superServiceOrderId)
         {
             Console.WriteLine($"Adding Invoice Record for {regNumber}");
-            Trace.WriteLine($"{regNumber}, Adding Invoice Record for ");
+            Trace.WriteLine($"{regNumber}, Adding Invoice Record ");
 
             using (var context = new JobDbContext(connectionString))
             {

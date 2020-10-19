@@ -194,6 +194,7 @@ namespace StorageServiceMigration
                 if (legacyJC.DATE_RECEIVED != null)
                 {
                     await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, string.Empty, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_RECEIVED, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
+                    Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                 }
             }
         }
