@@ -48,7 +48,7 @@ namespace StorageServiceMigration
         internal static async Task<List<Notes>> RetrievePrompts(string regNumber)
         {
             Console.WriteLine($"Retrieving Prompts for {regNumber}");
-            Trace.WriteLine($"{regNumber}, Prompts Notes for {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving Prompts for {regNumber}");
             try
             {
                 using (var context = new WaterDbContext())
