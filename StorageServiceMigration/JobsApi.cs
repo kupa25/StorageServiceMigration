@@ -119,83 +119,101 @@ namespace StorageServiceMigration
         internal static async Task CreateAndUpdateJobCostExpense(HttpClient httpClient, List<Vendor> _vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentSent> paymentSends,
     List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
         {
-            Console.WriteLine("Starting JC Expense creation");
-            Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
-
-            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
-            foreach (var legacyJC in paymentSends)
+            try
             {
-                var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
-                var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
-                var duplicateObjString = originalString;
+                Console.WriteLine("Starting JC Expense creation");
+                Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
 
-                var originalObj = Convert<SingleResult<GetPayableItemResponse>>(originalString, regNumber).Data;
-                var modifiedObj = Convert<SingleResult<GetPayableItemResponse>>(duplicateObjString, regNumber).Data;
-
-                if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
+                foreach (var legacyJC in paymentSends)
                 {
-                    modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                    var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
+                    var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
+                    var duplicateObjString = originalString;
+
+                    var originalObj = Convert<SingleResult<GetPayableItemResponse>>(originalString, regNumber).Data;
+                    var modifiedObj = Convert<SingleResult<GetPayableItemResponse>>(duplicateObjString, regNumber).Data;
+
+                    if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                    {
+                        modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                    }
+
+                    modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
+                    modifiedObj.BillFromId = legacyJC.VendorID;
+                    modifiedObj.BillFromType = legacyJC.BillToLabel;
+                    modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT;
+                    modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
+                    modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
+                    modifiedObj.CheckWireNumber = legacyJC.CHECK;
+                    modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
+
+                    await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                    if (legacyJC.DATE_PAID != null)
+                    {
+                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                    }
                 }
-
-                modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
-                modifiedObj.BillFromId = legacyJC.VendorID;
-                modifiedObj.BillFromType = legacyJC.BillToLabel;
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountVendorCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT;
-                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
-                modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
-                modifiedObj.CheckWireNumber = legacyJC.CHECK;
-                modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
-
-                await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
-
-                if (legacyJC.DATE_PAID != null)
-                {
-                    await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while updating JC Expense section");
+                Trace.WriteLine($"{regNumber}, Error while updating JC Expense section");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
         }
 
         internal static async Task CreateAndUpdateJobCostRevenue(HttpClient httpClient, List<Vendor> vendor, List<Suddath.Helix.JobMgmt.Services.Water.DbContext.PaymentReceived> paymentReceived, List<BillableItemType> billableItemTypes, int jobId, ServiceOrder serviceOrder, string regNumber)
         {
-            Console.WriteLine("Starting JC Revenue creation");
-            Trace.WriteLine($"{regNumber}, Starting JC Revenue creation");
-
-            var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
-
-            int invoiceCounter = 0;
-            foreach (var legacyJC in paymentReceived)
+            try
             {
-                var original = await PostToJobsApi<CreateBillableItemResponse>(httpClient, url, null, regNumber);
-                var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
-                var duplicateObjString = originalString;
+                Console.WriteLine("Starting JC Revenue creation");
+                Trace.WriteLine($"{regNumber}, Starting JC Revenue creation");
 
-                var originalObj = Convert<SingleResult<GetBillableItemResponse>>(originalString, regNumber).Data;
-                var modifiedObj = Convert<SingleResult<GetBillableItemResponse>>(duplicateObjString, regNumber).Data;
+                var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
 
-                if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                int invoiceCounter = 0;
+                foreach (var legacyJC in paymentReceived)
                 {
-                    modifiedObj.BillableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                    var original = await PostToJobsApi<CreateBillableItemResponse>(httpClient, url, null, regNumber);
+                    var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
+                    var duplicateObjString = originalString;
+
+                    var originalObj = Convert<SingleResult<GetBillableItemResponse>>(originalString, regNumber).Data;
+                    var modifiedObj = Convert<SingleResult<GetBillableItemResponse>>(duplicateObjString, regNumber).Data;
+
+                    if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
+                    {
+                        modifiedObj.BillableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                    }
+
+                    modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
+
+                    if (modifiedObj.BillToId != legacyJC.VendorID)
+                    {
+                        modifiedObj.BillToId = legacyJC.VendorID;
+                        modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
+                    }
+
+                    modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();
+                    modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
+                    modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
+
+                    await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
+
+                    if (legacyJC.DATE_RECEIVED != null)
+                    {
+                        await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, string.Empty, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_RECEIVED, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
+                        Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
+                    }
                 }
-
-                modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
-
-                if (modifiedObj.BillToId != legacyJC.VendorID)
-                {
-                    modifiedObj.BillToId = legacyJC.VendorID;
-                    modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
-                }
-
-                modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();
-                modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountBillingCurrency = legacyJC.AMOUNT.GetValueOrDefault();
-                modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
-
-                await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
-
-                if (legacyJC.DATE_RECEIVED != null)
-                {
-                    await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, string.Empty, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_RECEIVED, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
-                    Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error while updating JC Revenue section");
+                Trace.WriteLine($"{regNumber}, Error while updating JC Revenue section");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
         }
 
@@ -223,89 +241,107 @@ namespace StorageServiceMigration
 
         internal static async Task UpdateOriginMilestone(HttpClient httpClient, int serviceOrderId, Vendor oaVendor, Move move, int jobId, string regNumber)
         {
-            Console.WriteLine("Updating OA");
-            Trace.WriteLine($"{regNumber}, Updating OA");
-
-            if (oaVendor == null)
+            try
             {
-                Console.WriteLine("OA Vendor not found");
-                Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                Console.WriteLine("Updating OA");
+                Trace.WriteLine($"{regNumber}, Updating OA");
+
+                if (oaVendor == null)
+                {
+                    Console.WriteLine("OA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                }
+
+                var origin = move.OriginAgent;
+                var storageEntity = move.StorageAgent;
+
+                var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
+
+                var original = await CallJobsApi(httpClient, soUrl, null);
+                var copyOfOriginal = original;
+
+                var origObj = Convert<GetServiceOrderOriginAgentResponse>(original, regNumber);
+                var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal, regNumber);
+
+                modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
+                modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
+                modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
+                modifiedObj.NetWeightLb = move.NET_WEIGHT;
+
+                if (oaVendor == null)
+                {
+                    Console.WriteLine("OA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                }
+                else
+                {
+                    modifiedObj.VendorId = oaVendor.Id;
+                }
+
+                var patch = new JsonPatchDocument();
+                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+                await Patch(httpClient, soUrl, patch);
             }
-
-            var origin = move.OriginAgent;
-            var storageEntity = move.StorageAgent;
-
-            var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=OA";
-
-            var original = await CallJobsApi(httpClient, soUrl, null);
-            var copyOfOriginal = original;
-
-            var origObj = Convert<GetServiceOrderOriginAgentResponse>(original, regNumber);
-            var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal, regNumber);
-
-            modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
-            modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
-            modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
-            modifiedObj.NetWeightLb = move.NET_WEIGHT;
-
-            if (oaVendor == null)
+            catch (Exception ex)
             {
-                Console.WriteLine("OA Vendor not found");
-                Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                Console.WriteLine("Error while updating OA");
+                Trace.WriteLine($"{regNumber}, Error while updating OA");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
-            else
-            {
-                modifiedObj.VendorId = oaVendor.Id;
-            }
-
-            var patch = new JsonPatchDocument();
-            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
-
-            await Patch(httpClient, soUrl, patch);
         }
 
         internal static async Task UpdateDestinationMilestone(HttpClient httpClient, int serviceOrderId, Vendor daVendor, Move move, int jobId, string regNumber)
         {
-            Console.WriteLine("Updating DA");
-            Trace.WriteLine($"{regNumber}, Updating DA");
-
-            var destination = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
-
-            var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=DA";
-
-            var original = await CallJobsApi(httpClient, soUrl, null);
-            var copyOfOriginal = original;
-
-            var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original, regNumber);
-            var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal, regNumber);
-
-            if (daVendor == null)
+            try
             {
-                Console.WriteLine("DA Vendor not found");
-                Trace.WriteLine($"{regNumber}, DA Vendor not found");
+                Console.WriteLine("Updating DA");
+                Trace.WriteLine($"{regNumber}, Updating DA");
+
+                var destination = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
+
+                var soUrl = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=DA";
+
+                var original = await CallJobsApi(httpClient, soUrl, null);
+                var copyOfOriginal = original;
+
+                var origObj = Convert<GetServiceOrderDestinationAgentResponse>(original, regNumber);
+                var modifiedObj = Convert<GetServiceOrderDestinationAgentResponse>(copyOfOriginal, regNumber);
+
+                if (daVendor == null)
+                {
+                    Console.WriteLine("DA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, DA Vendor not found");
+                }
+                else
+                {
+                    modifiedObj.VendorId = daVendor.Id;
+                }
+
+                var partialDeliveryDate = DateTime.UtcNow;
+                if (destination.PartialDeliveryDateIn.HasValue)
+                {
+                    partialDeliveryDate = destination.PartialDeliveryDateIn.Value;
+                }
+                else
+                {
+                    Trace.WriteLine($"{regNumber}, Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
+                }
+
+                modifiedObj.ActualDeliveryStartDate = modifiedObj.ActualDeliveryEndDate = partialDeliveryDate;
+                modifiedObj.TotalWeightDeliveredLb = destination.SurveyWeight;
+
+                var patch = new JsonPatchDocument();
+                FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
+
+                await Patch(httpClient, soUrl, patch);
             }
-            else
+            catch (Exception ex)
             {
-                modifiedObj.VendorId = daVendor.Id;
+                Console.WriteLine("Error while updating DA");
+                Trace.WriteLine($"{regNumber}, Error while updating DA");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
-
-            var partialDeliveryDate = DateTime.UtcNow;
-            if (destination.PartialDeliveryDateIn.HasValue)
-            {
-                partialDeliveryDate = destination.PartialDeliveryDateIn.Value;
-            }
-            else
-            {
-                Trace.WriteLine($"{regNumber}, Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
-            }
-
-            modifiedObj.ActualDeliveryStartDate = modifiedObj.ActualDeliveryEndDate = partialDeliveryDate;
-            modifiedObj.TotalWeightDeliveredLb = destination.SurveyWeight;
-
-            var patch = new JsonPatchDocument();
-            FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
-
-            await Patch(httpClient, soUrl, patch);
         }
 
         #region Storage
@@ -420,72 +456,81 @@ namespace StorageServiceMigration
 
         internal static async Task UpdateICtMilestone(HttpClient httpClient, int serviceOrderId, Move move, int jobId, List<InsuranceClaims> legacyInsuranceClaims, string regNumber)
         {
-            Console.WriteLine("Updating IC");
-            Trace.WriteLine($"{regNumber}, Updating IC");
-
-            var url = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=IC";
-
-            var original = await CallJobsApi(httpClient, url, null);
-            var copyOfOriginal = original;
-
-            var origObj = Convert<GetServiceOrderInsuranceClaimResponse>(original, regNumber);
-            var modifiedObj = Convert<GetServiceOrderInsuranceClaimResponse>(copyOfOriginal, regNumber);
-
-            var record = legacyInsuranceClaims.FirstOrDefault();
-
-            if (record == null)
+            try
             {
-                Console.WriteLine($"{regNumber}, Insurance record not found in GMMS");
-                Trace.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+                Console.WriteLine("Updating IC");
+                Trace.WriteLine($"{regNumber}, Updating IC");
 
-                return;
+                var url = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=IC";
+
+                var original = await CallJobsApi(httpClient, url, null);
+                var copyOfOriginal = original;
+
+                var origObj = Convert<GetServiceOrderInsuranceClaimResponse>(original, regNumber);
+                var modifiedObj = Convert<GetServiceOrderInsuranceClaimResponse>(copyOfOriginal, regNumber);
+
+                var record = legacyInsuranceClaims.FirstOrDefault();
+
+                if (record == null)
+                {
+                    Console.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+                    Trace.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+
+                    return;
+                }
+
+                switch (record.CARRIER)
+                {
+                    case "3892":
+                        modifiedObj.InsuranceCarrierName = "Pac Global Insurance";
+                        break;
+
+                    case "CL4":
+                        modifiedObj.InsuranceCarrierName = "Account";
+                        break;
+
+                    case "CL5":
+                        modifiedObj.InsuranceCarrierName = "Agent";
+                        break;
+
+                    default:
+                        Trace.WriteLine($"{regNumber}, Couldn't get the CarrierName");
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(record.TYPE_OF_POLICY) && record.TYPE_OF_POLICY.Equals("FULL", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    modifiedObj.InsuranceType = "Full Value Inventory";
+                }
+
+                modifiedObj.Declaration = record.POLICY_NUMBER;
+                modifiedObj.HHGAmount = record.REQ_AMOUNT;
+                modifiedObj.HighValueAmount = record.HIGH_VALUE_AMOUNT;
+                modifiedObj.VehicleAmount = record.VEHICLE_AMOUNT;
+                modifiedObj.TotalInsuranceAmount = record.REQ_AMOUNT.GetValueOrDefault() + record.HIGH_VALUE_AMOUNT.GetValueOrDefault() + record.VEHICLE_AMOUNT.GetValueOrDefault();
+                modifiedObj.DeductibleAmount = record.DEDUCTIBLE;
+                modifiedObj.QuotedRate = record.PREMIUM_RATE;
+                modifiedObj.PayableRate = record.PREMIUM_COST;
+
+                if (!string.IsNullOrEmpty(record.PREMIUM_COST_TYPE) && record.PREMIUM_COST_TYPE.Equals("THOUSAND", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    modifiedObj.PayableRateType = "Per 1000 Insured";
+                }
+
+                //******************************** CLAIMS SECTION ****************
+
+                modifiedObj.ClaimNumber = record.CLAIM_NUMBER;
+                modifiedObj.ClaimedAmount = record.AMOUNT_PAID;
+                modifiedObj.ClaimantDocsCreatedDate = record.CLAIMANT_DOCS;
+
+                await GenerateAndPatch(httpClient, url, origObj, modifiedObj);
             }
-
-            switch (record.CARRIER)
+            catch (Exception ex)
             {
-                case "3892":
-                    modifiedObj.InsuranceCarrierName = "Pac Global Insurance";
-                    break;
-
-                case "CL4":
-                    modifiedObj.InsuranceCarrierName = "Account";
-                    break;
-
-                case "CL5":
-                    modifiedObj.InsuranceCarrierName = "Agent";
-                    break;
-
-                default:
-                    Trace.WriteLine($"{regNumber}, Couldn't get the CarrierName");
-                    break;
+                Console.WriteLine("Error while updating IC");
+                Trace.WriteLine($"{regNumber}, Error while updating IC");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
-
-            if (!string.IsNullOrEmpty(record.TYPE_OF_POLICY) && record.TYPE_OF_POLICY.Equals("FULL", StringComparison.InvariantCultureIgnoreCase))
-            {
-                modifiedObj.InsuranceType = "Full Value Inventory";
-            }
-
-            modifiedObj.Declaration = record.POLICY_NUMBER;
-            modifiedObj.HHGAmount = record.REQ_AMOUNT;
-            modifiedObj.HighValueAmount = record.HIGH_VALUE_AMOUNT;
-            modifiedObj.VehicleAmount = record.VEHICLE_AMOUNT;
-            modifiedObj.TotalInsuranceAmount = record.REQ_AMOUNT.GetValueOrDefault() + record.HIGH_VALUE_AMOUNT.GetValueOrDefault() + record.VEHICLE_AMOUNT.GetValueOrDefault();
-            modifiedObj.DeductibleAmount = record.DEDUCTIBLE;
-            modifiedObj.QuotedRate = record.PREMIUM_RATE;
-            modifiedObj.PayableRate = record.PREMIUM_COST;
-
-            if (!string.IsNullOrEmpty(record.PREMIUM_COST_TYPE) && record.PREMIUM_COST_TYPE.Equals("THOUSAND", StringComparison.InvariantCultureIgnoreCase))
-            {
-                modifiedObj.PayableRateType = "Per 1000 Insured";
-            }
-
-            //******************************** CLAIMS SECTION ****************
-
-            modifiedObj.ClaimNumber = record.CLAIM_NUMBER;
-            modifiedObj.ClaimedAmount = record.AMOUNT_PAID;
-            modifiedObj.ClaimantDocsCreatedDate = record.CLAIMANT_DOCS;
-
-            await GenerateAndPatch(httpClient, url, origObj, modifiedObj);
         }
 
         #endregion Update MileStone

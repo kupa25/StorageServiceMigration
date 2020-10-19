@@ -110,9 +110,18 @@ namespace StorageServiceMigration
 
                     var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
 
-                    await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
-                    await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
-                    await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                    try
+                    {
+                        await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
+                        await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
+                        await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error while trying to change JC status manually");
+                        Trace.WriteLine($"{regNumber}, Error while trying to change JC status manually");
+                        Trace.WriteLine($"{regNumber}, {ex.Message}");
+                    }
 
                     #endregion JobCost
 
@@ -149,56 +158,65 @@ namespace StorageServiceMigration
 
         private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee, List<InsuranceClaims> legacyInsuranceClaims)
         {
-            Console.WriteLine("Updating ST");
-            Trace.WriteLine($"{regNumber}, Updating ST");
-
-            var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == move.StorageAgent.VendorNameId);
-            var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
-
-            await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber, legacyInsuranceClaims);
-
-            var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId, regNumber);
-
-            dynamic billTo = null;
-            var billToLabel = string.Empty;
-            billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.StorageAgent.HOW_SENT));
-
-            if (billTo != null)
+            try
             {
-                billToLabel = "Account";
-            }
-            else
-            {
-                billTo = _vendor.FirstOrDefault(ae => ae.Accounting_SI_Code.Equals(move.StorageAgent.HOW_SENT));
+                Console.WriteLine("Updating ST");
+                Trace.WriteLine($"{regNumber}, Updating ST Expense record");
+
+                var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == move.StorageAgent.VendorNameId);
+                var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
+
+                await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber, legacyInsuranceClaims);
+
+                var storageRevId = await JobsApi.AddStorageRevRecord(_httpClient, soId, move, jobId, regNumber);
+
+                dynamic billTo = null;
+                var billToLabel = string.Empty;
+                billTo = _accountEntities.FirstOrDefault(ae => ae.AccountingId.Equals(move.StorageAgent.HOW_SENT));
 
                 if (billTo != null)
                 {
-                    billToLabel = "Vendor";
-                }
-            }
-            if (billTo == null)
-            {
-                //check to see if billto is transferee
-                var NamesRecord = await WaterDbAccess.GetNames(move.StorageAgent.HOW_SENT);
-                if (NamesRecord != null && NamesRecord.FirstName.Equals(transferee.FirstName, StringComparison.CurrentCultureIgnoreCase)
-                    && NamesRecord.LastName.Equals(transferee.LastName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    billTo = transferee;
-                    billToLabel = "Transferee";
+                    billToLabel = "Account";
                 }
                 else
                 {
-                    Console.WriteLine($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
-                    Trace.Write($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                    billTo = _vendor.FirstOrDefault(ae => ae.Accounting_SI_Code.Equals(move.StorageAgent.HOW_SENT));
+
+                    if (billTo != null)
+                    {
+                        billToLabel = "Vendor";
+                    }
                 }
-            }
+                if (billTo == null)
+                {
+                    //check to see if billto is transferee
+                    var NamesRecord = await WaterDbAccess.GetNames(move.StorageAgent.HOW_SENT);
+                    if (NamesRecord != null && NamesRecord.FirstName.Equals(transferee.FirstName, StringComparison.CurrentCultureIgnoreCase)
+                        && NamesRecord.LastName.Equals(transferee.LastName, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        billTo = transferee;
+                        billToLabel = "Transferee";
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                        Trace.Write($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                    }
+                }
 
-            if (!string.IsNullOrEmpty(move.StorageAgent.HOW_SENT) && billTo == null)
+                if (!string.IsNullOrEmpty(move.StorageAgent.HOW_SENT) && billTo == null)
+                {
+                    Trace.WriteLine($"{regNumber}, Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
+                }
+
+                await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel, legacyInsuranceClaims);
+            }
+            catch (Exception ex)
             {
-                Trace.WriteLine($"{regNumber}, Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
+                Console.WriteLine("Error while updating ST");
+                Trace.WriteLine($"{regNumber}, Error while updating ST");
+                Trace.WriteLine($"{regNumber}, {ex.Message}");
             }
-
-            await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel, legacyInsuranceClaims);
         }
 
         private static async Task AddPromptsFromGmmsToArive(Move move, int jobId, string regNumber)
