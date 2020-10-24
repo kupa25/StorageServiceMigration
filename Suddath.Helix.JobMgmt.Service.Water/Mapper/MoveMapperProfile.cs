@@ -59,8 +59,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 ;
 
-            CreateMap<CreateJobNoteRequest, Infrastructure.Domain.Note>()
-                .ForMember(d => d.DateCreated, opt => opt.MapFrom(src => DateTime.UtcNow));
+            CreateMap<CreateJobNoteRequest, Infrastructure.Domain.Note>();
         }
     }
 }
