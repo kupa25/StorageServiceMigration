@@ -18,7 +18,7 @@ namespace StorageServiceMigration
             Trace.WriteLine($"{regNumber},  StartTime: {DateTime.Now}");
 
             Console.WriteLine($"Retrieving GMMS move {regNumber}");
-            Trace.WriteLine($"{regNumber}, Retrieving GMMS move {regNumber}");
+            Trace.WriteLine($"{regNumber}, Retrieving GMMS move");
             try
             {
                 using (var context = new WaterDbContext())
@@ -39,7 +39,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"No moves retrieved for {regNumber}", ex);
-                Trace.WriteLine($"{regNumber}, No moves retrieved for {regNumber}");
+                Trace.WriteLine($"{regNumber}, No moves retrieved");
             }
 
             return null;

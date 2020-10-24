@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            //loadAllRecords = true;
+            loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -199,8 +199,8 @@ namespace StorageServiceMigration
                     }
                     else
                     {
-                        Console.WriteLine($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
-                        Trace.Write($"{regNumber}, Cant find the billto for Storage, so we are defaulting it");
+                        Console.WriteLine($"{regNumber}, Cant find the billto for Storage so we are defaulting it");
+                        Trace.Write($"{regNumber}, Cant find the billto for Storage so we are defaulting it");
                     }
                 }
 
@@ -324,8 +324,8 @@ namespace StorageServiceMigration
                             }
                             else
                             {
-                                Console.WriteLine("Defaulting MoveConsultant to Angela La Fronza, due to bad data");
-                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Angela La Fronza, due to bad data");
+                                Console.WriteLine("Defaulting MoveConsultant to Angela La Fronza due to bad data");
+                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Angela La Fronza due to bad data");
                                 nameToUse = "Angela.Lafronza";
                             }
                         }
