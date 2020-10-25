@@ -37,6 +37,13 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
             var translatedRevType = string.Empty;
 
             RevenueTypeTranslator.repo.TryGetValue(entity.SHIPMENT_TYPE.Trim(), out translatedRevType);
+
+            if (string.IsNullOrEmpty(translatedRevType))
+            {
+                Trace.WriteLine($"{entity.RegNumber}, Defaulting Revenue type because ShipmentType on Move Table isn't supported");
+                RevenueTypeTranslator.repo.TryGetValue("HOUSE ACCOUNT", out translatedRevType);
+            }
+
             obj.Job.RevenueType = translatedRevType;
 
             return obj;
