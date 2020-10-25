@@ -24,7 +24,6 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var moves = await context.Moves
-                   .Include(v => v.Profile)
                    .Include(v => v.Account)
                    .Include(v => v.Names)
                    .Include(v => v.MoveItems)
@@ -81,7 +80,6 @@ namespace StorageServiceMigration
                 using (var context = new WaterDbContext())
                 {
                     var notes = await context.Notes.AsNoTracking()
-                    //.Where(n => n.TABLE_ID == regNumber && !string.IsNullOrEmpty(n.TABLE_NAME) && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
                     .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
 
                     var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();

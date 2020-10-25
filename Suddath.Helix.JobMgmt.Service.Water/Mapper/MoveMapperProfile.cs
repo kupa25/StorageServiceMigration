@@ -36,7 +36,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
                 .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src.ENTERED_BY))
                 .ForMember(d => d.Category, opt => opt.MapFrom(src => MoveMappers.ToNotesCategory(src)))
                 .ForMember(d => d.IsCritical, opt => opt.MapFrom(src => src.CATEGORY.Equals("CRITICAL")))
-                .ForMember(d => d.DateCreated, opt => opt.MapFrom(src => src.DATE_ENTERED))
+                .ForMember(d => d.DateCreated, opt => opt.MapFrom(src => src.DATE_ENTERED.GetValueOrDefault(DateTime.Now)))
                 ;
 
             CreateMap<Notes, CreateJobTaskRequest>()

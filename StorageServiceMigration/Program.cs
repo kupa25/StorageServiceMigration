@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -488,9 +488,8 @@ namespace StorageServiceMigration
         {
             if (!loadAllRecords)
             {
-                //movesToImport.Add("274486");
-                movesToImport.Add("274527"); // GOOD one to import according to heather
-                //movesToImport.Add("106417");
+                //movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("185977");
             }
             else
             {

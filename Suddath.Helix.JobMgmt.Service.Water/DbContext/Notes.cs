@@ -14,7 +14,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public string NOTE { get; set; }
         public DateTime? CALLBACK_DATE { get; set; }
         public string ENTERED_BY { get; set; }
-        public DateTime DATE_ENTERED { get; set; }
+        public DateTime? DATE_ENTERED { get; set; }
         public string CATEGORY { get; set; }
         public DateTime? DATE_COMPLETED { get; set; }
 

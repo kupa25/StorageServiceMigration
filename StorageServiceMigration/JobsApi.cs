@@ -279,6 +279,21 @@ namespace StorageServiceMigration
                     modifiedObj.VendorId = oaVendor.Id;
                 }
 
+                var actualPackDate = storageEntity.SITinDate;
+
+                if (actualPackDate == null)
+                {
+                    Trace.WriteLine($"{regNumber}, Deafulting ActualPackDate because SIT_IN it was not found for the OA record");
+                    actualPackDate = DateTime.Now;
+                }
+                else
+                {
+                    Trace.WriteLine($"{regNumber}, Setting ActualPackDate from SIT_IN date For JC purposes");
+                }
+
+                modifiedObj.ActualPackStartDate = actualPackDate;
+                modifiedObj.ActualPackEndDate = actualPackDate;
+
                 var patch = new JsonPatchDocument();
                 FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
 
