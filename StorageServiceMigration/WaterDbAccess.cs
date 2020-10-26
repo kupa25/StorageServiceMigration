@@ -82,7 +82,8 @@ namespace StorageServiceMigration
                     var notes = await context.Notes.AsNoTracking()
                     .Where(n => n.TABLE_ID == regNumber && !n.TABLE_NAME.Equals("PROMPTS")).ToListAsync();
 
-                    var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE)).ToList();
+                    var result = notes.Where(n => !string.IsNullOrEmpty(n.NOTE) &&
+                                                  !string.IsNullOrEmpty(n.ENTERED_BY)).ToList();
                     return result;
                 }
             }
