@@ -126,6 +126,8 @@ namespace StorageServiceMigration
                 Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
 
                 var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
+
+                int invoiceCounter = 0;
                 foreach (var legacyJC in paymentSends)
                 {
                     var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
@@ -153,7 +155,8 @@ namespace StorageServiceMigration
 
                     if (legacyJC.DATE_PAID != null)
                     {
-                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                        Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                     }
                 }
             }
