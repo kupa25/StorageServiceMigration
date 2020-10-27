@@ -30,7 +30,6 @@ namespace Suddath.Helix.JobMgmt.Models
             {"DEBBIEK","Debbie Kummoung"},
             {"APLAZA","Andres Plaza"},
             {"NLUONG","Nelly Luong"},
-            {"KATIES","Katie Schiffers"},
             {"ROBERTH","Robert Hammer"},
             {"LISAK","Lisa Karam"},
             {"KLOPEZ","Kirk Lopez"},

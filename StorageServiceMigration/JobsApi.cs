@@ -139,7 +139,9 @@ namespace StorageServiceMigration
 
                     if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
                     {
-                        modifiedObj.PayableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                        var billItemType = billableItemTypes.FirstOrDefault(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2)));
+                        modifiedObj.PayableItemTypeId = billItemType.Id;
+                        Trace.WriteLine($"{regNumber}, Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
                     }
 
                     modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
@@ -149,13 +151,13 @@ namespace StorageServiceMigration
                     modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                     modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
                     modifiedObj.CheckWireNumber = legacyJC.CHECK;
-                    modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
+                    modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter;
 
                     await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
 
                     if (legacyJC.DATE_PAID != null)
                     {
-                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
                         Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                     }
                 }
@@ -189,7 +191,9 @@ namespace StorageServiceMigration
 
                     if (!string.IsNullOrEmpty(legacyJC.ACCOUNT_CODE))
                     {
-                        modifiedObj.BillableItemTypeId = billableItemTypes.Single(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2))).Id;
+                        var billItemType = billableItemTypes.FirstOrDefault(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2)));
+                        modifiedObj.BillableItemTypeId = billItemType.Id;
+                        Trace.WriteLine($"{regNumber}, Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
                     }
 
                     modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
