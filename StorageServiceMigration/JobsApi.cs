@@ -131,6 +131,10 @@ namespace StorageServiceMigration
                 foreach (var legacyJC in paymentSends)
                 {
                     var original = await PostToJobsApi<GetPayableItemResponse>(httpClient, url, null, regNumber);
+
+                    //wipe out any defaulting of bill to information
+                    JobsDbAccess.CleanBillFromInformation(original.Id, regNumber);
+
                     var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
                     var duplicateObjString = originalString;
 
@@ -151,13 +155,13 @@ namespace StorageServiceMigration
                     modifiedObj.ActualAmountUSD = modifiedObj.ActualAmountVendorCurrency = legacyJC.AMOUNT.GetValueOrDefault();
                     modifiedObj.ActualPostedDateTime = legacyJC.ACTUAL_POSTED;
                     modifiedObj.CheckWireNumber = legacyJC.CHECK;
-                    modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter;
+                    modifiedObj.VendorInvoiceNumber = legacyJC.INVOICE_NUMBER;
 
                     await GenerateAndPatch(httpClient, url + $"/{original.Id}", originalObj, modifiedObj);
 
                     if (legacyJC.DATE_PAID != null)
                     {
-                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
+                        await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
                         Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                     }
                 }
@@ -183,6 +187,10 @@ namespace StorageServiceMigration
                 foreach (var legacyJC in paymentReceived)
                 {
                     var original = await PostToJobsApi<CreateBillableItemResponse>(httpClient, url, null, regNumber);
+
+                    //wipe out any defaulting of bill to information
+                    JobsDbAccess.CleanBillToInformation(original.Id, regNumber);
+
                     var originalString = await CallJobsApi(httpClient, url + $"/{original.Id}", null);
                     var duplicateObjString = originalString;
 
@@ -201,7 +209,7 @@ namespace StorageServiceMigration
                     if (modifiedObj.BillToId != legacyJC.VendorID)
                     {
                         modifiedObj.BillToId = legacyJC.VendorID;
-                        modifiedObj.BillToType = legacyJC.BillToLabel + " ";//Forcing a change.. verify if this is true
+                        modifiedObj.BillToType = legacyJC.BillToLabel;
                     }
 
                     modifiedObj.AccrualAmountUSD = modifiedObj.AccrualAmountBillingCurrency = legacyJC.ESTIMATED_AMOUNT.GetValueOrDefault() + legacyJC.ADJ_EST_AMOUNT.GetValueOrDefault();

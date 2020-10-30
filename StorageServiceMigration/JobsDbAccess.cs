@@ -107,7 +107,8 @@ namespace StorageServiceMigration
                     VendorInvoiceNumber = iNVOICE_NUMBER,
                     LastPaidDate = dATE_PAID.GetValueOrDefault(),
                     GPDocNum = "Migration",
-                    LastPaidCheckNumber = cHECK
+                    LastPaidCheckNumber = cHECK,
+                    VendorInvoiceDate = dATE_PAID.GetValueOrDefault(DateTime.UtcNow)
                 };
 
                 context.VendorInvoice.Add(vendorInvoice);
@@ -152,6 +153,31 @@ namespace StorageServiceMigration
             {
                 Console.WriteLine($"Error while marking items void");
                 Trace.WriteLine($"{regNumber}, Error while marking items void");
+            }
+        }
+
+        internal static void CleanBillFromInformation(int id, string regNumber)
+        {
+            Console.WriteLine($"Cleaning BillFrom Information");
+
+            try
+            {
+                using (var context = new JobDbContext(connectionString))
+                {
+                    var billableItem = context.PayableItem.Single(x => x.Id == id);
+
+                    billableItem.BillFromAccountEntityId = null;
+                    billableItem.BillFromTransfereeId = null;
+                    billableItem.BillFromVendorId = null;
+                    billableItem.BillFromType = null;
+
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while cleaning payableitem");
+                Trace.WriteLine($"{regNumber}, Error while cleaning payableitem");
             }
         }
 
@@ -200,6 +226,31 @@ namespace StorageServiceMigration
             }
             catch (Exception ex)
             {
+            }
+        }
+
+        internal static void CleanBillToInformation(int id, string regNumber)
+        {
+            Console.WriteLine($"Cleaning BillTo Information");
+
+            try
+            {
+                using (var context = new JobDbContext(connectionString))
+                {
+                    var billableItem = context.BillableItem.Single(x => x.Id == id);
+
+                    billableItem.BillToAccountEntityId = null;
+                    billableItem.BillToTransfereeId = null;
+                    billableItem.BillToVendorId = null;
+                    billableItem.BillToType = null;
+
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while cleaning billableitem");
+                Trace.WriteLine($"{regNumber}, Error while cleaning billableitem");
             }
         }
 

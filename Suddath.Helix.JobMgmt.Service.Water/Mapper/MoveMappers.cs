@@ -157,19 +157,19 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
 
             if (!string.IsNullOrEmpty(origin.PHONE1))
             {
-                phoneList.Add(new PhoneDto { NationalNumber = origin.PHONE1 });
+                phoneList.Add(new PhoneDto { NationalNumber = origin.PHONE1.Replace("-", string.Empty) });
             }
             if (!string.IsNullOrEmpty(origin.PHONE2))
             {
-                phoneList.Add(new PhoneDto { NationalNumber = origin.PHONE2 });
+                phoneList.Add(new PhoneDto { NationalNumber = origin.PHONE2.Replace("-", string.Empty) });
             }
             if (!string.IsNullOrEmpty(destination.PHONE1))
             {
-                phoneList.Add(new PhoneDto { NationalNumber = destination.PHONE1 });
+                phoneList.Add(new PhoneDto { NationalNumber = destination.PHONE1.Replace("-", string.Empty) });
             }
             if (!string.IsNullOrEmpty(destination.PHONE2))
             {
-                phoneList.Add(new PhoneDto { NationalNumber = destination.PHONE2 });
+                phoneList.Add(new PhoneDto { NationalNumber = destination.PHONE2.Replace("-", string.Empty) });
             }
 
             var dto = new TransfereeDto
