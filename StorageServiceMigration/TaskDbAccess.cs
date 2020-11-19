@@ -33,13 +33,13 @@ namespace StorageServiceMigration
             var originalTaskToAddCount = workflowTasksToAdd.Count;
 
             Console.WriteLine($"Adding {originalTaskToAddCount} Prompts");
-            Trace.WriteLine($"{regNumber},Processing {originalTaskToAddCount} Prompts");
+            Trace.WriteLine($"{regNumber}, ,Processing {originalTaskToAddCount} Prompts");
 
             using (var context = new TaskMgmtDbContext(connectionString))
             {
                 var existingTask = await context.WorkflowTask.Where(wt => wt.ReferenceId == jobId).ToListAsync();
 
-                Trace.WriteLine($"{regNumber},Looking for duplicates because Milestone pages might have already created prompts");
+                Trace.WriteLine($"{regNumber}, ,Looking for duplicates because Milestone pages might have already created prompts");
 
                 foreach (var wtTask in existingTask)
                 {
@@ -51,7 +51,7 @@ namespace StorageServiceMigration
 
                 if (revisedTaskToAddCount != originalTaskToAddCount)
                 {
-                    Trace.WriteLine($"{regNumber},Found and removed duplicate prompts");
+                    Trace.WriteLine($"{regNumber}, ,Found and removed duplicate prompts");
                 }
 
                 if (workflowTasksToAdd.Count == 0)
@@ -67,7 +67,7 @@ namespace StorageServiceMigration
         internal static async Task AddNotes(List<CreateJobNoteRequest> createJobNoteRequests, int jobId, string regNumber)
         {
             Console.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
-            Trace.WriteLine($"{regNumber}, Adding {createJobNoteRequests.Count} Notes to Task");
+            Trace.WriteLine($"{regNumber}, , Adding {createJobNoteRequests.Count} Notes to Task");
 
             var noteEntity = createJobNoteRequests.ToNotesEntity();
 

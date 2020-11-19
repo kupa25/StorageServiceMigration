@@ -190,62 +190,84 @@ namespace Suddath.Helix.JobMgmt.Services.Water.Mapper
 
         internal static JobInfoDto ToJobInfo(Move move)
         {
-            var origin = move.OriginShipper;
-            var destination = move.DestinationShipper;
+            //var origin = move.OriginShipper;
+            //var destination = move.DestinationShipper;
 
-            if (origin == null)
-            {
-                throw new Exception($"origin is null on the moves table. Group_CODE probably doesn't match");
-            }
-            if (destination == null)
-            {
-                throw new Exception($"destination is null on the moves table. Group_CODE probably doesn't match");
-            }
+            //if (origin == null)
+            //{
+            //    throw new Exception($"origin is null on the moves table. Group_CODE probably doesn't match");
+            //}
+            //if (destination == null)
+            //{
+            //    throw new Exception($"destination is null on the moves table. Group_CODE probably doesn't match");
+            //}
+
+            //var dto = new JobInfoDto
+            //{
+            //    OriginAddressLabel = $"{origin.Street} {origin.City}, {origin.State} {origin.Zip}",
+            //    OriginAddressAdditionalInfo = origin.Appartment,
+            //    DestinationAddressLabel = $"{destination.Street} {destination.City}, {destination.State} {destination.Zip}",
+            //    DestinationAddressAdditionalInfo = destination.Appartment,
+            //    Addresses = new List<AddressDto>
+            //    {
+            //        new AddressDto
+            //        {
+            //            Type = "Origin",
+            //            Address1 = origin.Street,
+            //            City = origin.City,
+            //            State = origin.State,
+            //            PostalCode = origin.Zip,
+            //            AdditionalAddressInfo = origin.Appartment,
+            //            Country = origin.Country
+            //        },
+            //        new AddressDto
+            //        {
+            //            Type = "Destination",
+            //            Address1 = destination.Street,
+            //            City = destination.City,
+            //            State = destination.State,
+            //            PostalCode = destination.Zip,
+            //            AdditionalAddressInfo = destination.Appartment,
+            //            Country = destination.Country
+            //        }
+            //    }
+            //};
+
+            ////clean origin label
+
+            //if (string.IsNullOrEmpty(origin.City))
+            //{
+            //    dto.OriginAddressLabel = $"{origin.State}";
+            //}
+
+            ////clean destination label
+
+            //if (string.IsNullOrEmpty(destination.City))
+            //{
+            //    dto.DestinationAddressLabel = $"{destination.State}";
+            //}
+
+            var originAddress = move.Origin;
+            var destinationAddress = move.Destination;
 
             var dto = new JobInfoDto
             {
-                OriginAddressLabel = $"{origin.Street} {origin.City}, {origin.State} {origin.Zip}",
-                OriginAddressAdditionalInfo = origin.Appartment,
-                DestinationAddressLabel = $"{destination.Street} {destination.City}, {destination.State} {destination.Zip}",
-                DestinationAddressAdditionalInfo = destination.Appartment,
+                OriginAddressLabel = $"{originAddress}",
+                DestinationAddressLabel = $"{destinationAddress}",
                 Addresses = new List<AddressDto>
                 {
                     new AddressDto
                     {
                         Type = "Origin",
-                        Address1 = origin.Street,
-                        City = origin.City,
-                        State = origin.State,
-                        PostalCode = origin.Zip,
-                        AdditionalAddressInfo = origin.Appartment,
-                        Country = origin.Country
+                        Country = originAddress
                     },
                     new AddressDto
                     {
                         Type = "Destination",
-                        Address1 = destination.Street,
-                        City = destination.City,
-                        State = destination.State,
-                        PostalCode = destination.Zip,
-                        AdditionalAddressInfo = destination.Appartment,
-                        Country = destination.Country
+                        Country = destinationAddress
                     }
                 }
             };
-
-            //clean origin label
-
-            if (string.IsNullOrEmpty(origin.City))
-            {
-                dto.OriginAddressLabel = $"{origin.State}";
-            }
-
-            //clean destination label
-
-            if (string.IsNullOrEmpty(destination.City))
-            {
-                dto.DestinationAddressLabel = $"{destination.State}";
-            }
 
             return dto;
         }

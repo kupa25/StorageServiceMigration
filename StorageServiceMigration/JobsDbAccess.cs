@@ -24,7 +24,7 @@ namespace StorageServiceMigration
         public static void ChangeDateCreated(int jobId, DateTime date, string regNumber)
         {
             Console.WriteLine($"Updating Jobs Created Date to {date}");
-            Trace.WriteLine($"{regNumber}, Updating Jobs Created Date to {date}");
+            Trace.WriteLine($"{regNumber}, , Updating Jobs Created Date to {date}");
             using (var context = new JobDbContext(connectionString))
             {
                 var createdJob = context.Job.Find(jobId);
@@ -37,7 +37,7 @@ namespace StorageServiceMigration
         internal static async Task<List<ServiceOrder>> GetServiceOrderForJobs(int jobId, string regNumber)
         {
             Console.WriteLine($"Retrieve all the ServiceOrders Created");
-            //Trace.WriteLine($"{regNumber}, Retrieve all the ServiceOrders Created");
+            //Trace.WriteLine($"{regNumber}, , Retrieve all the ServiceOrders Created");
 
             List<ServiceOrder> result;
             using (var context = new JobDbContext(connectionString))
@@ -67,7 +67,7 @@ namespace StorageServiceMigration
         internal static void ChangeDisplayName(int ssoId, string regNumber)
         {
             Console.WriteLine($"Changing Storage DisplayName to {regNumber}");
-            Trace.WriteLine($"{regNumber}, Changing Storage DisplayName to {regNumber}");
+            Trace.WriteLine($"{regNumber}, , Changing Storage DisplayName to {regNumber}");
 
             using (var context = new JobDbContext(connectionString))
             {
@@ -81,7 +81,7 @@ namespace StorageServiceMigration
         internal static async Task<List<BillableItemType>> RetrieveBillableItemTypes(string regNumber)
         {
             Console.WriteLine($"Retrieve JC BillableItemTypes");
-            Trace.WriteLine($"{regNumber}, Retrieve JC BillableItemTypes");
+            Trace.WriteLine($"{regNumber}, , Retrieve JC BillableItemTypes");
 
             if (_billableItemTypes == null || _billableItemTypes.Count == 0)
             {
@@ -97,7 +97,7 @@ namespace StorageServiceMigration
         internal static async Task CreateVendorInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID, int superServiceOrderId)
         {
             Console.WriteLine($"Adding Vendor Invoice Record for {regNumber}");
-            Trace.WriteLine($"{regNumber}, Adding Vendor Invoice Record ");
+            Trace.WriteLine($"{regNumber}, , Adding Vendor Invoice Record ");
 
             using (var context = new JobDbContext(connectionString))
             {
@@ -123,7 +123,7 @@ namespace StorageServiceMigration
         internal static async Task MarkAllAsVoid(int superServiceOrderId, string regNumber)
         {
             Console.WriteLine($"Marking JC records as void");
-            Trace.WriteLine($"{regNumber}, Marking JC void ");
+            Trace.WriteLine($"{regNumber}, , Marking JC void ");
 
             try
             {
@@ -152,7 +152,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"Error while marking items void");
-                Trace.WriteLine($"{regNumber}, Error while marking items void");
+                Trace.WriteLine($"{regNumber}, , Error while marking items void");
             }
         }
 
@@ -177,14 +177,14 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"Error while cleaning payableitem");
-                Trace.WriteLine($"{regNumber}, Error while cleaning payableitem");
+                Trace.WriteLine($"{regNumber}, , Error while cleaning payableitem");
             }
         }
 
         internal static async Task MarkAsPosted(int superServiceOrderId, DateTime accrualFinancialPeriodDateTime, bool isOriginalAccrual, string regNumber, DateTime? accruedDate)
         {
             Console.WriteLine($"Marking JC as posted");
-            Trace.WriteLine($"{regNumber}, Marking JC as posted ");
+            Trace.WriteLine($"{regNumber}, , Marking JC as posted ");
 
             try
             {
@@ -250,7 +250,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine($"Error while cleaning billableitem");
-                Trace.WriteLine($"{regNumber}, Error while cleaning billableitem");
+                Trace.WriteLine($"{regNumber}, , Error while cleaning billableitem");
             }
         }
 
@@ -262,7 +262,7 @@ namespace StorageServiceMigration
         internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId, DateTime? accrueDate)
         {
             Console.WriteLine($"Locking JC");
-            Trace.WriteLine($"{regNumber}, Locking JC ");
+            Trace.WriteLine($"{regNumber}, , Locking JC ");
 
             try
             {
@@ -313,15 +313,15 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("Error While trying to lock");
-                Trace.WriteLine($"{regNumber}, Error while trying to lock");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while trying to lock");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
         internal static async Task CreateInvoiceRecord(int id, string regNumber, string cHECK, string iNVOICE_NUMBER, DateTime? dATE_PAID, DateTime? aCTUAL_POSTED, int superServiceOrderId)
         {
             Console.WriteLine($"Adding Invoice Record for {regNumber}");
-            Trace.WriteLine($"{regNumber}, Adding Invoice Record ");
+            Trace.WriteLine($"{regNumber}, , Adding Invoice Record ");
 
             using (var context = new JobDbContext(connectionString))
             {

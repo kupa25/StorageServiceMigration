@@ -101,7 +101,7 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("*********ERROR parsing response**");
-                Trace.WriteLine($"{regNumber}, *********ERROR parsing response**");
+                Trace.WriteLine($"{regNumber}, , *********ERROR parsing response**");
             }
 
             return default(T);
@@ -123,7 +123,7 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Starting JC Expense creation");
-                Trace.WriteLine($"{regNumber}, Starting JC Expense creation");
+                Trace.WriteLine($"{regNumber}, , Starting JC Expense creation");
 
                 var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/payableItems";
 
@@ -145,7 +145,7 @@ namespace StorageServiceMigration
                     {
                         var billItemType = billableItemTypes.FirstOrDefault(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2)));
                         modifiedObj.PayableItemTypeId = billItemType.Id;
-                        Trace.WriteLine($"{regNumber}, Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
+                        Trace.WriteLine($"{regNumber}, , Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
                     }
 
                     modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
@@ -162,15 +162,15 @@ namespace StorageServiceMigration
                     if (legacyJC.DATE_PAID != null)
                     {
                         await JobsDbAccess.CreateVendorInvoiceRecord(original.Id, regNumber, legacyJC.CHECK, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_PAID, serviceOrder.SuperServiceOrderId);
-                        Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
+                        Trace.WriteLine($"{regNumber}, , Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating JC Expense section");
-                Trace.WriteLine($"{regNumber}, Error while updating JC Expense section");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating JC Expense section");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
@@ -179,7 +179,7 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Starting JC Revenue creation");
-                Trace.WriteLine($"{regNumber}, Starting JC Revenue creation");
+                Trace.WriteLine($"{regNumber}, , Starting JC Revenue creation");
 
                 var url = $"/{jobId}/superServices/orders/{serviceOrder.SuperServiceOrderId}/billableItems";
 
@@ -201,7 +201,7 @@ namespace StorageServiceMigration
                     {
                         var billItemType = billableItemTypes.FirstOrDefault(bi => bi.AccountCode.Equals(legacyJC.ACCOUNT_CODE.Substring(0, 2)));
                         modifiedObj.BillableItemTypeId = billItemType.Id;
-                        Trace.WriteLine($"{regNumber}, Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
+                        Trace.WriteLine($"{regNumber}, , Found the closest match for the accountcode {legacyJC.ACCOUNT_CODE.Substring(0, 2) } to {billItemType.BillableItemTypeName}");
                     }
 
                     modifiedObj.Description = legacyJC.ACCOUNT_DESCRIPTION;
@@ -221,22 +221,22 @@ namespace StorageServiceMigration
                     if (legacyJC.DATE_RECEIVED != null)
                     {
                         await JobsDbAccess.CreateInvoiceRecord(original.Id, regNumber, string.Empty, legacyJC.INVOICE_NUMBER + "-" + ++invoiceCounter, legacyJC.DATE_RECEIVED, legacyJC.ACTUAL_POSTED, serviceOrder.SuperServiceOrderId);
-                        Trace.WriteLine($"{regNumber}, Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
+                        Trace.WriteLine($"{regNumber}, , Changing InvoiceNumber because duplicates could be there Orig: {legacyJC.INVOICE_NUMBER} - New: {legacyJC.INVOICE_NUMBER + "-" + invoiceCounter}");
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating JC Revenue section");
-                Trace.WriteLine($"{regNumber}, Error while updating JC Revenue section");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating JC Revenue section");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
         internal static async Task<CreateSuperServiceOrderResponse> CreateStorageSSO(HttpClient _httpClient, int jobId, string regNumber)
         {
             Console.WriteLine("Creating Storage Service");
-            Trace.WriteLine($"{regNumber}, Creating Storage Service");
+            Trace.WriteLine($"{regNumber}, , Creating Storage Service");
 
             var url = $"/{jobId}/superServices/order";
             var model = new CreateSuperServiceOrderRequest { SuperServiceId = 4 };
@@ -260,12 +260,12 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Updating OA");
-                Trace.WriteLine($"{regNumber}, Updating OA");
+                Trace.WriteLine($"{regNumber}, , Updating OA");
 
                 if (oaVendor == null)
                 {
                     Console.WriteLine("OA Vendor not found");
-                    Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, , OA Vendor not found");
                 }
 
                 var origin = move.OriginAgent;
@@ -287,7 +287,7 @@ namespace StorageServiceMigration
                 if (oaVendor == null)
                 {
                     Console.WriteLine("OA Vendor not found");
-                    Trace.WriteLine($"{regNumber}, OA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, , OA Vendor not found");
                 }
                 else
                 {
@@ -298,12 +298,12 @@ namespace StorageServiceMigration
 
                 if (actualPackDate == null)
                 {
-                    Trace.WriteLine($"{regNumber}, Deafulting ActualPackDate because SIT_IN it was not found for the OA record");
+                    Trace.WriteLine($"{regNumber}, , Deafulting ActualPackDate because SIT_IN it was not found for the OA record");
                     actualPackDate = DateTime.Now;
                 }
                 else
                 {
-                    Trace.WriteLine($"{regNumber}, Setting ActualPackDate from SIT_IN date For JC purposes");
+                    Trace.WriteLine($"{regNumber}, , Setting ActualPackDate from SIT_IN date For JC purposes");
                 }
 
                 modifiedObj.ActualPackStartDate = actualPackDate;
@@ -317,8 +317,8 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating OA");
-                Trace.WriteLine($"{regNumber}, Error while updating OA");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating OA");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
@@ -327,7 +327,7 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Updating DA");
-                Trace.WriteLine($"{regNumber}, Updating DA");
+                Trace.WriteLine($"{regNumber}, , Updating DA");
 
                 var destination = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
 
@@ -342,25 +342,26 @@ namespace StorageServiceMigration
                 if (daVendor == null)
                 {
                     Console.WriteLine("DA Vendor not found");
-                    Trace.WriteLine($"{regNumber}, DA Vendor not found");
+                    Trace.WriteLine($"{regNumber}, , DA Vendor not found");
                 }
                 else
                 {
                     modifiedObj.VendorId = daVendor.Id;
                 }
 
-                var partialDeliveryDate = DateTime.UtcNow;
-                if (destination.PartialDeliveryDateIn.HasValue)
-                {
-                    partialDeliveryDate = destination.PartialDeliveryDateIn.Value;
-                }
-                else
-                {
-                    Trace.WriteLine($"{regNumber}, Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
-                }
+                var weight = destination.SurveyWeight;
+                var partialDeliveryDate = destination.PartialDeliveryDateIn;
 
-                modifiedObj.ActualDeliveryStartDate = modifiedObj.ActualDeliveryEndDate = partialDeliveryDate;
-                modifiedObj.TotalWeightDeliveredLb = destination.SurveyWeight;
+                if (weight.HasValue)
+                {
+                    modifiedObj.TotalWeightDeliveredLb = weight;
+                    modifiedObj.ActualDeliveryStartDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
+
+                    if (!partialDeliveryDate.HasValue)
+                    {
+                        Trace.WriteLine($"{regNumber}, , Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
+                    }
+                }
 
                 var patch = new JsonPatchDocument();
                 FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
@@ -370,8 +371,8 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating DA");
-                Trace.WriteLine($"{regNumber}, Error while updating DA");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating DA");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
@@ -401,7 +402,7 @@ namespace StorageServiceMigration
 
             modifiedObj.InsuranceCostUnit = "Monthly";
 
-            Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
+            Trace.WriteLine($"{regNumber}, , Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
 
             await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
 
@@ -441,7 +442,7 @@ namespace StorageServiceMigration
         internal static async Task updateStorageRevRecord(HttpClient httpClient, int soId, int storageRevId, Move move, int jobId, string regNumber, dynamic billTo, string billToLabel, List<InsuranceClaims> legacyInsuranceClaims)
         {
             Console.WriteLine("Update ST Rev Record");
-            Trace.WriteLine($"{regNumber}, Update ST Rev Record");
+            Trace.WriteLine($"{regNumber}, , Update ST Rev Record");
 
             var url = $"/{jobId}/services/orders/{soId}/storage/revenues";
             var icRecord = legacyInsuranceClaims.FirstOrDefault();
@@ -467,7 +468,7 @@ namespace StorageServiceMigration
 
             modifiedObj.InsuranceCostUnit = "Monthly";
 
-            Trace.WriteLine($"{regNumber}, Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
+            Trace.WriteLine($"{regNumber}, , Couldn't find Insurance Cost Unit.. defaulting it to Monthly");
 
             if (billTo != null)
             {
@@ -490,7 +491,7 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Updating IC");
-                Trace.WriteLine($"{regNumber}, Updating IC");
+                Trace.WriteLine($"{regNumber}, , Updating IC");
 
                 var url = $"/{jobId}/services/orders/{serviceOrderId}?serviceName=IC";
 
@@ -505,7 +506,7 @@ namespace StorageServiceMigration
                 if (record == null)
                 {
                     Console.WriteLine($"{regNumber}, Insurance record not found in GMMS");
-                    Trace.WriteLine($"{regNumber}, Insurance record not found in GMMS");
+                    Trace.WriteLine($"{regNumber}, , Insurance record not found in GMMS");
 
                     return;
                 }
@@ -525,7 +526,7 @@ namespace StorageServiceMigration
                         break;
 
                     default:
-                        Trace.WriteLine($"{regNumber}, Couldn't get the CarrierName");
+                        Trace.WriteLine($"{regNumber}, , Couldn't get the CarrierName");
                         break;
                 }
 
@@ -559,8 +560,8 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating IC");
-                Trace.WriteLine($"{regNumber}, Error while updating IC");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating IC");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 

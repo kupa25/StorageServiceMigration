@@ -29,6 +29,7 @@ namespace StorageServiceMigration
             SetMovesToImport(loadAllRecords);
             await RetrieveJobsAccountAndVendor();
 
+            Trace.WriteLine($"GMMS REG Number, Arive Job# , Log text ");
             int counter = 0;
             foreach (var regNumber in movesToImport)
             {
@@ -37,8 +38,8 @@ namespace StorageServiceMigration
                     Console.WriteLine("-----------------------------------------------------------------------------------");
                     Console.WriteLine($"Processing { ++counter} records of {movesToImport.Count} to import");
 
-                    Trace.WriteLine($"{regNumber}, ");
-                    Trace.WriteLine($"{regNumber}, -----------------------------------------------------------------------------------");
+                    Trace.WriteLine($"{regNumber}, , ");
+                    Trace.WriteLine($"{regNumber}, , -----------------------------------------------------------------------------------");
 
                     await SungateApi.setApiAccessTokenAsync(_httpClient);
                     var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
@@ -119,8 +120,8 @@ namespace StorageServiceMigration
                     catch (Exception ex)
                     {
                         Console.WriteLine("Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, {ex.Message}");
+                        Trace.WriteLine($"{regNumber}, , Error while trying to change JC status manually");
+                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
                     }
 
                     #endregion JobCost
@@ -134,18 +135,18 @@ namespace StorageServiceMigration
                     decimal percentage = (decimal)(counter * 100) / movesToImport.Count;
 
                     Console.WriteLine($"{ Math.Round(percentage, 2)}% Completed ");
-                    Trace.WriteLine($"{regNumber}, EndTime: {DateTime.Now}");
+                    Trace.WriteLine($"{regNumber}, , EndTime: {DateTime.Now}");
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"{regNumber}, *** ERROR ***");
+                    Trace.WriteLine($"{regNumber}, , *** ERROR ***");
                     if (ex.InnerException != null)
                     {
-                        Trace.WriteLine($"{regNumber}, {ex.InnerException.Message}");
+                        Trace.WriteLine($"{regNumber}, , {ex.InnerException.Message}");
                     }
                     else
                     {
-                        Trace.WriteLine($"{regNumber}, {ex.Message}");
+                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
                     }
 
                     Console.WriteLine($"**** ERROR ****");
@@ -161,7 +162,7 @@ namespace StorageServiceMigration
             try
             {
                 Console.WriteLine("Updating ST");
-                Trace.WriteLine($"{regNumber}, Updating ST Expense record");
+                Trace.WriteLine($"{regNumber}, , Updating ST Expense record");
 
                 var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == move.StorageAgent.VendorNameId);
                 var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
@@ -206,7 +207,7 @@ namespace StorageServiceMigration
 
                 if (!string.IsNullOrEmpty(move.StorageAgent.HOW_SENT) && billTo == null)
                 {
-                    Trace.WriteLine($"{regNumber}, Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
+                    Trace.WriteLine($"{regNumber}, , Missing Storage BillTo {move.StorageAgent.HOW_SENT}");
                 }
 
                 await JobsApi.updateStorageRevRecord(_httpClient, soId, storageRevId, move, jobId, regNumber, billTo, billToLabel, legacyInsuranceClaims);
@@ -214,8 +215,8 @@ namespace StorageServiceMigration
             catch (Exception ex)
             {
                 Console.WriteLine("Error while updating ST");
-                Trace.WriteLine($"{regNumber}, Error while updating ST");
-                Trace.WriteLine($"{regNumber}, {ex.Message}");
+                Trace.WriteLine($"{regNumber}, , Error while updating ST");
+                Trace.WriteLine($"{regNumber}, , {ex.Message}");
             }
         }
 
@@ -224,7 +225,7 @@ namespace StorageServiceMigration
             var legacyPromptEntity = await WaterDbAccess.RetrievePrompts(move.RegNumber);
             if (legacyPromptEntity == null || legacyPromptEntity.Count == 0)
             {
-                Trace.WriteLine($"{regNumber}, No Available prompts found in GMMS");
+                Trace.WriteLine($"{regNumber}, , No Available prompts found in GMMS");
                 return;
             }
 
@@ -239,7 +240,7 @@ namespace StorageServiceMigration
                 else
                 {
                     Console.WriteLine($"{regNumber}, Can't get Prompt created User So defaulting it to MigrationScript@test.com");
-                    Trace.WriteLine($"{regNumber}, Can't get Prompt created User So defaulting it to MigrationScript@test.com");
+                    Trace.WriteLine($"{regNumber}, , Can't get Prompt created User So defaulting it to MigrationScript@test.com");
                     prompt.ENTERED_BY = "MigrationScript@test.com";
                 }
 
@@ -257,7 +258,7 @@ namespace StorageServiceMigration
 
             if (notesEntity == null)
             {
-                Trace.WriteLine($"{regNumber}, No Available notes found in GMMS");
+                Trace.WriteLine($"{regNumber}, , No Available notes found in GMMS");
                 return;
             }
 
@@ -325,7 +326,7 @@ namespace StorageServiceMigration
                             else
                             {
                                 Console.WriteLine("Defaulting MoveConsultant to Angela La Fronza due to bad data");
-                                Trace.WriteLine($"{regNumber}, Defaulting MoveConsultant to Angela La Fronza due to bad data");
+                                Trace.WriteLine($"{regNumber}, , Defaulting MoveConsultant to Angela La Fronza due to bad data");
                                 nameToUse = "Angela.Lafronza";
                             }
                         }
@@ -334,7 +335,7 @@ namespace StorageServiceMigration
 
                         if (string.IsNullOrEmpty(dictionaryValue))
                         {
-                            Trace.WriteLine($"{regNumber}, Move Consultant from GMMS {nameToUse} couldn't be found in Arive thus Defaulting to Angela La Fronza");
+                            Trace.WriteLine($"{regNumber}, , Move Consultant from GMMS {nameToUse} couldn't be found in Arive thus Defaulting to Angela La Fronza");
                             dictionaryValue = NameTranslator.repo.GetValueOrDefault("Angela.Lafronza");
                         }
                         break;
@@ -370,7 +371,7 @@ namespace StorageServiceMigration
             }
 
             Console.WriteLine("Adding Job Contacts");
-            Trace.WriteLine($"{regNumber}, Adding Job Contacts");
+            Trace.WriteLine($"{regNumber}, , Adding Job Contacts");
 
             var url = $"/{jobId}/contacts";
 
@@ -380,7 +381,7 @@ namespace StorageServiceMigration
         private static async Task<int> addStorageJob(Move move, string regNumber)
         {
             Console.WriteLine("Creating a job in Arive");
-            Trace.WriteLine($"{regNumber}, Creating a job in Arive");
+            Trace.WriteLine($"{regNumber}, , Creating a job in Arive");
 
             var url = string.Empty;
 
@@ -391,7 +392,7 @@ namespace StorageServiceMigration
             {
                 if (move.AccountId.Equals("1674")) //Shipper Direct
                 {
-                    Trace.WriteLine($"{regNumber}, Missing Account in Arive {move.AccountId}, thus Defaulting Shipper Direct");
+                    Trace.WriteLine($"{regNumber}, , Missing Account in Arive {move.AccountId}, thus Defaulting Shipper Direct");
                     movesAccount = _accountEntities.FirstOrDefault(ae => ae.Id == 283);
                 }
                 else
@@ -404,8 +405,8 @@ namespace StorageServiceMigration
 
             if (response.BilltoId == null)
             {
-                Trace.WriteLine($"{regNumber}, Missing BillTo in Arive {move.BILL}");
-                Trace.WriteLine($"{regNumber}, Defaulting BillTo as Shipper Direct");
+                Trace.WriteLine($"{regNumber}, , Missing BillTo in Arive {move.BILL}");
+                Trace.WriteLine($"{regNumber}, , Defaulting BillTo as Shipper Direct");
                 response.BilltoId = 283;
                 response.BilltoType = "Account";
             }
@@ -414,7 +415,7 @@ namespace StorageServiceMigration
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job created {parsedResponse}");
-            Trace.WriteLine($"{regNumber}, Job created {parsedResponse}");
+            Trace.WriteLine($"{regNumber},{parsedResponse} , Job created");
             return int.Parse(parsedResponse);
         }
 
@@ -490,6 +491,7 @@ namespace StorageServiceMigration
             {
                 movesToImport.Add("274527"); // GOOD one to import according to heather
                 //movesToImport.Add("191731");
+                //movesToImport.Add("284497");
             }
             else
             {

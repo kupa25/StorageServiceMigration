@@ -49,7 +49,7 @@ namespace StorageServiceMigration
             if (!found && !string.IsNullOrEmpty(v))
             {
                 Console.WriteLine("Get the Ad Name for : " + v);
-                Trace.WriteLine($"{regNumber}, Get the Ad Name for : " + v);
+                Trace.WriteLine($"{regNumber}, , Get the Ad Name for : " + v);
 
                 var url = _sugGateBaseUrl + $"/api/v1/aad/lookup/{v}";
                 var response = await _httpClient.GetAsync(url);

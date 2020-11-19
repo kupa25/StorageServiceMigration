@@ -44,7 +44,7 @@ namespace StorageServiceMigration
         internal static async Task CreateNotes(HttpClient httpClient, List<CreateJobNoteRequest> createJobNoteRequests, int jobId, string regNumber)
         {
             Console.WriteLine($"Adding {createJobNoteRequests.Count} Notes to Task");
-            Trace.WriteLine($"{regNumber}, Adding {createJobNoteRequests.Count} Notes to Task");
+            Trace.WriteLine($"{regNumber}, , Adding {createJobNoteRequests.Count} Notes to Task");
 
             //string url = "​Notes"; //TODO: figure out why this isn't working
             string url = $"Notes/jobs/{jobId}";
