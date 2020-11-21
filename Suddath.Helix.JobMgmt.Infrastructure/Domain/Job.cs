@@ -30,6 +30,8 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Domain
         public string BranchName { get; set; }
         public string RevenueType { get; set; }
         public string MoveType { get; set; }
+        public string ExternalReference { get; set; }
+        public string ExternalReferenceDescription { get; set; }
         public string AuthorizationPONumber { get; set; }
         public string AccountCustomerReference { get; set; }
         public DateTime DateCreated { get; set; }

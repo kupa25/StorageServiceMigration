@@ -14,8 +14,9 @@ namespace StorageServiceMigration
     public static class TaskDbAccess
     {
         //public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Tasks;trusted_connection=yes;";
-        //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
-        public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
+        public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
+
+        //public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         public static void ChangeDateCreated(int noteId, DateTime date, string regNumber)
         {
@@ -75,6 +76,19 @@ namespace StorageServiceMigration
             {
                 context.Note.AddRange(noteEntity);
                 context.SaveChanges();
+            }
+        }
+
+        internal static void RemovePrompts()
+        {
+            Console.WriteLine($"Removing Prompts create on behalf of MigrationScript@test.com");
+
+            using (var context = new TaskMgmtDbContext(connectionString))
+            {
+                context.Database.ExecuteSqlCommand(@"
+                                                Delete from WorkFlowTask
+                                                where ModifiedBy = 'MigrationScript@test.com'
+                                                ");
             }
         }
     }

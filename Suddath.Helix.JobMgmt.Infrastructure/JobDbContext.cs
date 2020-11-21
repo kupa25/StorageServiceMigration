@@ -1061,6 +1061,10 @@ namespace Suddath.Helix.JobMgmt.Infrastructure
                     .HasMaxLength(50)
                     .HasDefaultValueSql("'active'");
 
+                entity.Property(e => e.ExternalReference).HasMaxLength(100);
+
+                entity.Property(e => e.ExternalReferenceDescription).HasMaxLength(100);
+
                 entity.Property(e => e.ModifiedBy)
                     .IsRequired()
                     .HasMaxLength(100)

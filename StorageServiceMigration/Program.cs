@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -60,7 +60,8 @@ namespace StorageServiceMigration
 
                     //Add SuperService
                     var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
-                    JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
+
+                    //JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
 
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
 
@@ -83,31 +84,31 @@ namespace StorageServiceMigration
 
                     #region JobCost
 
-                    var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
+                    //var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
 
-                    var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
-                    foreach (var legacyJC in paymentSends)
-                    {
-                        var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
+                    //var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
+                    //foreach (var legacyJC in paymentSends)
+                    //{
+                    //    var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
 
-                        legacyJC.VendorID = response.BilltoId;
-                        legacyJC.BillToLabel = response.BilltoType;
-                    }
+                    //    legacyJC.VendorID = response.BilltoId;
+                    //    legacyJC.BillToLabel = response.BilltoType;
+                    //}
 
-                    await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
-                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
+                    //await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
+                    //    serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
-                    var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
-                    foreach (var legacyJC in paymentReceived)
-                    {
-                        var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
+                    //var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
+                    //foreach (var legacyJC in paymentReceived)
+                    //{
+                    //    var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
 
-                        legacyJC.VendorID = response.BilltoId;
-                        legacyJC.BillToLabel = response.BilltoType;
-                    }
+                    //    legacyJC.VendorID = response.BilltoId;
+                    //    legacyJC.BillToLabel = response.BilltoType;
+                    //}
 
-                    await JobsApi.CreateAndUpdateJobCostRevenue(_httpClient, _vendor, paymentReceived, billableItemTypes, jobId,
-                        serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
+                    //await JobsApi.CreateAndUpdateJobCostRevenue(_httpClient, _vendor, paymentReceived, billableItemTypes, jobId,
+                    //    serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
 
@@ -115,7 +116,7 @@ namespace StorageServiceMigration
                     {
                         await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
                         await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
-                        await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                        //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
                     }
                     catch (Exception ex)
                     {
@@ -155,6 +156,9 @@ namespace StorageServiceMigration
 
                 Trace.Flush();
             }
+
+            //Remove Prompts from MigrationScript
+            TaskDbAccess.RemovePrompts();
         }
 
         private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee, List<InsuranceClaims> legacyInsuranceClaims)
@@ -412,6 +416,9 @@ namespace StorageServiceMigration
             }
 
             var model = move.ToJobModel(movesAccount.Id, movesBooker?.Id, response.BilltoId, response.BilltoType);
+            model.Job.ExternalReference = regNumber;
+            model.Job.ExternalReferenceDescription = "RegNumber from GMMS : Storage Migration";
+
             string parsedResponse = await JobsApi.CallJobsApi(_httpClient, url, model);
 
             Console.WriteLine($"Job created {parsedResponse}");

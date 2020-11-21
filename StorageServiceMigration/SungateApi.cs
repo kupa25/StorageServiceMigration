@@ -13,8 +13,8 @@ namespace StorageServiceMigration
 {
     public static class SungateApi
     {
-        //private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
-        private static string _sugGateBaseUrl = "https://qaue2sungtv2wb02.azurewebsites.net";
+        private static string _sugGateBaseUrl = "https://daue2sungtv2wb02.azurewebsites.net";
+        //private static string _sugGateBaseUrl = "https://qaue2sungtv2wb02.azurewebsites.net";
 
         private static Dictionary<string, List<ADUser>> cachedAdUser { get; set; } = new Dictionary<string, List<ADUser>>();
 

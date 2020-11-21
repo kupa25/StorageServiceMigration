@@ -72,6 +72,8 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Mapper
                 .ForMember(d => d.AccrualStatus, opt => opt.MapFrom(src => src.AccrualStatus))
                 .ForMember(d => d.JobSource, opt => opt.MapFrom(src => src.JobSource))
                 .ForMember(d => d.AccountCustomerReference, opt => opt.MapFrom(src => src.AccountCustomerReference))
+                .ForMember(d => d.ExternalReference, opt => opt.MapFrom(src => src.ExternalReference))
+                .ForMember(d => d.ExternalReferenceDescription, opt => opt.MapFrom(src => src.ExternalReferenceDescription))
                 .ForAllOtherMembers(opt => opt.Ignore());
 
             CreateMap<Transferee, TransfereeDto>().ReverseMap();

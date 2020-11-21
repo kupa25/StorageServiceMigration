@@ -46,6 +46,8 @@ namespace Suddath.Helix.JobMgmt.Models
         public bool IsSurveyAndBid { get; set; }
         public string AccrualStatus { get; set; }
         public DateTime DateCreated { get; set; }
+        public string ExternalReference { get; set; }
+        public string ExternalReferenceDescription { get; set; }
 
         [JsonIgnore]
         public string JobSource { get; set; }
