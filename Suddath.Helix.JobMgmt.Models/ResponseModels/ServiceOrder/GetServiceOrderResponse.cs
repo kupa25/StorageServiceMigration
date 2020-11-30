@@ -131,6 +131,7 @@ namespace Suddath.Helix.JobMgmt.Models.ResponseModels.ServiceOrder
         public DateTime? OAFinalsReceivedDate { get; set; }
         public DateTime? OAGreenLightDate { get; set; }
         public DateTime? OASubmittedToFMCDate { get; set; }
+        public int? OAPieceCount { get; set; }
         public bool IsSITAuthorized { get; set; }
         public DateTime? SITInDate { get; set; }
         public DateTime? SITLastAuthorizedDate { get; set; }
