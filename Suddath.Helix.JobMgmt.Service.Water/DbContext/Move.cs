@@ -24,6 +24,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public string TRAFFIC_MANAGER { get; set; }
         public string BILLER { get; set; }
         public string QUOTED_BY { get; set; }
+        public string SALES { get; set; }
         public DateTime? READY_TO_ACCRUE_DATE { get; set; }
         public DateTime? ACCRUED_DATE { get; set; }
 
