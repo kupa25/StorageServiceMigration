@@ -284,7 +284,7 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
                 modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
                 modifiedObj.NetWeightLb = move.NET_WEIGHT;
-                modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null).NumberOfPieces;
+                modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
 
                 if (oaVendor == null)
                 {
@@ -296,7 +296,7 @@ namespace StorageServiceMigration
                     modifiedObj.VendorId = oaVendor.Id;
                 }
 
-                var actualPackDate = storageEntity.SITinDate;
+                var actualPackDate = origin.EST_PK_DATE1;
 
                 if (actualPackDate == null)
                 {

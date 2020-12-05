@@ -61,6 +61,7 @@ namespace Suddath.Helix.JobMgmt.Services.Water.DbContext
         public DateTime? ACT_AR_DATE2 { get; set; }
         public DateTime? EST_PU_DATE1 { get; set; }
         public DateTime? EST_PU_DATE2 { get; set; }
+        public DateTime? EST_PK_DATE1 { get; set; }
 
         public DateTime? ACT_SURVEY_DATE { get; set; }
 

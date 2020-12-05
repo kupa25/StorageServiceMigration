@@ -31,6 +31,9 @@ namespace StorageServiceMigration
 
             Trace.WriteLine($"GMMS REG Number, Arive Job# , Log text ");
             int counter = 0;
+            var jobId = 0;
+
+            //Normal Import
             foreach (var regNumber in movesToImport)
             {
                 try
@@ -50,7 +53,7 @@ namespace StorageServiceMigration
                     }
 
                     //Add the job
-                    var jobId = await addStorageJob(move, regNumber);
+                    jobId = await addStorageJob(move, regNumber);
 
                     //update datecreated on the job
                     JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
@@ -60,7 +63,7 @@ namespace StorageServiceMigration
 
                     //Add SuperService
                     var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
-
+                    var ssoId = result.Id;
                     //JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
 
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
@@ -77,38 +80,12 @@ namespace StorageServiceMigration
 
                     // STORAGE
                     var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
-                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims);
+                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims, ssoId);
 
                     // INSURANCE
                     await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
 
                     #region JobCost
-
-                    //var billableItemTypes = await JobsDbAccess.RetrieveBillableItemTypes(regNumber);
-
-                    //var paymentSends = await WaterDbAccess.RetrieveJobCostExpense(move.RegNumber);
-                    //foreach (var legacyJC in paymentSends)
-                    //{
-                    //    var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
-
-                    //    legacyJC.VendorID = response.BilltoId;
-                    //    legacyJC.BillToLabel = response.BilltoType;
-                    //}
-
-                    //await JobsApi.CreateAndUpdateJobCostExpense(_httpClient, _vendor, paymentSends, billableItemTypes, jobId,
-                    //    serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
-
-                    //var paymentReceived = await WaterDbAccess.RetrieveJobCostRevenue(move.RegNumber);
-                    //foreach (var legacyJC in paymentReceived)
-                    //{
-                    //    var response = await DetermineBillTo(legacyJC.NAMES_ID, transfereeEntity, regNumber);
-
-                    //    legacyJC.VendorID = response.BilltoId;
-                    //    legacyJC.BillToLabel = response.BilltoType;
-                    //}
-
-                    //await JobsApi.CreateAndUpdateJobCostRevenue(_httpClient, _vendor, paymentReceived, billableItemTypes, jobId,
-                    //    serviceOrders.FirstOrDefault(so => so.ServiceId == 29), regNumber);
 
                     var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
 
@@ -157,11 +134,156 @@ namespace StorageServiceMigration
                 Trace.Flush();
             }
 
+            movesToImport = new List<string>
+            {
+                "203448",
+                "209609",
+
+                "277539",
+                "279343",
+
+                "267222",
+                "267459",
+
+                "281081",
+                "282370",
+
+                "249998",
+                "250554",
+
+                "271267",
+                "272331",
+
+                "277066",
+                "279329",
+
+                "265756",
+                "267839",
+
+                "267497",
+                "267734",
+
+                "275510",
+                "282051",
+
+                "176484",
+                "228684",
+                "248044"
+            };
+
+            counter = 0;
+
+            foreach (var regNumber in movesToImport)
+            {
+                try
+                {
+                    Console.WriteLine("---------------------------Adding jobs with multiple service boards--------------------------------------------------------");
+                    Console.WriteLine($"Processing { ++counter} records of {movesToImport.Count} to import");
+
+                    Trace.WriteLine($"{regNumber}, , ");
+                    Trace.WriteLine($"{regNumber}, , -----------------------------------------------------------------------------------");
+
+                    await SungateApi.setApiAccessTokenAsync(_httpClient);
+                    var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
+
+                    if (move == null)
+                    {
+                        continue;
+                    }
+
+                    if (counter % 2 != 0)
+                    {
+                        //Add the job
+                        if (!regNumber.Equals("248044"))
+                        {
+                            jobId = await addStorageJob(move, regNumber);
+                        }
+                    }
+
+                    //update datecreated on the job
+                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
+
+                    //Add JobContacts
+                    await addJobContacts(move, jobId, regNumber);
+
+                    //Add SuperService
+                    var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
+                    var ssoId = result.Id;
+
+                    //JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
+
+                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
+
+                    // ORIGIN
+                    var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
+                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24 && so.SuperServiceOrderId == ssoId).Id, oaVendor, move, jobId, regNumber);
+
+                    // DESTINATION
+                    var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
+                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26 && so.SuperServiceOrderId == ssoId).Id, daVendor, move, jobId, regNumber);
+
+                    var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
+
+                    // STORAGE
+                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
+                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims, ssoId);
+
+                    // INSURANCE
+                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27 && so.SuperServiceOrderId == ssoId).Id, move, jobId, legacyInsuranceClaims, regNumber);
+
+                    #region JobCost
+
+                    var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29 && so.SuperServiceOrderId == ssoId).SuperServiceOrderId;
+
+                    try
+                    {
+                        await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
+                        await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error while trying to change JC status manually");
+                        Trace.WriteLine($"{regNumber}, , Error while trying to change JC status manually");
+                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
+                    }
+
+                    #endregion JobCost
+
+                    //Add Notes
+                    await AddNotesFromGmmsToArive(move, jobId, regNumber);
+
+                    //Add Prompts
+                    await AddPromptsFromGmmsToArive(move, jobId, regNumber);
+
+                    decimal percentage = (decimal)(counter * 100) / movesToImport.Count;
+
+                    Console.WriteLine($"{ Math.Round(percentage, 2)}% Completed ");
+                    Trace.WriteLine($"{regNumber}, , EndTime: {DateTime.Now}");
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"{regNumber}, , *** ERROR ***");
+                    if (ex.InnerException != null)
+                    {
+                        Trace.WriteLine($"{regNumber}, , {ex.InnerException.Message}");
+                    }
+                    else
+                    {
+                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
+                    }
+
+                    Console.WriteLine($"**** ERROR ****");
+                    Console.WriteLine($"{ex.Message}");
+                }
+
+                Trace.Flush();
+            }
+
             //Remove Prompts from MigrationScript
             TaskDbAccess.RemovePrompts();
         }
 
-        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee, List<InsuranceClaims> legacyInsuranceClaims)
+        private static async Task updateStorageJob(Move move, int jobId, List<ServiceOrder> serviceOrders, string regNumber, Transferee transferee, List<InsuranceClaims> legacyInsuranceClaims, int ssoId)
         {
             try
             {
@@ -169,7 +291,7 @@ namespace StorageServiceMigration
                 Trace.WriteLine($"{regNumber}, , Updating ST Expense record");
 
                 var vendorEntity = _vendor.FirstOrDefault(v => v.Accounting_SI_Code == move.StorageAgent.VendorNameId);
-                var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32).Id;
+                var soId = serviceOrders.FirstOrDefault(so => so.ServiceId == 32 && so.SuperServiceOrderId == ssoId).Id;
 
                 await JobsApi.UpdateStorageMilestone(_httpClient, soId, move, jobId, vendorEntity, regNumber, legacyInsuranceClaims);
 
