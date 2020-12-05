@@ -15,8 +15,10 @@ namespace StorageServiceMigration
     {
         //public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Tasks;trusted_connection=yes;";
         //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
+        //public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
+        public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=g8f3Y0zMFT3emUL#; Connect Timeout=120;MultipleActiveResultSets=True;";
 
-        public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
+        //public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Tasks;User ID=helix3_app;Password=V$@h@ERZnrDFGvZ9; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         public static void ChangeDateCreated(int noteId, DateTime date, string regNumber)
         {

@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);

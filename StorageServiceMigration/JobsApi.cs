@@ -27,8 +27,10 @@ namespace StorageServiceMigration
     {
         //private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
         //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
-        private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://paue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         private static List<BillableItemType> billableItemTypes = new List<BillableItemType>();
 
@@ -284,7 +286,10 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
                 modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
                 modifiedObj.NetWeightLb = move.NET_WEIGHT;
-                modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
+
+                //TODO: Enable this once the code goes to uat or prod
+                //modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
+                Trace.WriteLine($"{regNumber}, , OA peice count {move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces}");
 
                 if (oaVendor == null)
                 {
