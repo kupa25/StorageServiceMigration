@@ -171,6 +171,7 @@ namespace StorageServiceMigration
                 "248044"
             };
 
+            movesToImport = new List<string>();
             counter = 0;
 
             foreach (var regNumber in movesToImport)
@@ -524,7 +525,11 @@ namespace StorageServiceMigration
 
             if (movesAccount == null)
             {
-                if (move.AccountId.Equals("1674")) //Shipper Direct
+                if (move.AccountId.Equals("1674") ||
+                    move.AccountId.Equals("279029") ||
+                    move.AccountId.Equals("273923") ||
+                    move.AccountId.Equals("370377") ||
+                    move.AccountId.Equals("OM1119")) //Shipper Direct
                 {
                     Trace.WriteLine($"{regNumber}, , Missing Account in Arive {move.AccountId}, thus Defaulting Shipper Direct");
                     movesAccount = _accountEntities.FirstOrDefault(ae => ae.Id == 283);
