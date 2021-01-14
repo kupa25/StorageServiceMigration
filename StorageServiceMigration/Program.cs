@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            //loadAllRecords = true;
+            loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -94,152 +94,6 @@ namespace StorageServiceMigration
                         await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
                         await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
                         //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, , Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
-                    }
-
-                    #endregion JobCost
-
-                    //Add Notes
-                    await AddNotesFromGmmsToArive(move, jobId, regNumber);
-
-                    //Add Prompts
-                    await AddPromptsFromGmmsToArive(move, jobId, regNumber);
-
-                    decimal percentage = (decimal)(counter * 100) / movesToImport.Count;
-
-                    Console.WriteLine($"{ Math.Round(percentage, 2)}% Completed ");
-                    Trace.WriteLine($"{regNumber}, , EndTime: {DateTime.Now}");
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine($"{regNumber}, , *** ERROR ***");
-                    if (ex.InnerException != null)
-                    {
-                        Trace.WriteLine($"{regNumber}, , {ex.InnerException.Message}");
-                    }
-                    else
-                    {
-                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
-                    }
-
-                    Console.WriteLine($"**** ERROR ****");
-                    Console.WriteLine($"{ex.Message}");
-                }
-
-                Trace.Flush();
-            }
-
-            movesToImport = new List<string>
-            {
-                "203448",
-                "209609",
-
-                "277539",
-                "279343",
-
-                "267222",
-                "267459",
-
-                "281081",
-                "282370",
-
-                "249998",
-                "250554",
-
-                "271267",
-                "272331",
-
-                "277066",
-                "279329",
-
-                "265756",
-                "267839",
-
-                "267497",
-                "267734",
-
-                "275510",
-                "282051",
-
-                "176484",
-                "228684",
-                "248044"
-            };
-
-            movesToImport = new List<string>();
-            counter = 0;
-
-            foreach (var regNumber in movesToImport)
-            {
-                try
-                {
-                    Console.WriteLine("---------------------------Adding jobs with multiple service boards--------------------------------------------------------");
-                    Console.WriteLine($"Processing { ++counter} records of {movesToImport.Count} to import");
-
-                    Trace.WriteLine($"{regNumber}, , ");
-                    Trace.WriteLine($"{regNumber}, , -----------------------------------------------------------------------------------");
-
-                    await SungateApi.setApiAccessTokenAsync(_httpClient);
-                    var move = await WaterDbAccess.RetrieveWaterRecords(regNumber);
-
-                    if (move == null)
-                    {
-                        continue;
-                    }
-
-                    if (counter % 2 != 0)
-                    {
-                        //Add the job
-                        if (!regNumber.Equals("248044"))
-                        {
-                            jobId = await addStorageJob(move, regNumber);
-                        }
-                    }
-
-                    //update datecreated on the job
-                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
-
-                    //Add JobContacts
-                    await addJobContacts(move, jobId, regNumber);
-
-                    //Add SuperService
-                    var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
-                    var ssoId = result.Id;
-
-                    //JobsDbAccess.ChangeDisplayName(result.Id, move.RegNumber);
-
-                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
-
-                    // ORIGIN
-                    var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
-                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24 && so.SuperServiceOrderId == ssoId).Id, oaVendor, move, jobId, regNumber);
-
-                    // DESTINATION
-                    var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
-                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26 && so.SuperServiceOrderId == ssoId).Id, daVendor, move, jobId, regNumber);
-
-                    var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
-
-                    // STORAGE
-                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
-                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims, ssoId);
-
-                    // INSURANCE
-                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27 && so.SuperServiceOrderId == ssoId).Id, move, jobId, legacyInsuranceClaims, regNumber);
-
-                    #region JobCost
-
-                    var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29 && so.SuperServiceOrderId == ssoId).SuperServiceOrderId;
-
-                    try
-                    {
-                        await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
-                        await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
                     }
                     catch (Exception ex)
                     {
@@ -487,6 +341,16 @@ namespace StorageServiceMigration
                 {
                     var adObj = await SungateApi.GetADName(_httpClient, dictionaryValue, regNumber);
 
+                    if ((adObj == null || adObj.Count == 0) && contactType.Equals("Move Consultant"))
+                    {
+                        Console.WriteLine("User not found in sungate");
+                        Trace.WriteLine($"{regNumber}, , user not found in sungate");
+
+                        dictionaryValue = NameTranslator.repo.GetValueOrDefault("Angela.Lafronza");
+
+                        adObj = await SungateApi.GetADName(_httpClient, dictionaryValue, regNumber);
+                    }
+
                     if (adObj == null || adObj.Count == 0)
                     {
                         Console.WriteLine("User not found in sungate");
@@ -533,6 +397,11 @@ namespace StorageServiceMigration
                 {
                     Trace.WriteLine($"{regNumber}, , Missing Account in Arive {move.AccountId}, thus Defaulting Shipper Direct");
                     movesAccount = _accountEntities.FirstOrDefault(ae => ae.Id == 283);
+                }
+                else if (move.AccountId.Equals("181359"))
+                {
+                    Trace.WriteLine($"{regNumber}, , Missing Account in Arive {move.AccountId}, thus Defaulting Overseas Agent");
+                    movesAccount = _accountEntities.FirstOrDefault(ae => ae.Name == "OVERSEAS AGENT BOOKING");
                 }
                 else
                 {
@@ -631,8 +500,8 @@ namespace StorageServiceMigration
         {
             if (!loadAllRecords)
             {
-                movesToImport.Add("274527"); // GOOD one to import according to heather
-                //movesToImport.Add("191731");
+                //movesToImport.Add("274527"); // GOOD one to import according to heather
+                movesToImport.Add("283071");
                 //movesToImport.Add("284497");
             }
             else
@@ -643,7 +512,6 @@ namespace StorageServiceMigration
 "225365",
 "283071",
 "133965",
-"116638",
 "282954",
 "224051",
 "215297",
@@ -683,7 +551,6 @@ namespace StorageServiceMigration
 "228028",
 "228764",
 "228882",
-"180632",
 "180509",
 "175353",
 "167096",
@@ -739,8 +606,6 @@ namespace StorageServiceMigration
 "258328",
 "257580",
 "257523",
-"257998",
-"257586",
 "257590",
 "257885",
 "257435",
@@ -791,7 +656,6 @@ namespace StorageServiceMigration
 "206146",
 "243579",
 "260566",
-"259907",
 "259014",
 "259036",
 "257492",
@@ -805,7 +669,6 @@ namespace StorageServiceMigration
 "246948",
 "246067",
 "246572",
-"247050",
 "269232",
 "270697",
 "270702",
@@ -818,6 +681,7 @@ namespace StorageServiceMigration
 "268987",
 "276587",
 "280431",
+"280155",
 "281539",
 "281020",
 "267349",
@@ -839,12 +703,10 @@ namespace StorageServiceMigration
 "276561",
 "276584",
 "264871",
-"282351",
 "268741",
 "267116",
 "279602",
 "279615",
-"263931",
 "277144",
 "276461",
 "280800",
@@ -869,9 +731,7 @@ namespace StorageServiceMigration
 "282039",
 "282435",
 "283180",
-"266013",
 "273517",
-"277401",
 "282745",
 "272500",
 "274364",
@@ -887,7 +747,6 @@ namespace StorageServiceMigration
 "283338",
 "271831",
 "265423",
-"272080",
 "275681",
 "281211",
 "282058",
@@ -907,7 +766,6 @@ namespace StorageServiceMigration
 "272124",
 "281598",
 "274550",
-"275308",
 "267796",
 "268750",
 "284280",
@@ -941,7 +799,6 @@ namespace StorageServiceMigration
 "269744",
 "269875",
 "270007",
-"283531",
 "271460",
 "271468",
 "265500",
@@ -963,7 +820,6 @@ namespace StorageServiceMigration
 "268674",
 "270103",
 "270104",
-"270508",
 "274736",
 "270099",
 "283601",
@@ -1005,7 +861,6 @@ namespace StorageServiceMigration
 "270460",
 "270511",
 "267158",
-"272358",
 "272992",
 "284207",
 "277011",

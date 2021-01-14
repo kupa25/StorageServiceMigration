@@ -27,6 +27,7 @@ namespace StorageServiceMigration
     {
         //private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
         //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+
         //private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
         private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
@@ -301,7 +302,7 @@ namespace StorageServiceMigration
                     modifiedObj.VendorId = oaVendor.Id;
                 }
 
-                var actualPackDate = origin.EST_PK_DATE1;
+                var actualPackDate = origin.PackDate; //TODO: this should change to PackDate
 
                 if (actualPackDate == null)
                 {
