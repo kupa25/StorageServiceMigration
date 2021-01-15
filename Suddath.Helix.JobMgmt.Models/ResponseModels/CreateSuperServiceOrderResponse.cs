@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Suddath.Helix.JobMgmt.Models.ResponseModels
 {
-    //TODO: This is also used by Gets and patches so maybe create should be removed from name
     public class CreateSuperServiceOrderResponse
     {
         public int Id { get; set; }

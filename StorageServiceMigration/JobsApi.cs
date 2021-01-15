@@ -287,9 +287,8 @@ namespace StorageServiceMigration
                 modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
                 modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
                 modifiedObj.NetWeightLb = move.NET_WEIGHT;
+                modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
 
-                //TODO: Enable this once the code goes to uat or prod
-                //modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
                 Trace.WriteLine($"{regNumber}, , OA peice count {move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces}");
 
                 if (oaVendor == null)
@@ -302,7 +301,7 @@ namespace StorageServiceMigration
                     modifiedObj.VendorId = oaVendor.Id;
                 }
 
-                var actualPackDate = origin.PackDate; //TODO: this should change to PackDate
+                var actualPackDate = origin.PackDate;
 
                 if (actualPackDate == null)
                 {
