@@ -363,6 +363,7 @@ namespace StorageServiceMigration
                 {
                     modifiedObj.TotalWeightDeliveredLb = weight;
                     modifiedObj.ActualDeliveryStartDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
+                    modifiedObj.ActualDeliveryEndDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
 
                     if (!partialDeliveryDate.HasValue)
                     {
