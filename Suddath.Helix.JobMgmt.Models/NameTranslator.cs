@@ -6,13 +6,21 @@ namespace Suddath.Helix.JobMgmt.Models
 {
     public static class NameTranslator
     {
+        public static string StorageUser
+        {
+            get
+            {
+                return "Angela.Lafronza";
+            }
+        }
+
         public static Dictionary<string, string> repo = new Dictionary<string, string>
         {
             {"STEVEC","Steve Crooks"},
             {"JASON","Jason Bell"},
-            {"TERESAB","**"},
+            {"TERESAB",$"{StorageUser}"},
             {"DOTTYS","Dotty Schmitt"},
-            {"LINDAW","**"},
+            {"LINDAW",$"{StorageUser}"},
             {"PATSYC","Patsy Conn"},
             {"BINGO","Bingo Bell"},
             {"JAMESB","James Bell"},
@@ -24,7 +32,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"RAMONS","Ramon Sierra"},
             {"HEATHERR","Heather Randolph"},
             {"JOSEM","Jose Marrero"},
-            {"ANGELAK","**"},
+            {"ANGELAK",$"{StorageUser}"},
             {"CHRISJ","Chris Jenkins"},
             {"LAURENK","Lauren Kolesar"},
             {"DEBBIEK","Debbie Kummoung"},
@@ -34,7 +42,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"LISAK","Lisa Karam"},
             {"KLOPEZ","Kirk Lopez"},
             {"TWILLIAMS","Teresa Williams"},
-            {"PMARTIN","**"},
+            {"PMARTIN",$"{StorageUser}"},
             {"TWHITE","Timothy White"},
             {"DALLEN","Devorah Allen"},
             {"RKAMINSKI","Rosalia Kaminski"},
@@ -59,7 +67,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"JMACIK","Janna Macik"},
             {"BDRUMM","Briana Lee Drumm"},
             {"KMULLINS","Kenneth Mullins"},
-            {"DCOLLINS","**"},
+            {"DCOLLINS",$"{StorageUser}"},
             {"SLOWE","Sarah Lowe"},
             {"AMBARB","Ambar Brust"},
             {"MRENZELLA","Michael Renzella"},
@@ -100,7 +108,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"ZWALKER","Zach Walker"},
             {"CDROSDICK","Courtney Drosdick"},
             {"JCROWLEY","Jennifer Crowley"},
-            {"ATAYLOR","**"},
+            {"ATAYLOR",$"{StorageUser}"},
             {"MBRODRIGUEZ","Marybell Rodriguez"},
             {"JSTANINGER","Jean Staninger"},
             {"DEA2011","Special for DEA"},
@@ -143,10 +151,10 @@ namespace Suddath.Helix.JobMgmt.Models
             {"DLIMBAUGH","Daffney Limbaugh"},
             {"MLUGO","Mercedes Lugo"},
             {"DMARSON","Dave Marson"},
-            {"MMOONEY","**"},
+            {"MMOONEY",$"{StorageUser}"},
             {"JRIOS","Jessie Rios"},
             {"DANIELKING","Daniel King"},
-            {"LISAW","**"},
+            {"LISAW",$"{StorageUser}"},
             {"LSWANSON","Larry Swanson"},
             {"ASILOYAN","Anzhelika Siloyan"},
             {"BGINDY","Brandi Gindy"},
@@ -218,7 +226,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"NPINSON","Nancy Pinson"},
             {"LOTALVARO","Lucas Otalvaro"},
             {"JAMIN","Jay Amin"},
-            {"JLORD","**"},
+            {"JLORD",$"{StorageUser}"},
             {"EPROCTOR","Elizabeth Miller"},
             {"TCOHEE","Tracie Cohee"},
             {"CRODRIGUES","Francisco Rodrigues"},
@@ -233,7 +241,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"CMOROSE","Carissa Morose"},
             {"CSANCHEZ","Carlos Sanchez"},
             {"AMOORE","Angel Moore"},
-            {"YTHIBODEAUX","**"},
+            {"YTHIBODEAUX",$"{StorageUser}"},
             {"SONEILL","Scott O'Neill"},
             {"ABROOKS","Ashley Brooks"},
             {"GCAMACHO","George Camacho"},
@@ -248,7 +256,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"SHARONBENTFORD","Sharon Bentford"},
             {"MDARWISH","Marisol Wild"},
             {"STEPHANYBALLASSO","Maha Darwish"},
-            {"LOLIVOS","**"},
+            {"LOLIVOS",$"{StorageUser}"},
             {"CKNILL","Caryn Knill"},
             {"MFISHER2","Matthew Fisher"},
             {"SSAWANT","Christine Anthony"},
@@ -256,13 +264,13 @@ namespace Suddath.Helix.JobMgmt.Models
             {"DCLEMENTS","Leda Olivos"},
             {"ANNETTECRAWFORD","Annette Crawford"},
             {"Angela.Lafronza", "Angela.Lafronza" },
-            {"STORAGE", "**" },
-            {"RIGARTA", "**" },
-            {"LBOWMAN", "**" },
-            {"KATIES", "**" },
+            {"STORAGE", $"{StorageUser}" },
+            {"RIGARTA", $"{StorageUser}" },
+            {"LBOWMAN", $"{StorageUser}" },
+            {"KATIES", $"{StorageUser}" },
             {"JMARRERO", "Jose G Marrero" },
-            {"IJIMENEZ", "**" },
-            {"ALAFRONZA", "**" }
+            {"IJIMENEZ", $"{StorageUser}" },
+            {"ALAFRONZA", $"{StorageUser}" }
         };
     }
 }
