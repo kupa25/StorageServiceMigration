@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -90,9 +90,12 @@ namespace StorageServiceMigration
 
                     try
                     {
-                        await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE);
-                        await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
-                        //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                        if (move.READY_TO_ACCRUE_DATE != null)
+                        {
+                            await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE.Value);
+                            await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
+                            //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -500,8 +503,8 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 //movesToImport.Add("274527"); // GOOD one to import according to heather
-                movesToImport.Add("283071");
-                //movesToImport.Add("284497");
+                //movesToImport.Add("283071");
+                movesToImport.Add("226248");
             }
             else
             {

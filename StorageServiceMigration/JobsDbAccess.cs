@@ -16,10 +16,10 @@ namespace StorageServiceMigration
     public static class JobsDbAccess
     {
         //public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Jobs;trusted_connection=yes;";
-        //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
+        public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         //public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
-        public static string connectionString = @"data source=uaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=g8f3Y0zMFT3emUL#; Connect Timeout=120;MultipleActiveResultSets=True;";
+        //public static string connectionString = @"data source=uaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=g8f3Y0zMFT3emUL#; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         //public static string connectionString = @"data source=paue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=V$@h@ERZnrDFGvZ9; Connect Timeout=120;MultipleActiveResultSets=True;";
 
@@ -263,7 +263,7 @@ namespace StorageServiceMigration
             return "MigrationScript @test.com";
         }
 
-        internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId, DateTime? accrueDate)
+        internal static async Task LockJC(int jobId, string regNumber, int superServiceOrderId, DateTime accrueDate)
         {
             Console.WriteLine($"Locking JC");
             Trace.WriteLine($"{regNumber}, , Locking JC ");
@@ -273,7 +273,7 @@ namespace StorageServiceMigration
                 using (var _dbContext = new JobDbContext(connectionString))
                 {
                     //BILLABLE ITEM
-                    var dateStamp = accrueDate ?? DateTime.UtcNow;
+                    var dateStamp = accrueDate;
                     string currentUser = "MigrationScript@test.com";
 
                     var items = await _dbContext.BillableItem.Where(bi => bi.SuperServiceOrderId == superServiceOrderId && bi.BillableItemStatusIdentifier == BillableItemStatusIdentifier.QUEUED).ToListAsync();

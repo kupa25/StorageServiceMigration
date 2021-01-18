@@ -26,10 +26,10 @@ namespace StorageServiceMigration
     public static class JobsApi
     {
         //private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
-        //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         //private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
-        private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         //private static string _jobsBaseUrl = "https://paue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
@@ -289,6 +289,15 @@ namespace StorageServiceMigration
                 modifiedObj.NetWeightLb = move.NET_WEIGHT;
                 modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
 
+                if (modifiedObj.ActualPickupStartDate == null)
+                {
+                    //use pickup date from oa page
+                    modifiedObj.ActualPickupStartDate = origin.PickupDate;
+                    modifiedObj.ActualPickupEndDate = origin.PickupDate;
+
+                    Trace.WriteLine($"{regNumber}, , OA Actual PickupDate updated from Origin page");
+                }
+
                 Trace.WriteLine($"{regNumber}, , OA peice count {move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces}");
 
                 if (oaVendor == null)
@@ -359,17 +368,17 @@ namespace StorageServiceMigration
                 var weight = destination.SurveyWeight;
                 var partialDeliveryDate = destination.PartialDeliveryDateIn;
 
-                if (weight.HasValue)
-                {
-                    modifiedObj.TotalWeightDeliveredLb = weight;
-                    modifiedObj.ActualDeliveryStartDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
-                    modifiedObj.ActualDeliveryEndDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
+                //if (weight.HasValue)
+                //{
+                //    modifiedObj.TotalWeightDeliveredLb = weight;
+                //    //modifiedObj.ActualDeliveryStartDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
+                //    //modifiedObj.ActualDeliveryEndDate = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
 
-                    if (!partialDeliveryDate.HasValue)
-                    {
-                        Trace.WriteLine($"{regNumber}, , Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
-                    }
-                }
+                //    if (!partialDeliveryDate.HasValue)
+                //    {
+                //        Trace.WriteLine($"{regNumber}, , Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
+                //    }
+                //}
 
                 var patch = new JsonPatchDocument();
                 FillPatchForObject(JObject.FromObject(origObj), JObject.FromObject(modifiedObj), patch, "/");
@@ -414,22 +423,33 @@ namespace StorageServiceMigration
 
             await GenerateAndPatch(httpClient, soSTUrl, origObj, modifiedObj);
 
-            //TODO: Validate that we don't need this entry in the partial storage table.  Rather we need the survey weight in the rev section
             //create a partial delivery entry
-            //var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
-            ////update the partial delivery record
-            //var pdurl = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
+            var pdId = await JobsApi.CreatePartialDelivery(httpClient, jobId, serviceOrderId, regNumber);
+            //update the partial delivery record
+            var pdurl = $"/{jobId}/services/orders/{serviceOrderId}/storage/partialDeliveries";
 
-            //var originalPartialDeliv = await CallJobsApi(httpClient, pdurl, null);
-            //var copyOfOriginalPartialDeliv = originalPartialDeliv;
+            var originalPartialDeliv = await CallJobsApi(httpClient, pdurl, null);
+            var copyOfOriginalPartialDeliv = originalPartialDeliv;
 
-            //var origPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(originalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
-            //var modifiedPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(copyOfOriginalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+            var origPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(originalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
+            var modifiedPdObj = Convert<SingleResult<IEnumerable<GetStoragePartialDeliveryResponse>>>(copyOfOriginalPartialDeliv, regNumber).Data.Single(pd => pd.Id == pdId);
 
-            //modifiedPdObj.NetWeightLb = legacyStorageEntity.SurveyWeight.ToString();
-            //modifiedPdObj.DateIn = legacyStorageEntity.PartialDeliveryDateIn;
+            var destination = move.MoveAgents.FirstOrDefault(ma => ma.JobCategory.Equals("DESTINATION"));
+            var weight = destination.SurveyWeight;
+            var partialDeliveryDate = destination.PartialDeliveryDateIn;
 
-            //await GenerateAndPatch(httpClient, pdurl + $"/{pdId}", origPdObj, modifiedPdObj);
+            if (weight.HasValue)
+            {
+                modifiedPdObj.NetWeightLb = weight.ToString();
+                modifiedPdObj.DateOut = partialDeliveryDate.GetValueOrDefault(DateTime.UtcNow);
+
+                if (!partialDeliveryDate.HasValue)
+                {
+                    Trace.WriteLine($"{regNumber}, , Defaulting date for Partial deliver because ACT_AR_DATE1 is not present here");
+                }
+            }
+
+            await GenerateAndPatch(httpClient, pdurl + $"/{pdId}", origPdObj, modifiedPdObj);
         }
 
         private static async Task<int> CreatePartialDelivery(HttpClient httpClient, int jobId, int serviceOrderId, string regNumber)
