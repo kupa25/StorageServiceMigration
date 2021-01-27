@@ -284,8 +284,8 @@ namespace StorageServiceMigration
                 var modifiedObj = Convert<GetServiceOrderOriginAgentResponse>(copyOfOriginal, regNumber);
 
                 modifiedObj.IsAllDocumentsReceived = origin.DOCS_RCV_DATE.HasValue;
-                modifiedObj.ActualPickupStartDate = storageEntity.SITinDate;
-                modifiedObj.ActualPickupEndDate = storageEntity.SITinDate;
+                modifiedObj.ActualPickupStartDate = storageEntity?.SITinDate;
+                modifiedObj.ActualPickupEndDate = storageEntity?.SITinDate;
                 modifiedObj.NetWeightLb = move.NET_WEIGHT;
                 modifiedObj.OAPieceCount = move.MoveItems.FirstOrDefault(mi => mi.NetWeight != null)?.NumberOfPieces;
 
