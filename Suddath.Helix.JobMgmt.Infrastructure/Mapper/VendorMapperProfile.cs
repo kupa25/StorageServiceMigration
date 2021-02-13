@@ -24,7 +24,7 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Mapper
                 ;
 
             CreateMap<VendorDTO, Vendor>()
-                .ForMember(d => d.AccountingId, opt => opt.MapFrom(src => src.Accounting_SI_Code))
+                //.ForMember(d => d.AccountingId, opt => opt.MapFrom(src => src.Accounting_SI_Code))
                 .ForMember(d => d.ShortAddress, opt => opt.MapFrom(src => DtoTranslations.ToShortAddress(
                     src.VendorAddress.FirstOrDefault(a =>
                         a.VendorAddressType.Name.Equals("Main", StringComparison.InvariantCultureIgnoreCase)).City,
@@ -40,7 +40,7 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Mapper
 
             // Note: VendorlegacyQueryDto will likely be deprecated
             CreateMap<VendorLegacyQueryDto, Vendor>()
-                .ForMember(d => d.AccountingId, opt => opt.MapFrom(src => src.AccountingId))
+                //.ForMember(d => d.AccountingId, opt => opt.MapFrom(src => src.AccountingId))
                 .ForMember(d => d.ShortAddress, opt => opt.MapFrom(src => src.ShortAddress))
                 .ReverseMap()
                 ;

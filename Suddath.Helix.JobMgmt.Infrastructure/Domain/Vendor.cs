@@ -24,7 +24,6 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Domain
         }
 
         public int Id { get; set; }
-        public string AccountingId { get; set; }
         public int? PrimaryAddressId { get; set; }
         public string Name { get; set; }
         public string Website { get; set; }

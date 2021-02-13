@@ -3728,10 +3728,6 @@ namespace Suddath.Helix.JobMgmt.Infrastructure
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.AccountingId)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
                 entity.Property(e => e.Accounting_MIL_Code).HasMaxLength(50);
 
                 entity.Property(e => e.Accounting_SI_Code).HasMaxLength(50);

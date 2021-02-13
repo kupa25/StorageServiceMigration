@@ -48,7 +48,7 @@ namespace Suddath.Helix.JobMgmt.Infrastructure.Mapper
 
             CreateMap<Vendor, GetSuperServiceOrderAvailableBillTosResponse>()
                 .ForMember(d => d.BillToType, opt => opt.MapFrom(src => EntityType.VENDOR))
-                .ForMember(d => d.Value, opt => opt.MapFrom(src => src.AccountingId))
+                //.ForMember(d => d.Value, opt => opt.MapFrom(src => src.AccountingId))
                 .ForMember(d => d.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(d => d.Category, opt => opt.MapFrom(src => EntityType.VENDOR))
                 .ForMember(d => d.Label, opt => opt.MapFrom(src => $"{EntityType.VENDOR}-{src.Id}"))

@@ -23,7 +23,7 @@ namespace StorageServiceMigration
 
         private static async Task Main(string[] args)
         {
-            loadAllRecords = true;
+            //loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -503,14 +503,11 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 // Moves that failed to created job because email origin record was blank
-                //movesToImport.Add("238072");
-                //movesToImport.Add("237351");
-                //movesToImport.Add("238375");
-                //movesToImport.Add("238272");
-                //movesToImport.Add("235336");
-
-                //movesToImport.Add("274778");
-                movesToImport.Add("274778");
+                movesToImport.Add("238072");
+                movesToImport.Add("237351");
+                movesToImport.Add("238375");
+                movesToImport.Add("238272");
+                movesToImport.Add("235336");
             }
             else
             {
