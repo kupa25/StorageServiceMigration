@@ -891,7 +891,8 @@ namespace StorageServiceMigration
 "271200",
 "284497",
 "270505",
-"263240"
+"263240",
+"284216"
  };
 
                 movesToImport = array.ToList<string>();

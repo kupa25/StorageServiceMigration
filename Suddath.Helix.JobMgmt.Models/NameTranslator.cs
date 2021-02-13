@@ -263,7 +263,7 @@ namespace Suddath.Helix.JobMgmt.Models
             {"DDATTA","Carolyn Perez"},
             {"DCLEMENTS","Leda Olivos"},
             {"ANNETTECRAWFORD","Annette Crawford"},
-            {"Angela.Lafronza", "Angela.Lafronza" },
+            {"Angela.Lafronza", $"{StorageUser}" },
             {"STORAGE", $"{StorageUser}" },
             {"RIGARTA", $"{StorageUser}" },
             {"LBOWMAN", $"{StorageUser}" },
