@@ -20,10 +20,11 @@ namespace StorageServiceMigration
         private static List<Vendor> _vendor;
         private static bool loadAllRecords = false;
         private static List<string> movesToImport = new List<string>();
+        private static Dictionary<string, int> transfereeAccountingId = new Dictionary<string, int>();
 
         private static async Task Main(string[] args)
         {
-            //loadAllRecords = true;
+            loadAllRecords = true;
 
             SetConsoleWriteLine();
             SetMovesToImport(loadAllRecords);
@@ -57,6 +58,8 @@ namespace StorageServiceMigration
 
                     //update datecreated on the job
                     JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
+
+                    JobsDbAccess.ChangeTransfereeAccountingId(jobId, regNumber, transfereeAccountingId.GetValueOrDefault(regNumber));
 
                     //Add JobContacts
                     await addJobContacts(move, jobId, regNumber);
@@ -503,11 +506,12 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 // Moves that failed to created job because email origin record was blank
+
                 movesToImport.Add("238072");
-                movesToImport.Add("237351");
-                movesToImport.Add("238375");
-                movesToImport.Add("238272");
-                movesToImport.Add("235336");
+                //movesToImport.Add("237351");
+                //movesToImport.Add("238375");
+                //movesToImport.Add("238272");
+                //movesToImport.Add("235336");
             }
             else
             {
@@ -894,6 +898,10 @@ namespace StorageServiceMigration
 
                 movesToImport = array.ToList<string>();
             }
+
+            //KEY: regnumber
+            //Value: Transferee accountingID
+            transfereeAccountingId.Add("140675", 12133);
         }
 
         private static void SetConsoleWriteLine()

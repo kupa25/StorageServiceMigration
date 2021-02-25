@@ -1,12 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Suddath.Helix.JobMgmt.Models;
 using Suddath.Helix.JobMgmt.Services.Water.DbContext;
-using Suddath.Helix.JobMgmt.Services.Water.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace StorageServiceMigration
@@ -31,6 +28,27 @@ namespace StorageServiceMigration
                        .ThenInclude(v => v.Name)
                    .AsNoTracking()
                    .Where(m => m.RegNumber == regNumber).SingleAsync();
+
+                    if (regNumber.Equals("238072"))
+                    {
+                        moves.Names = await context.Names.Where(n => n.ShipperMoveId == "238003").ToListAsync();
+                    }
+                    if (regNumber.Equals("237351"))
+                    {
+                        moves.Names = await context.Names.Where(n => n.ShipperMoveId == "232991").ToListAsync();
+                    }
+                    if (regNumber.Equals("238375"))
+                    {
+                        moves.Names = await context.Names.Where(n => n.ShipperMoveId == "235086").ToListAsync();
+                    }
+                    if (regNumber.Equals("238272"))
+                    {
+                        moves.Names = await context.Names.Where(n => n.ShipperMoveId == "238001").ToListAsync();
+                    }
+                    if (regNumber.Equals("235336"))
+                    {
+                        moves.Names = await context.Names.Where(n => n.ShipperMoveId == "235274").ToListAsync();
+                    }
 
                     return moves;
                 }

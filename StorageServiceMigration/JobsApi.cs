@@ -1,9 +1,7 @@
 ﻿using Helix.API.Results;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Suddath.Helix.JobMgmt.Infrastructure.Constants;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
 using Suddath.Helix.JobMgmt.Models.Constant;
 using Suddath.Helix.JobMgmt.Models.RequestModels;
@@ -26,10 +24,10 @@ namespace StorageServiceMigration
     public static class JobsApi
     {
         //private static string _jobsBaseUrl = "https://localhost:5001/api/v1/Jobs";
-        private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         //private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
-        //private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         //private static string _jobsBaseUrl = "https://paue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 

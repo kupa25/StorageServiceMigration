@@ -2,13 +2,10 @@
 using Suddath.Helix.JobMgmt.Infrastructure;
 using Suddath.Helix.JobMgmt.Infrastructure.Constants;
 using Suddath.Helix.JobMgmt.Infrastructure.Domain;
-using Suddath.Helix.JobMgmt.Services;
-using Suddath.Helix.JobMgmt.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace StorageServiceMigration
@@ -16,10 +13,10 @@ namespace StorageServiceMigration
     public static class JobsDbAccess
     {
         //public static string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;;database=Jobs;trusted_connection=yes;";
-        public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
+        //public static string connectionString = @"data source=daue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=CHEjSEK7qMHdt7!; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         //public static string connectionString = @"data source=qaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=c%$xm61RqykHjWU4; Connect Timeout=120;MultipleActiveResultSets=True;";
-        //public static string connectionString = @"data source=uaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=g8f3Y0zMFT3emUL#; Connect Timeout=120;MultipleActiveResultSets=True;";
+        public static string connectionString = @"data source=uaue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=g8f3Y0zMFT3emUL#; Connect Timeout=120;MultipleActiveResultSets=True;";
 
         //public static string connectionString = @"data source=paue2helix3sql01.database.windows.net;initial catalog=Helix3.Jobs;User ID=helix3_app;Password=V$@h@ERZnrDFGvZ9; Connect Timeout=120;MultipleActiveResultSets=True;";
 
@@ -52,6 +49,25 @@ namespace StorageServiceMigration
             }
 
             return result;
+        }
+
+        internal static void ChangeTransfereeAccountingId(int jobId, string regNumber, int transfereeAccountingId)
+        {
+            if (transfereeAccountingId == 0)
+            {
+                return;
+            }
+            Console.WriteLine($"Updating Transferee AccountingID to {transfereeAccountingId}");
+            Trace.WriteLine($"{regNumber}, , Updating Transferee AccountingID to {transfereeAccountingId}");
+            using (var context = new JobDbContext(connectionString))
+            {
+                var createdJob = context.Job.AsNoTracking().Single(j => j.Id == jobId);
+                var createdTransferee = context.Transferee.Find(createdJob.TransfereeId);
+
+                createdTransferee.AccountingId = transfereeAccountingId;
+
+                context.SaveChanges();
+            }
         }
 
         internal static async Task<Transferee> GetJobsTransfereeId(int jobId)
