@@ -53,67 +53,67 @@ namespace StorageServiceMigration
                         continue;
                     }
 
-                    //Add the job
-                    jobId = await addStorageJob(move, regNumber);
+                    ////Add the job
+                    //jobId = await addStorageJob(move, regNumber);
 
-                    //update datecreated on the job
-                    JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
+                    ////update datecreated on the job
+                    //JobsDbAccess.ChangeDateCreated(jobId, move.DateEntered.GetValueOrDefault(DateTime.UtcNow), regNumber);
 
-                    JobsDbAccess.ChangeTransfereeAccountingId(jobId, regNumber, transfereeAccountingId.GetValueOrDefault(regNumber));
+                    //JobsDbAccess.ChangeTransfereeAccountingId(jobId, regNumber, transfereeAccountingId.GetValueOrDefault(regNumber));
 
-                    //Add JobContacts
-                    await addJobContacts(move, jobId, regNumber);
+                    ////Add JobContacts
+                    //await addJobContacts(move, jobId, regNumber);
 
-                    //Add SuperService
-                    var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
-                    var ssoId = result.Id;
+                    ////Add SuperService
+                    //var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
+                    //var ssoId = result.Id;
 
-                    var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
+                    //var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
 
-                    // ORIGIN
-                    var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
-                    await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId, regNumber);
+                    //// ORIGIN
+                    //var oaVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.OriginAgent.VendorNameId));
+                    //await JobsApi.UpdateOriginMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 24).Id, oaVendor, move, jobId, regNumber);
 
-                    // DESTINATION
-                    var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
-                    await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
+                    //// DESTINATION
+                    //var daVendor = _vendor.Find(v => v.Accounting_SI_Code.Equals(move.DestinationAgent.VendorNameId));
+                    //await JobsApi.UpdateDestinationMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 26).Id, daVendor, move, jobId, regNumber);
 
-                    var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
+                    //var legacyInsuranceClaims = await WaterDbAccess.RetrieveInsuranceClaims(move.RegNumber);
 
-                    // STORAGE
-                    var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
-                    await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims, ssoId);
+                    //// STORAGE
+                    //var transfereeEntity = await JobsDbAccess.GetJobsTransfereeId(jobId);
+                    //await updateStorageJob(move, jobId, serviceOrders, regNumber, transfereeEntity, legacyInsuranceClaims, ssoId);
 
-                    // INSURANCE
-                    await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
+                    //// INSURANCE
+                    //await JobsApi.UpdateICtMilestone(_httpClient, serviceOrders.FirstOrDefault(so => so.ServiceId == 27).Id, move, jobId, legacyInsuranceClaims, regNumber);
 
-                    #region JobCost
+                    //#region JobCost
 
-                    var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
+                    //var superServiceOrderId = serviceOrders.FirstOrDefault(so => so.ServiceId == 29).SuperServiceOrderId;
 
-                    try
-                    {
-                        if (move.READY_TO_ACCRUE_DATE != null)
-                        {
-                            await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE.Value);
-                            await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
-                            //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, , Error while trying to change JC status manually");
-                        Trace.WriteLine($"{regNumber}, , {ex.Message}");
-                    }
+                    //try
+                    //{
+                    //    if (move.READY_TO_ACCRUE_DATE != null)
+                    //    {
+                    //        await JobsDbAccess.LockJC(jobId, regNumber, superServiceOrderId, move.READY_TO_ACCRUE_DATE.Value);
+                    //        await JobsDbAccess.MarkAsPosted(superServiceOrderId, DateTime.Now, true, regNumber, move.ACCRUED_DATE);
+                    //        //await JobsDbAccess.MarkAllAsVoid(superServiceOrderId, regNumber);
+                    //    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("Error while trying to change JC status manually");
+                    //    Trace.WriteLine($"{regNumber}, , Error while trying to change JC status manually");
+                    //    Trace.WriteLine($"{regNumber}, , {ex.Message}");
+                    //}
 
-                    #endregion JobCost
+                    //#endregion JobCost
 
-                    //Add Notes
-                    await AddNotesFromGmmsToArive(move, jobId, regNumber);
+                    ////Add Notes
+                    //await AddNotesFromGmmsToArive(move, jobId, regNumber);
 
-                    //Add Prompts
-                    await AddPromptsFromGmmsToArive(move, jobId, regNumber);
+                    ////Add Prompts
+                    //await AddPromptsFromGmmsToArive(move, jobId, regNumber);
 
                     decimal percentage = (decimal)(counter * 100) / movesToImport.Count;
 
