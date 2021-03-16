@@ -483,9 +483,14 @@ namespace StorageServiceMigration
             var freePeriodId = legacyStorageEntity.EXAM_AMOUNT1;
             modifiedObj.FreePeriodStartDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
             modifiedObj.FreePeriodEndDate = FreePeriodDate.StartDate(freePeriodId, move.DateEntered.GetValueOrDefault().Year);
-            modifiedObj.BillingCycle = char.ToUpper(legacyStorageEntity.PORT_IN[0]) + legacyStorageEntity.PORT_IN.Substring(1).ToLower(); //first character upper case everything lower case
             modifiedObj.StorageCostRate = legacyStorageEntity.QUOTED;
             modifiedObj.StorageCostUnit = legacyStorageEntity.QUOTE_REF;
+
+            if (!string.IsNullOrEmpty(legacyStorageEntity.PORT_IN))
+            {
+                //first character upper case everything lower case
+                modifiedObj.BillingCycle = char.ToUpper(legacyStorageEntity.PORT_IN[0]) + legacyStorageEntity.PORT_IN.Substring(1).ToLower();
+            }
 
             if (icRecord != null)
             {
