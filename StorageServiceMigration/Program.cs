@@ -68,6 +68,9 @@ namespace StorageServiceMigration
                     var result = await JobsApi.CreateStorageSSO(_httpClient, jobId, regNumber);
                     var ssoId = result.Id;
 
+                    //Add Survey result
+                    await JobsApi.CreateSurveyResult(_httpClient, jobId, ssoId, regNumber);
+
                     var serviceOrders = await JobsDbAccess.GetServiceOrderForJobs(jobId, regNumber);
 
                     // ORIGIN
