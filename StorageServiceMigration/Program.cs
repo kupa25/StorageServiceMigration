@@ -339,7 +339,7 @@ namespace StorageServiceMigration
                     case 4:
                         contactType = "Salesperson Contact";
                         dictionaryValue = NameTranslator.repo.GetValueOrDefault(move.SALES.Format());
-                        Trace.WriteLine($"{regNumber}, ,Sales: GMMS-{move.SALES.Format()}, Arive-{dictionaryValue}");
+                        Trace.WriteLine($"{regNumber}, ,Sales: GMMS-{move.SALES.Format()} Arive-{dictionaryValue}");
                         break;
                 }
 
@@ -508,7 +508,7 @@ namespace StorageServiceMigration
             {
                 // Moves that failed to created job because email origin record was blank
 
-                movesToImport.Add("266342");
+                movesToImport.Add("126658");
                 //movesToImport.Add("237351");
                 //movesToImport.Add("238375");
                 //movesToImport.Add("238272");
