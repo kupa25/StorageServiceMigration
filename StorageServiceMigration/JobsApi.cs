@@ -27,9 +27,9 @@ namespace StorageServiceMigration
         //private static string _jobsBaseUrl = "https://daue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         //private static string _jobsBaseUrl = "https://qaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
-        private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        //private static string _jobsBaseUrl = "https://uaue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
-        //private static string _jobsBaseUrl = "https://paue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
+        private static string _jobsBaseUrl = "https://paue2helixjobwa01.azurewebsites.net/api/v1/Jobs";
 
         private static List<BillableItemType> billableItemTypes = new List<BillableItemType>();
 
