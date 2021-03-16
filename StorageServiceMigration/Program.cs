@@ -510,27 +510,12 @@ namespace StorageServiceMigration
             if (!loadAllRecords)
             {
                 movesToImport.Add("234933");
-                movesToImport.Add("251031");
-                movesToImport.Add("271054");
-                movesToImport.Add("272169");
-                movesToImport.Add("279196");
-                movesToImport.Add("279197");
-                movesToImport.Add("279271");
-                movesToImport.Add("279615");
-                movesToImport.Add("279971");
-                movesToImport.Add("280037");
-                movesToImport.Add("280263");
-                movesToImport.Add("280839");
-                movesToImport.Add("281020");
-                movesToImport.Add("282486");
-                movesToImport.Add("282954");
-                movesToImport.Add("283416");
             }
             else
             {
                 var array = new String[]
                 {
-                    "106417",
+                "106417",
 "121356",
 "126658",
 "126836",
@@ -721,6 +706,7 @@ namespace StorageServiceMigration
 "268741",
 "268750",
 "268835",
+"268860",
 "268870",
 "268987",
 "269095",
@@ -921,13 +907,11 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("126658", 152648);
             transfereeAccountingId.Add("126836", 153003);
             transfereeAccountingId.Add("127017", 164505);
-            transfereeAccountingId.Add("130902", 170772);
             transfereeAccountingId.Add("133965", 166584);
             transfereeAccountingId.Add("140675", 178105);
             transfereeAccountingId.Add("151325", 191507);
             transfereeAccountingId.Add("152245", 192761);
             transfereeAccountingId.Add("154280", 195542);
-            transfereeAccountingId.Add("155004", 196527);
             transfereeAccountingId.Add("155129", 196724);
             transfereeAccountingId.Add("157923", 200345);
             transfereeAccountingId.Add("160010", 203027);
@@ -962,7 +946,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("206792", 267041);
             transfereeAccountingId.Add("207812", 268445);
             transfereeAccountingId.Add("209366", 270785);
-            transfereeAccountingId.Add("209609", 262417);
             transfereeAccountingId.Add("210120", 271914);
             transfereeAccountingId.Add("210494", 272432);
             transfereeAccountingId.Add("211489", 273912);
@@ -982,7 +965,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("226248", 299044);
             transfereeAccountingId.Add("226406", 299299);
             transfereeAccountingId.Add("228028", 302154);
-            transfereeAccountingId.Add("228684", 225398);
             transfereeAccountingId.Add("228764", 303409);
             transfereeAccountingId.Add("228882", 303619);
             transfereeAccountingId.Add("233000", 310774);
@@ -1021,7 +1003,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("246572", 333494);
             transfereeAccountingId.Add("246948", 334151);
             transfereeAccountingId.Add("247656", 335455);
-            transfereeAccountingId.Add("248044", 225398);
             transfereeAccountingId.Add("248296", 336573);
             transfereeAccountingId.Add("249036", 337903);
             transfereeAccountingId.Add("249104", 338025);
@@ -1029,7 +1010,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("250208", 339974);
             transfereeAccountingId.Add("250323", 340179);
             transfereeAccountingId.Add("250332", 340199);
-            transfereeAccountingId.Add("250554", 340579);
             transfereeAccountingId.Add("251031", 341425);
             transfereeAccountingId.Add("251169", 341662);
             transfereeAccountingId.Add("251741", 342719);
@@ -1082,7 +1062,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("264871", 367326);
             transfereeAccountingId.Add("265423", 368299);
             transfereeAccountingId.Add("265500", 368456);
-            transfereeAccountingId.Add("265756", 368916);
             transfereeAccountingId.Add("265958", 369236);
             transfereeAccountingId.Add("266013", 369341);
             transfereeAccountingId.Add("266045", 369402);
@@ -1102,11 +1081,9 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("267222", 371444);
             transfereeAccountingId.Add("267349", 371657);
             transfereeAccountingId.Add("267412", 371781);
-            transfereeAccountingId.Add("267459", 371869);
             transfereeAccountingId.Add("267477", 371902);
             transfereeAccountingId.Add("267482", 371911);
             transfereeAccountingId.Add("267497", 371942);
-            transfereeAccountingId.Add("267734", 372357);
             transfereeAccountingId.Add("267796", 372467);
             transfereeAccountingId.Add("267839", 372554);
             transfereeAccountingId.Add("267925", 372691);
@@ -1116,6 +1093,7 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("268741", 374235);
             transfereeAccountingId.Add("268750", 374259);
             transfereeAccountingId.Add("268835", 374428);
+            transfereeAccountingId.Add("268860", 374477);
             transfereeAccountingId.Add("268870", 374494);
             transfereeAccountingId.Add("268987", 374720);
             transfereeAccountingId.Add("269095", 374929);
@@ -1183,7 +1161,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("271897", 380073);
             transfereeAccountingId.Add("272124", 380477);
             transfereeAccountingId.Add("272169", 380551);
-            transfereeAccountingId.Add("272331", 380826);
             transfereeAccountingId.Add("272420", 380997);
             transfereeAccountingId.Add("272500", 381142);
             transfereeAccountingId.Add("272740", 381611);
@@ -1208,8 +1185,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("275038", 385940);
             transfereeAccountingId.Add("275210", 386245);
             transfereeAccountingId.Add("275240", 386307);
-            transfereeAccountingId.Add("275510", 386827);
-            transfereeAccountingId.Add("275681", 387170);
             transfereeAccountingId.Add("275706", 387212);
             transfereeAccountingId.Add("276080", 387900);
             transfereeAccountingId.Add("276088", 273923);
@@ -1240,8 +1215,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("279271", 394071);
             transfereeAccountingId.Add("279288", 394093);
             transfereeAccountingId.Add("279309", 394136);
-            transfereeAccountingId.Add("279329", 394175);
-            transfereeAccountingId.Add("279343", 394203);
             transfereeAccountingId.Add("279403", 394324);
             transfereeAccountingId.Add("279458", 394434);
             transfereeAccountingId.Add("279473", 394461);
@@ -1260,7 +1233,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("280800", 396923);
             transfereeAccountingId.Add("280839", 396989);
             transfereeAccountingId.Add("281020", 397308);
-            transfereeAccountingId.Add("281081", 397427);
             transfereeAccountingId.Add("281091", 397446);
             transfereeAccountingId.Add("281130", 397526);
             transfereeAccountingId.Add("281211", 397663);
@@ -1273,12 +1245,10 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("282051", 399202);
             transfereeAccountingId.Add("282058", 399216);
             transfereeAccountingId.Add("282304", 399632);
-            transfereeAccountingId.Add("282370", 399780);
             transfereeAccountingId.Add("282390", 399820);
             transfereeAccountingId.Add("282435", 399912);
             transfereeAccountingId.Add("282459", 399958);
             transfereeAccountingId.Add("282486", 400005);
-            transfereeAccountingId.Add("282610", 400225);
             transfereeAccountingId.Add("282642", 400284);
             transfereeAccountingId.Add("282702", 400402);
             transfereeAccountingId.Add("282745", 400486);
@@ -1286,7 +1256,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("282912", 400789);
             transfereeAccountingId.Add("282954", 400851);
             transfereeAccountingId.Add("283071", 401073);
-            transfereeAccountingId.Add("283180", 401296);
             transfereeAccountingId.Add("283230", 401395);
             transfereeAccountingId.Add("283244", 401422);
             transfereeAccountingId.Add("283338", 401573);
@@ -1296,15 +1265,14 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("283688", 402197);
             transfereeAccountingId.Add("283778", 402357);
             transfereeAccountingId.Add("283858", 402496);
+            transfereeAccountingId.Add("283860", 402500);
             transfereeAccountingId.Add("283880", 402537);
             transfereeAccountingId.Add("283993", 402731);
             transfereeAccountingId.Add("284032", 402801);
             transfereeAccountingId.Add("284127", 402989);
             transfereeAccountingId.Add("284201", 403148);
             transfereeAccountingId.Add("284207", 403160);
-            transfereeAccountingId.Add("284216", 403178);
             transfereeAccountingId.Add("284280", 403278);
-            transfereeAccountingId.Add("284318", 403334);
             transfereeAccountingId.Add("284470", 403581);
             transfereeAccountingId.Add("284497", 403633);
             transfereeAccountingId.Add("284536", 403710);
@@ -1314,12 +1282,6 @@ namespace StorageServiceMigration
             transfereeAccountingId.Add("284782", 404166);
             transfereeAccountingId.Add("284784", 404170);
             transfereeAccountingId.Add("284821", 404242);
-
-            /*
-             * New Ones 3/15
-               select * from names
-               where group_code = '155004'
-            */
         }
 
         private static void SetConsoleWriteLine()
