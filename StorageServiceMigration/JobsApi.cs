@@ -71,6 +71,19 @@ namespace StorageServiceMigration
             return result.Data;
         }
 
+        internal static async Task CreateSurveyResult(HttpClient _httpClient, int jobId, int ssoId, string regNumber)
+        {
+            Console.WriteLine("Creating Storage Survey Result");
+            Trace.WriteLine($"{regNumber}, , Creating Storage Result");
+
+            var url = $"/{jobId}/superServices/orders/{ssoId}/surveyResult";
+            try
+            {
+                var parsedResponse = await PostToJobsApi<int>(_httpClient, url, null, regNumber);
+            }
+            catch (Exception ex) { }
+        }
+
         public static async Task<string> Patch(HttpClient _httpClient, string url, dynamic model)
         {
             url = _jobsBaseUrl + url;
